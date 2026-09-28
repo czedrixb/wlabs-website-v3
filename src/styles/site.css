@@ -155,13 +155,16 @@ main{padding-bottom:calc(var(--tabbar) + env(safe-area-inset-bottom,0px))}
 
 /* language toggle */
 .lang{display:inline-flex;border:1px solid var(--line-strong);border-radius:var(--r-pill);padding:3px;gap:2px;background:var(--cream)}
-.lang button{min-width:40px;min-height:32px;padding:0 10px;border-radius:var(--r-pill);font:700 12px/1 var(--body);letter-spacing:.04em;color:var(--muted)}
-.lang button[aria-pressed="true"]{background:var(--ink);color:#fff}
+/* v3 used <button data-lang> (one page, JS-switched text); the port
+   navigates to the other /ko or /en route instead, so these are real
+   links — same rule, extended to match <a>, not rewritten. */
+.lang button,.lang a{min-width:40px;min-height:32px;padding:0 10px;border-radius:var(--r-pill);font:700 12px/1 var(--body);letter-spacing:.04em;color:var(--muted);display:inline-flex;align-items:center;justify-content:center;text-decoration:none}
+.lang button[aria-pressed="true"],.lang a[aria-pressed="true"]{background:var(--ink);color:#fff}
 .lang-float{position:fixed;left:max(var(--gutter),env(safe-area-inset-left,0px));bottom:calc(var(--tabbar) + 12px + env(safe-area-inset-bottom,0px));z-index:45;box-shadow:0 2px 4px rgba(20,26,46,.06),0 10px 24px -10px rgba(20,26,46,.25);opacity:.92;transition:opacity .2s,transform .2s var(--ease)}
 .lang-float:hover,.lang-float:focus-within{opacity:1;transform:translateY(-1px)}
 .on-navy .lang{border-color:var(--line-navy);background:transparent}
-.on-navy .lang button{color:var(--on-navy-muted)}
-.on-navy .lang button[aria-pressed="true"]{background:var(--cyan);color:var(--navy)}
+.on-navy .lang button,.on-navy .lang a{color:var(--on-navy-muted)}
+.on-navy .lang button[aria-pressed="true"],.on-navy .lang a[aria-pressed="true"]{background:var(--cyan);color:var(--navy)}
 
 /* proof band */
 .proof{padding-block:var(--s5)}
