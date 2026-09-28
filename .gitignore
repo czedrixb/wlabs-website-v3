@@ -55,3 +55,7 @@ next-env.d.ts
 /output-old/
 /output-failed/
 /output.tar.gz
+
+# ad-hoc git worktrees (Claude Code and manual)
+/.worktrees/
+/.claude/worktrees/
