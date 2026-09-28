@@ -2,17 +2,19 @@ import { test, expect } from "@playwright/test";
 import path from "path";
 
 // WOS-329 DB resilience: posts are served through unstable_cache
-// (src/lib/cachedPosts.ts) and (frontend)/error.tsx replaces Next's raw
+// (src/lib/cachedPosts.ts) and (blog)/error.tsx replaces Next's raw
 // production 500 when Postgres is unreachable.
 
 const SCREENSHOT_DIR = process.env.E2E_SCREENSHOT_DIR || "e2e/screenshots";
 // A second `next start` of the same build, pointed at an unreachable
 // DATABASE_URI — set by the runner; the boundary test is skipped without it.
+// WOS-314 moved every reader-facing page under /ko or /en — point this at
+// .../ko/blog now, not the bare origin.
 const DB_DOWN_URL = process.env.E2E_DB_DOWN_URL;
 
 test.describe("posts served through the data cache", () => {
   test("homepage renders the posts list", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/ko/blog");
     const items = page.locator("main ul > li");
     await expect(items.first()).toBeVisible({ timeout: 20_000 });
     expect(await items.count()).toBeGreaterThan(0);
@@ -23,11 +25,11 @@ test.describe("posts served through the data cache", () => {
   });
 
   test("post detail renders through getPostBySlug", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/ko/blog");
     const firstPost = page.locator("main ul > li a").first();
     await expect(firstPost).toBeVisible({ timeout: 20_000 });
     await firstPost.click();
-    await expect(page).toHaveURL(/\/posts\//);
+    await expect(page).toHaveURL(/\/ko\/blog\//);
     await expect(page.locator("article")).toBeVisible({ timeout: 20_000 });
   });
 });

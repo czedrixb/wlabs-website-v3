@@ -80,7 +80,9 @@ Seeded accounts (override via `SEED_ADMIN_EMAIL`/`SEED_ADMIN_PASSWORD`/
 
 1. Create / edit / delete posts — Payload admin at `/admin`, Korean by
    default (WOS-312 §5/§6).
-2. Post list + detail view, paginated — `/` and `/posts/[slug]`.
+2. Post list + detail view, paginated — `/ko/blog` (or `/en/blog`) and
+   `/[locale]/blog/[slug]` (WOS-314 moved these under a `/ko`/`/en` locale
+   prefix; `/` and `/posts/[slug]` redirect for old links).
 3. Published / unpublished toggle — Payload's native drafts (`_status`),
    with autosave + an explicit "초안 저장" (Save Draft) button.
 4. Data fetching → frontend display, independent of the news component —

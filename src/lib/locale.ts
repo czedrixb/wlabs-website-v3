@@ -26,14 +26,14 @@ export function pick<T>(locale: Locale, ko: T, en: T | null | undefined): T {
   return ko;
 }
 
-// Locale rides on ?locale= and nothing else (no cookie, no middleware) — a
-// sticky per-user locale is the exact "my English text vanished" bug class
-// this branch just removed from the admin. That means every internal link
-// has to carry it forward explicitly or the reader silently falls back to
-// ko mid-session.
+// Locale rides on the URL path (/ko/..., /en/...) and nothing else — no
+// cookie, no middleware. A sticky per-user locale is the exact "my English
+// text vanished" bug class this branch removed from the admin, and a path
+// segment (unlike a query param) can't be silently dropped by a link that
+// forgets to carry it forward: every route lives under /ko or /en, so the
+// [locale] segment is present or the route doesn't resolve at all
+// (src/app/(frontend)/[locale]/layout.tsx sets dynamicParams = false).
 export function withLocale(path: string, locale: Locale): string {
-  const [base, qs] = path.split("?");
-  const params = new URLSearchParams(qs);
-  params.set("locale", locale);
-  return `${base}?${params.toString()}`;
+  const normalized = path.startsWith("/") ? path : `/${path}`;
+  return `/${locale}${normalized}`;
 }

@@ -49,7 +49,7 @@ test("post banner renders through next/image", async ({ page, baseURL }) => {
   const postId = (await postRes.json()).doc.id;
 
   try {
-    await page.goto(`/posts/${SLUG}`);
+    await page.goto(`/ko/blog/${SLUG}`);
     await expect(
       page.getByRole("heading", { name: "E2E 배너 이미지 회귀 테스트" }),
     ).toBeVisible();
@@ -62,7 +62,7 @@ test("post banner renders through next/image", async ({ page, baseURL }) => {
     expect(loaded).toBe(true);
 
     // The list page 500'd on the same error — it must render the banner too.
-    await page.goto("/");
+    await page.goto("/ko/blog");
     await expect(page.getByRole("heading", { name: "W Labs Blog" })).toBeVisible();
     await expect(page.locator('img[src*="/_next/image"]').first()).toBeVisible();
   } finally {
