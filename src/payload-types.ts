@@ -76,6 +76,7 @@ export interface Config {
     services: Service;
     faq: Faq;
     insights: Insight;
+    inquiries: Inquiry;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -92,6 +93,7 @@ export interface Config {
     services: ServicesSelect<false> | ServicesSelect<true>;
     faq: FaqSelect<false> | FaqSelect<true>;
     insights: InsightsSelect<false> | InsightsSelect<true>;
+    inquiries: InquiriesSelect<false> | InquiriesSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -569,6 +571,48 @@ export interface Insight {
   createdAt: string;
 }
 /**
+ * Submissions from the site's contact form. Created only by the form itself — read-only here.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "inquiries".
+ */
+export interface Inquiry {
+  id: number;
+  ref: string;
+  topic:
+    | 'general'
+    | 'ai'
+    | 'custom'
+    | 'data'
+    | 'design'
+    | 'support'
+    | 'skinarch'
+    | 'wiz'
+    | 'brainarch'
+    | 'partnership'
+    | 'newsletter'
+    | 'other';
+  name: string;
+  org?: string | null;
+  email: string;
+  phone?: string | null;
+  message?: string | null;
+  consentPrivacy: boolean;
+  consentMarketing?: boolean | null;
+  locale: 'ko' | 'en';
+  /**
+   * Which form this came from (only contact-form exists today).
+   */
+  source: string;
+  captchaStatus: 'ok' | 'skipped' | 'unavailable' | 'error' | 'low-score';
+  captchaScore?: number | null;
+  userAgent?: string | null;
+  ip?: string | null;
+  status: 'new' | 'replied' | 'archived';
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
@@ -627,6 +671,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'insights';
         value: number | Insight;
+      } | null)
+    | ({
+        relationTo: 'inquiries';
+        value: number | Inquiry;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -934,6 +982,30 @@ export interface InsightsSelect<T extends boolean = true> {
       };
   order?: T;
   slug?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "inquiries_select".
+ */
+export interface InquiriesSelect<T extends boolean = true> {
+  ref?: T;
+  topic?: T;
+  name?: T;
+  org?: T;
+  email?: T;
+  phone?: T;
+  message?: T;
+  consentPrivacy?: T;
+  consentMarketing?: T;
+  locale?: T;
+  source?: T;
+  captchaStatus?: T;
+  captchaScore?: T;
+  userAgent?: T;
+  ip?: T;
+  status?: T;
   updatedAt?: T;
   createdAt?: T;
 }

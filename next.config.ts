@@ -24,6 +24,14 @@ const nextConfig: NextConfig = {
       {
         pathname: "/api/media/file/**",
       },
+      // WOS-334: product/team photography under public/site/ moved to
+      // next/image (TeamGrid.tsx, CompanyTeaser.tsx, products/[slug]).
+      // localPatterns is an allowlist — /_next/image 400s on anything not
+      // listed here, so this has to land before any of those components
+      // switch off plain <img>.
+      {
+        pathname: "/site/**",
+      },
     ],
   },
   turbopack: {

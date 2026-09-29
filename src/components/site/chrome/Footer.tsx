@@ -20,6 +20,10 @@ export function Footer({ locale }: Props) {
     <footer>
       <div className="wrap">
         <Link className="lockup foot-lockup" href={withLocale("/", locale)} aria-label="W Labs">
+          {/* Plain <img>, deliberately — an SVG logo, not photography.
+              WOS-334's next/image switch is scoped to product/team
+              photography (TeamGrid/CompanyTeaser/products' visual); Next's
+              optimizer can't improve an SVG and warns on it. */}
           <img className="logo-h" src="/site/logo/primary-land.svg" alt="W Labs" aria-hidden="true" />
         </Link>
 

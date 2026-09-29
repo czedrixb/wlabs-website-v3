@@ -1,8 +1,11 @@
+import type { Metadata } from "next";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import type { Locale } from "@/lib/locale";
 import { resolveLocale, withLocale } from "@/lib/locale";
 import { PRODUCTS, SERVICES, type ProductId } from "@/lib/site/content";
+import { siteMetadata } from "@/lib/site/metadata";
 
 type Props = { params: Promise<{ locale: string; slug: string }> };
 
@@ -13,6 +16,19 @@ export function generateStaticParams() {
     { locale: "ko", slug },
     { locale: "en", slug },
   ]);
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale: localeParam, slug } = await params;
+  const locale = resolveLocale(localeParam);
+  const product = PRODUCTS[slug as ProductId];
+  if (!product) return {};
+  return siteMetadata({
+    locale,
+    path: `/products/${slug}`,
+    title: product.name,
+    description: locale === "en" ? product.lead.en : product.lead.ko,
+  });
 }
 
 // Every string below is a literal bilingual pair, not a dictionary key —
@@ -80,7 +96,17 @@ export default async function ProductPage({ params }: Props) {
           </div>
         </div>
         <div className="prod-visual pvis" aria-hidden="true">
-          <img src={`/site/img/${product.id}.webp`} alt="" />
+          {/* fill, not width/height: .prod-visual is aspect-ratio-driven
+              and its concrete size varies by breakpoint (site.css's
+              .prod-visual/.pvis rules) — fill lets it track the container
+              instead of the image's own intrinsic size. */}
+          <Image
+            src={`/site/img/${product.id}.webp`}
+            alt=""
+            fill
+            sizes="(min-width: 744px) 430px, 100vw"
+            style={{ objectFit: "cover" }}
+          />
         </div>
       </header>
 

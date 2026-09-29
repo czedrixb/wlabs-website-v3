@@ -196,6 +196,29 @@ export const V3_STRINGS = {
       "n5h": "예산이 보이지 않을 때, 시스템이 필요해집니다",
       "n5p": "\"사업이 성장하면서 프로젝트 예산 집행을 관리하기 어려워졌다.\" 한 고객사의 이 한 문장에서 프로젝트 관리 시스템이 시작되었습니다. 구축과 연동, 그리고 쉽게 감독할 수 있는 화면까지.",
       "insNote": "기사 프로그램은 2026년 9월부터 새로 구축 중입니다. 다른 회사의 연구를 요약한 기존 글은 옮기지 않았습니다."
+    },
+    "contact": {
+      "contactH1": "어떤 문제를 풀고 싶으신가요?",
+      "contactLead": "간단히 남겨 주시면 하루 안에 답변드립니다. 정리되지 않은 아이디어도 괜찮습니다.",
+      "reqNote": "필수 항목",
+      "fName": "이름",
+      "fOrg": "회사 / 기관",
+      "fEmail": "이메일",
+      "fPhone": "연락처",
+      "fTopic": "문의 주제",
+      "fMsg": "내용",
+      "consent1": "개인정보 수집·이용에 동의합니다. (필수) 수집 항목: 이름, 이메일, 연락처, 문의 내용. 문의 응대 목적으로만 사용하며 처리 완료 후 파기합니다.",
+      "consent2": "뉴스레터와 소식 수신에 동의합니다. (선택)",
+      "send": "문의 보내기",
+      "errName": "이름을 입력해 주세요.",
+      "errEmail": "올바른 이메일 주소를 입력해 주세요.",
+      "errTopic": "주제를 선택해 주세요.",
+      "rcNote": "이 양식은 reCAPTCHA v3로 보호됩니다. Google <a href=\"https://policies.google.com/privacy\" target=\"_blank\" rel=\"noopener\">개인정보처리방침</a>과 <a href=\"https://policies.google.com/terms\" target=\"_blank\" rel=\"noopener\">서비스 약관</a>이 적용됩니다.",
+      "sent": "감사합니다. 문의가 저장되었습니다. 접수번호 {ref}. 하루 안에 답변드립니다.",
+      "sending": "전송 중…",
+      "failed": "문의를 저장하지 못했습니다. 다시 시도하거나 이메일로 직접 연락해 주세요.",
+      "invalid": "필수 항목을 채우고 개인정보 안내에 동의해 주세요.",
+      "needConsent": "개인정보 안내에 동의하면 전송할 수 있습니다."
     }
   },
   "en": {
@@ -385,6 +408,29 @@ export const V3_STRINGS = {
       "n5h": "When the budget stops being visible, a system becomes necessary",
       "n5p": "\"As the client's business grew, managing project budget expenditures became difficult.\" A project-management system began with that one sentence from a client — build, integrate, and a view that makes supervision easy.",
       "insNote": "The article programme is being rebuilt from September 2026. Earlier posts that summarised other companies' research were not carried over."
+    },
+    "contact": {
+      "contactH1": "What problem would you like to solve?",
+      "contactLead": "Leave a short note and we reply within one business day. Unfinished ideas welcome.",
+      "reqNote": "Required",
+      "fName": "Name",
+      "fOrg": "Company / organisation",
+      "fEmail": "Email",
+      "fPhone": "Phone",
+      "fTopic": "Topic",
+      "fMsg": "Message",
+      "consent1": "I agree to the collection and use of personal data (required). Collected: name, email, phone, message. Used only to respond to this inquiry and deleted afterwards.",
+      "consent2": "Send me the newsletter and updates (optional).",
+      "send": "Send inquiry",
+      "errName": "Please enter your name.",
+      "errEmail": "Please enter a valid email address.",
+      "errTopic": "Please choose a topic.",
+      "rcNote": "This form is protected by reCAPTCHA v3. The Google <a href=\"https://policies.google.com/privacy\" target=\"_blank\" rel=\"noopener\">Privacy Policy</a> and <a href=\"https://policies.google.com/terms\" target=\"_blank\" rel=\"noopener\">Terms of Service</a> apply.",
+      "sent": "Thank you — your inquiry is saved. Reference {ref}. We reply within one business day.",
+      "sending": "Sending…",
+      "failed": "We could not save your inquiry. Please try again, or email us directly.",
+      "invalid": "Please fill the required fields and accept the privacy notice.",
+      "needConsent": "Accept the privacy notice to enable sending."
     }
   }
 } as const;

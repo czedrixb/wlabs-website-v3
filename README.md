@@ -145,6 +145,7 @@ breaks if standalone mode is left on.
 | `NEXT_PUBLIC_SERVER_URL` | the production `.vercel.app` URL | **Production only** — build-inlined; left unset on Preview so CSRF/serverURL fall back to runtime `VERCEL_*` vars (see `src/lib/deployOrigins.ts`) |
 | `S3_BUCKET` / `S3_ENDPOINT` / `S3_REGION` / `S3_ACCESS_KEY_ID` / `S3_SECRET_ACCESS_KEY` | from Supabase Storage → Settings | enables `@payloadcms/storage-s3` in `src/payload.config.ts`; absent → local-disk storage (VM behavior) |
 | `ENABLE_EXPERIMENTAL_COREPACK` | `1` | so Vercel honours `packageManager: pnpm@12.4.1` |
+| `RECAPTCHA_SECRET` / `NEXT_PUBLIC_RECAPTCHA_SITE_KEY` | from the reCAPTCHA admin console (v3) | **optional** (WOS-334) — the `/contact` form works with both unset: the route handler records `captchaStatus:"skipped"` and accepts the submission anyway. Setting them turns on server-side token verification. `NEXT_PUBLIC_RECAPTCHA_SITE_KEY` is build-inlined like `NEXT_PUBLIC_SERVER_URL` above |
 
 Also enable **Settings → Environment Variables → "Enable access to System
 Environment Variables"**, required for `VERCEL_URL` / `VERCEL_BRANCH_URL` /

@@ -1,8 +1,10 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import type { Locale } from "@/lib/locale";
 import { resolveLocale, withLocale } from "@/lib/locale";
 import { siteT } from "@/lib/site/dictionary";
+import { siteMetadata } from "@/lib/site/metadata";
 import { INSIGHTS } from "@/lib/site/content";
 import { SegNav } from "@/components/site/work/SegNav";
 import { TeamGrid } from "@/components/site/company/TeamGrid";
@@ -19,6 +21,14 @@ export function generateStaticParams() {
     { locale: "ko", panel },
     { locale: "en", panel },
   ]);
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale: localeParam, panel } = await params;
+  const locale = resolveLocale(localeParam);
+  if (!PANEL_KEYS.includes(panel as PanelKey)) return {};
+  const { company } = siteT(locale);
+  return siteMetadata({ locale, path: `/company/${panel}`, title: company.coH1, description: company.coLead2 });
 }
 
 // Company's three segmented panels. `story` ships prose + the 5-entry

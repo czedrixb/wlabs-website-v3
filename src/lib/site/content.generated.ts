@@ -2,12 +2,12 @@
 // Regenerate with: node scripts/extract-v3-content.mjs
 // Source: D:\Submit\W Labs Website v3\site\index.html
 //
-// Raw TEAM/GROUPS/PROJECTS/CATS/PRODUCT_PAGES literals harvested from the
-// v3 design repo, verbatim except for TEAM's photo column (base64 data URI
-// swapped for the public/site/team/<Name>.webp path). Every value here is
-// still v3's own tuple/array shape ([en, ko] pairs, positional TEAM rows) —
-// src/lib/site/content.ts composes these into the named, typed shapes
-// components actually consume.
+// Raw TEAM/GROUPS/PROJECTS/CATS/PRODUCT_PAGES/TOPICS literals harvested
+// from the v3 design repo, verbatim except for TEAM's photo column (base64
+// data URI swapped for the public/site/team/<Name>.webp path). Every value
+// here is still v3's own tuple/array shape ([en, ko] pairs, positional
+// TEAM/TOPICS rows) — src/lib/site/content.ts composes these into the
+// named, typed shapes components actually consume.
 
 export const V3_CONTENT = {
   "team": [
@@ -846,5 +846,67 @@ export const V3_CONTENT = {
         }
       ]
     }
-  }
+  },
+  "topics": [
+    [
+      "general",
+      "프로젝트 전반",
+      "General project"
+    ],
+    [
+      "ai",
+      "AI & Automation",
+      "AI & Automation"
+    ],
+    [
+      "custom",
+      "Custom Software",
+      "Custom Software"
+    ],
+    [
+      "data",
+      "Data & Imaging",
+      "Data & Imaging"
+    ],
+    [
+      "design",
+      "UI/UX & Product Design",
+      "UI/UX & Product Design"
+    ],
+    [
+      "support",
+      "Modernization & Support",
+      "Modernization & Support"
+    ],
+    [
+      "skinarch",
+      "SkinArch",
+      "SkinArch"
+    ],
+    [
+      "wiz",
+      "WIZ Assistant",
+      "WIZ Assistant"
+    ],
+    [
+      "brainarch",
+      "BrainArch",
+      "BrainArch"
+    ],
+    [
+      "partnership",
+      "파트너십",
+      "Partnership"
+    ],
+    [
+      "newsletter",
+      "뉴스레터",
+      "Newsletter"
+    ],
+    [
+      "other",
+      "기타",
+      "Other"
+    ]
+  ]
 } as const;

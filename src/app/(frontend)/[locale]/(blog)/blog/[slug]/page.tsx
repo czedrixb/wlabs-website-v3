@@ -1,9 +1,11 @@
+import type { Metadata } from "next";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { RichText } from "@payloadcms/richtext-lexical/react";
 import { getPostBySlug } from "@/lib/cachedPosts";
 import { resolveLocale } from "@/lib/locale";
 import { mediaPath } from "@/lib/mediaPath";
+import { siteMetadata } from "@/lib/site/metadata";
 import { SiteHeader } from "@/components/frontend/SiteHeader";
 import { t } from "@/lib/strings";
 
@@ -12,6 +14,18 @@ export const dynamic = "force-dynamic";
 type Props = {
   params: Promise<{ locale: string; slug: string }>;
 };
+
+// post.title/excerpt render unconditionally in Korean on this page
+// (see src/lib/strings.ts's own comment: blog content isn't part of the
+// chrome locale switch) — matched here rather than pick()'d, so metadata
+// never disagrees with what the page actually renders.
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale: localeParam, slug } = await params;
+  const locale = resolveLocale(localeParam);
+  const post = await getPostBySlug(slug);
+  if (!post) return {};
+  return siteMetadata({ locale, path: `/blog/${slug}`, title: post.title, description: post.excerpt ?? undefined });
+}
 
 export default async function PostDetailPage({ params }: Props) {
   const { locale: localeParam, slug } = await params;

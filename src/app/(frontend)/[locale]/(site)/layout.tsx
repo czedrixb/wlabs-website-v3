@@ -8,6 +8,7 @@ import { Masthead } from "@/components/site/chrome/Masthead";
 import { TabBar } from "@/components/site/chrome/TabBar";
 import { Footer } from "@/components/site/chrome/Footer";
 import { LangToggle } from "@/components/site/chrome/LangToggle";
+import { OrganizationJsonLd } from "@/components/site/chrome/OrganizationJsonLd";
 import "@/styles/site.css";
 
 type Props = {
@@ -38,6 +39,7 @@ export default async function SiteLayout({ children, params }: Props) {
 
   return (
     <div className={siteFontVariables}>
+      <OrganizationJsonLd locale={locale} description={chrome.legal2} />
       <a className="skip" href="#main">
         {chrome.skip}
       </a>

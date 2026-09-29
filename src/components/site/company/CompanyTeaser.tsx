@@ -1,3 +1,4 @@
+import Image from "next/image";
 import type { Locale } from "@/lib/locale";
 import { withLocale } from "@/lib/locale";
 import type { SiteStrings } from "@/lib/site/dictionary";
@@ -28,7 +29,7 @@ export function CompanyTeaser({ locale, s }: Props) {
           <div className="avatars" aria-label="W Labs team">
             {shown.map((m) =>
               m.photo ? (
-                <img key={m.name} src={m.photo} alt={m.name} width={40} height={40} />
+                <Image key={m.name} src={m.photo} alt={m.name} width={40} height={40} />
               ) : (
                 <span key={m.name} className="initial" aria-hidden="true">
                   {m.name[0]}

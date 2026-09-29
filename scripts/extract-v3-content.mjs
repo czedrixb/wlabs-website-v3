@@ -151,21 +151,25 @@ function main() {
   const projects = evalConst(source, "PROJECTS");
   const cats = evalConst(source, "CATS");
   const productPages = evalConst(source, "PRODUCT_PAGES");
+  // WOS-334: the /contact form's topic <select> — a 12-row [id, ko, en]
+  // table, same evalConst treatment as the five literals above (no free
+  // identifiers, one top-level `const TOPICS=` in the source).
+  const topics = evalConst(source, "TOPICS");
 
   const banner = `// GENERATED FILE — do not hand-edit.
 // Regenerate with: node scripts/extract-v3-content.mjs
 // Source: ${v3IndexPath}
 //
-// Raw TEAM/GROUPS/PROJECTS/CATS/PRODUCT_PAGES literals harvested from the
-// v3 design repo, verbatim except for TEAM's photo column (base64 data URI
-// swapped for the public/site/team/<Name>.webp path). Every value here is
-// still v3's own tuple/array shape ([en, ko] pairs, positional TEAM rows) —
-// src/lib/site/content.ts composes these into the named, typed shapes
-// components actually consume.
+// Raw TEAM/GROUPS/PROJECTS/CATS/PRODUCT_PAGES/TOPICS literals harvested
+// from the v3 design repo, verbatim except for TEAM's photo column (base64
+// data URI swapped for the public/site/team/<Name>.webp path). Every value
+// here is still v3's own tuple/array shape ([en, ko] pairs, positional
+// TEAM/TOPICS rows) — src/lib/site/content.ts composes these into the
+// named, typed shapes components actually consume.
 `;
 
   const body = `export const V3_CONTENT = ${JSON.stringify(
-    { team, groups, projects, cats, productPages },
+    { team, groups, projects, cats, productPages, topics },
     null,
     2,
   )} as const;\n`;
@@ -174,7 +178,7 @@ function main() {
   console.log(`Wrote ${outPath}`);
   console.log(
     `  team=${team.length} groups=${groups.length} projects=${projects.length} ` +
-      `cats=${cats.length} products=${Object.keys(productPages).length}`,
+      `cats=${cats.length} products=${Object.keys(productPages).length} topics=${topics.length}`,
   );
 }
 

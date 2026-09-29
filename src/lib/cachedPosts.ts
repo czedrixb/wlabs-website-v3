@@ -41,3 +41,25 @@ export const getPostBySlug = unstable_cache(
   ["post-by-slug"],
   { tags: ["posts"], revalidate: 60 },
 );
+
+export const RSS_FEED_LIMIT = 20;
+
+// WOS-334: /ko/rss.xml and /en/rss.xml (src/app/(frontend)/[locale]/rss.xml/route.ts).
+// Same unstable_cache treatment as the two functions above, for the same
+// reason (WOS-329): a Postgres blip degrades the feed to ≤60s-stale
+// instead of a 500.
+export const getFeedPosts = unstable_cache(
+  async () => {
+    const payload = await getPayload();
+    const { docs } = await payload.find({
+      collection: "posts",
+      overrideAccess: false,
+      sort: "-publishedAt",
+      limit: RSS_FEED_LIMIT,
+      depth: 1,
+    });
+    return docs;
+  },
+  ["posts-feed"],
+  { tags: ["posts"], revalidate: 60 },
+);
