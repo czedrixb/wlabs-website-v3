@@ -15,7 +15,10 @@ const DB_DOWN_URL = process.env.E2E_DB_DOWN_URL;
 test.describe("posts served through the data cache", () => {
   test("homepage renders the posts list", async ({ page }) => {
     await page.goto("/ko/blog");
-    const items = page.locator("main ul > li");
+    // WOS-335: the list moved from a Tailwind <ul>/<li> to the v3 site's
+    // .news/.news-item article-list pattern (src/components/site/company/
+    // NewsList.tsx is the model this was ported from).
+    const items = page.locator("main .news-item");
     await expect(items.first()).toBeVisible({ timeout: 20_000 });
     expect(await items.count()).toBeGreaterThan(0);
     await page.screenshot({
@@ -26,7 +29,7 @@ test.describe("posts served through the data cache", () => {
 
   test("post detail renders through getPostBySlug", async ({ page }) => {
     await page.goto("/ko/blog");
-    const firstPost = page.locator("main ul > li a").first();
+    const firstPost = page.locator("main .news-item a").first();
     await expect(firstPost).toBeVisible({ timeout: 20_000 });
     await firstPost.click();
     await expect(page).toHaveURL(/\/ko\/blog\//);
