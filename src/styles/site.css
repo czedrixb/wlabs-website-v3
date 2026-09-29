@@ -1490,10 +1490,9 @@ html:lang(ko) .sp-faq2-item b{font-family:var(--body);word-break:keep-all}
 #contact .sp-faq2-item p{color:var(--on-navy-muted)}
 #contact .sp-faq2-item p.cap{color:var(--on-navy-muted);opacity:.8}
 #contact .sp-faq2-q:focus-visible{outline-color:var(--cyan)}
-#sp-bands-faq .sp-band-panel{padding-top:0}
-/* the inquiry screen is already navy; the stack is darker than it, so the ring
-   is all that is needed to read it as an object */
-#sp-bands-faq{box-shadow:inset 0 0 0 1px var(--line-navy)}
+/* (WOS-336: the two #sp-bands-faq rules that sat here were dead in the v3
+   reference too — its contact FAQ is the sp-faq2 accordion, and no element
+   carries that id in the built page — so they're removed, not ported.) */
 
 /* Services band stack sits full-width inside the home column. The section
    already has its own SERVICES eyebrow, so the stack's is screen-reader only. */

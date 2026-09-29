@@ -9,13 +9,18 @@ import { test, expect } from "@playwright/test";
 
 const REF_RE = /WL-\d{6}-[A-Z0-9]{4}/;
 
+// Queries are scoped to #contact-form (WOS-336): the page-level contact
+// sheet carries its own email field / send button / status line, and the
+// toast is a second page-level role="status" — unscoped getBy* queries
+// became strict-mode violations when those singletons landed.
 test.describe("contact form", () => {
   test("ko: renders the translated form, and the localStorage-stub disclaimer is gone", async ({ page }) => {
     await page.goto("/ko/contact");
+    const form = page.locator("#contact-form");
     await expect(page.getByRole("heading", { name: "어떤 문제를 풀고 싶으신가요?" })).toBeVisible();
-    await expect(page.getByLabel("이름", { exact: true })).toBeVisible();
-    await expect(page.getByLabel("이메일", { exact: true })).toBeVisible();
-    await expect(page.getByRole("button", { name: "문의 보내기" })).toBeVisible();
+    await expect(form.getByLabel("이름", { exact: true })).toBeVisible();
+    await expect(form.getByLabel("이메일", { exact: true })).toBeVisible();
+    await expect(form.getByRole("button", { name: "문의 보내기" })).toBeVisible();
     // The prototype's own disclaimer said inquiries only lived in
     // localStorage — its absence is the visible proof this landed.
     await expect(page.getByText("localStorage")).toHaveCount(0);
@@ -23,14 +28,15 @@ test.describe("contact form", () => {
 
   test("en: renders the translated form", async ({ page }) => {
     await page.goto("/en/contact");
+    const form = page.locator("#contact-form");
     await expect(page.getByRole("heading", { name: "What problem would you like to solve?" })).toBeVisible();
-    await expect(page.getByLabel("Name", { exact: true })).toBeVisible();
-    await expect(page.getByRole("button", { name: "Send inquiry" })).toBeVisible();
+    await expect(form.getByLabel("Name", { exact: true })).toBeVisible();
+    await expect(form.getByRole("button", { name: "Send inquiry" })).toBeVisible();
   });
 
   test("submit is disabled until the privacy checkbox is ticked", async ({ page }) => {
     await page.goto("/ko/contact");
-    const submit = page.getByRole("button", { name: "문의 보내기" });
+    const submit = page.locator("#contact-form").getByRole("button", { name: "문의 보내기" });
     await expect(submit).toBeDisabled();
     await page.locator("#c-privacy").check();
     await expect(submit).toBeEnabled();
@@ -38,15 +44,16 @@ test.describe("contact form", () => {
 
   test("blank required fields: shows the invalid status and never calls the API", async ({ page }) => {
     await page.goto("/ko/contact");
+    const form = page.locator("#contact-form");
     const calls: string[] = [];
     page.on("request", (req) => {
       if (req.url().includes("/api/contact")) calls.push(req.url());
     });
 
     await page.locator("#c-privacy").check();
-    await page.getByRole("button", { name: "문의 보내기" }).click();
+    await form.getByRole("button", { name: "문의 보내기" }).click();
 
-    await expect(page.getByRole("status")).toHaveText("필수 항목을 채우고 개인정보 안내에 동의해 주세요.");
+    await expect(form.locator(".form-status")).toHaveText("필수 항목을 채우고 개인정보 안내에 동의해 주세요.");
     await page.waitForTimeout(300);
     expect(calls).toHaveLength(0);
   });
@@ -55,14 +62,15 @@ test.describe("contact form", () => {
     const email = `wos334-${Date.now()}@example.com`;
 
     await page.goto("/ko/contact");
-    await page.getByLabel("이름", { exact: true }).fill("테스트 사용자");
-    await page.getByLabel("이메일", { exact: true }).fill(email);
+    const form = page.locator("#contact-form");
+    await form.getByLabel("이름", { exact: true }).fill("테스트 사용자");
+    await form.getByLabel("이메일", { exact: true }).fill(email);
     await page.locator("#c-topic").selectOption("general");
-    await page.getByLabel("내용", { exact: true }).fill("E2E 테스트 문의입니다.");
+    await form.getByLabel("내용", { exact: true }).fill("E2E 테스트 문의입니다.");
     await page.locator("#c-privacy").check();
-    await page.getByRole("button", { name: "문의 보내기" }).click();
+    await form.getByRole("button", { name: "문의 보내기" }).click();
 
-    const status = page.getByRole("status");
+    const status = form.locator(".form-status");
     await expect(status).toContainText(REF_RE, { timeout: 15_000 });
     const statusText = (await status.textContent()) ?? "";
     const ref = statusText.match(REF_RE)?.[0];
@@ -93,6 +101,9 @@ test.describe("contact form", () => {
     const ctx = page.context().request;
     const origin = { Origin: baseURL! };
     const res = await ctx.post("/api/contact", {
+      // Unique client IP: the route rate-limits 5/min per IP, and the
+      // browser-submitted tests in a full-suite run share the real one.
+      headers: { "x-forwarded-for": `10.99.1.${Date.now() % 250}` },
       data: {
         name: "Bot",
         email: "bot@example.com",
@@ -114,6 +125,7 @@ test.describe("contact form", () => {
 
   test("API: missing consent is rejected", async ({ page }) => {
     const res = await page.context().request.post("/api/contact", {
+      headers: { "x-forwarded-for": `10.99.2.${Date.now() % 250}` },
       data: { name: "Test", email: "test@example.com", topic: "general", consentPrivacy: false, locale: "ko" },
     });
     expect(res.status()).toBe(400);
@@ -121,6 +133,7 @@ test.describe("contact form", () => {
 
   test("API: unknown topic is rejected", async ({ page }) => {
     const res = await page.context().request.post("/api/contact", {
+      headers: { "x-forwarded-for": `10.99.3.${Date.now() % 250}` },
       data: { name: "Test", email: "test@example.com", topic: "not-a-real-topic", consentPrivacy: true, locale: "ko" },
     });
     expect(res.status()).toBe(400);

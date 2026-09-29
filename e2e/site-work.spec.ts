@@ -49,14 +49,16 @@ test.describe("work: cases panel", () => {
   test("renders all 8 projects (unlimited, unlike the Home strip) with a live count", async ({ page }) => {
     await page.goto("/ko/work/cases");
     await expect(page.locator(".pgrid .pcard")).toHaveCount(8);
-    await expect(page.locator('[role="status"]')).toContainText("8");
+    // Scoped to main: SiteChrome also mounts the toast, a page-level
+    // role="status" singleton (WOS-336), so a bare [role=status] is ambiguous.
+    await expect(page.locator('main [role="status"]')).toContainText("8");
   });
 
   test("filtering to one category updates both the grid and the count", async ({ page }) => {
     await page.goto("/ko/work/cases");
     await page.locator(".filters-track").getByRole("button", { name: "교육 & 학습" }).click();
     await expect(page.locator(".pgrid .pcard")).toHaveCount(2);
-    await expect(page.locator('[role="status"]')).toContainText("2");
+    await expect(page.locator('main [role="status"]')).toContainText("2");
   });
 });
 

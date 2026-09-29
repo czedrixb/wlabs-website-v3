@@ -86,16 +86,19 @@ test.describe("contact sheet", () => {
   test("API: sheet-form needs no name, but contact-form still does", async ({ page, baseURL }) => {
     const ctx = page.context().request;
     const base = { email: "wos336-api@example.com", topic: "general", consentPrivacy: true, locale: "ko" as const };
+    // Unique client IP: the route rate-limits 5/min per IP, and the
+    // browser-submitted tests in a full-suite run share the real one.
+    const headers = { "x-forwarded-for": `10.99.4.${Date.now() % 250}` };
 
-    const sheetRes = await ctx.post("/api/contact", { data: { ...base, source: "sheet-form" } });
+    const sheetRes = await ctx.post("/api/contact", { headers, data: { ...base, source: "sheet-form" } });
     expect(sheetRes.status()).toBe(200);
     const sheetBody = await sheetRes.json();
     expect(sheetBody.ok).toBe(true);
 
-    const formRes = await ctx.post("/api/contact", { data: { ...base, source: "contact-form" } });
+    const formRes = await ctx.post("/api/contact", { headers, data: { ...base, source: "contact-form" } });
     expect(formRes.status()).toBe(400);
 
-    const unknownRes = await ctx.post("/api/contact", { data: { ...base, source: "not-a-form" } });
+    const unknownRes = await ctx.post("/api/contact", { headers, data: { ...base, source: "not-a-form" } });
     expect(unknownRes.status()).toBe(400);
 
     // Clean up the row the sheet-form call created.

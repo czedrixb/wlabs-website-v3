@@ -24,10 +24,11 @@ type Props = {
 // Ported from src/mods/mod-band.html: "any number of stacks can live on a
 // page; every .sp-bands root is wired independently" — the class names
 // (.sp-bands-stack/.sp-band/.sp-band-*) are fixed, reused as-is for every
-// instance (Home's 5 services here; the design repo's own CSS shows the
-// same classes reused again for Contact's larger FAQ-as-bands stack,
-// #sp-bands-faq, not yet ported — hence no per-instance "prefix": there
-// isn't one in the source, only different container ids).
+// instance — hence no per-instance "prefix": there isn't one in the
+// source, only different container ids. (An earlier design pass also used
+// this stack for Contact's FAQ as #sp-bands-faq; today's built reference
+// renders that FAQ as a plain sp-faq2 accordion instead — see Faq.tsx —
+// so Home's 5 services are the one instance.)
 //
 // Texture: columns are time through the item's own question+answer text,
 // rows are frequency bins; a character's code lights a row with a weight
