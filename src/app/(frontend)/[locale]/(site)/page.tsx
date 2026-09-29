@@ -1,5 +1,6 @@
 import type { Locale } from "@/lib/locale";
 import { resolveLocale } from "@/lib/locale";
+import { siteT } from "@/lib/site/dictionary";
 import { Hero } from "@/components/site/home/Hero";
 import { ProofBand } from "@/components/site/home/ProofBand";
 import { Field } from "@/components/site/modules/Field";
@@ -16,15 +17,16 @@ type Props = { params: Promise<{ locale: string }> };
 export default async function HomePage({ params }: Props) {
   const { locale: localeParam } = await params;
   const locale: Locale = resolveLocale(localeParam);
+  const s = siteT(locale);
 
   return (
     <>
-      <Hero locale={locale} />
+      <Hero locale={locale} s={s.home} />
       <Field dark>
-        <ProofBand />
+        <ProofBand s={s.proof} />
       </Field>
-      <Band locale={locale} />
-      <Faq locale={locale} />
+      <Band locale={locale} s={s.band} />
+      <Faq locale={locale} s={s.faq} />
     </>
   );
 }

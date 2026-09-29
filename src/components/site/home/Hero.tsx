@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useRef } from "react";
 import type { Locale } from "@/lib/locale";
 import { withLocale } from "@/lib/locale";
+import type { SiteStrings } from "@/lib/site/dictionary";
 import { HeroMark } from "./HeroMark";
 
 // The scroll-driven hero: a sticky stage inside a tall .story, cross-fading
@@ -22,57 +23,48 @@ import { HeroMark } from "./HeroMark";
 // paths (HeroMark.tsx has the doc on why), and the pointer-parallax that
 // existed only to serve them.
 
-const CHAPTERS = [
-  {
-    eyebrow: "01 / INPUT — 가능성의 시작",
-    heading: (
-      <h1>
-        복잡한 문제를,
-        <br />
-        <span className="accent">작동하는 소프트웨어</span>로.
-      </h1>
-    ),
-    lead: "AI와 소프트웨어로 비즈니스의 다음 단계를 함께 설계하고 만듭니다. 성장과 디지털 전환의 파트너, W Labs.",
-  },
-  {
-    eyebrow: "02 / PROCESS — 연결되는 맥락",
-    heading: (
-      <h2>
-        문제를 먼저 정의하고,
-        <br />
-        <span className="accent">그다음 기술</span>을 고릅니다.
-      </h2>
-    ),
-    lead: "데이터를 읽고, 맥락을 연결하고, 그 문제에 정말 필요한 AI와 소프트웨어를 설계합니다.",
-  },
-  {
-    eyebrow: "03 / OUTPUT — 현실이 되는 기술",
-    heading: (
-      <h2>
-        가능성이 아닌,
-        <br />
-        <span className="accent">작동하는 서비스</span>.
-      </h2>
-    ),
-    lead: "분석에서 안내까지, 영상에서 번역까지. 기술의 마지막 목적지는 누군가의 업무 현장입니다.",
-  },
-];
-
-const SCENES = ["입력", "이해", "실현"];
+// Each chapter's `heading` is the {lead, accent, tail} triple
+// dictionary.ts splits heroH1/ch2h/ch3h into — see its HEADING_RE comment
+// for why (v3's markup-bearing headings, ported without
+// dangerouslySetInnerHTML).
+function buildChapters(s: SiteStrings["home"]) {
+  return [
+    { eyebrow: s.ch1e, heading: s.heading1, lead: s.heroLead },
+    { eyebrow: s.ch2e, heading: s.heading2, lead: s.ch2p },
+    { eyebrow: s.ch3e, heading: s.heading3, lead: s.ch3p },
+  ];
+}
 
 // Layer 0 = data floor, 1 = intelligence, 2 = experience, 3 = platform
 // (never lifted — it's what everything else lands on). --i/--z are the
 // deck's own static stacking tokens; --lz is the one this component drives.
-const LAYERS = [
-  { key: "data", i: 0, z: 1, className: "dp-layer is-data", label: "데이터" },
-  { key: "intel", i: 1, z: 2, className: "dp-layer", label: "지능" },
-  { key: "exp", i: 2, z: 3, className: "dp-layer", label: "경험" },
-  { key: "platform", i: 3, z: 4, className: "dp-layer is-top", label: "플랫폼" },
-];
+const LAYER_META = [
+  { key: "data", i: 0, z: 1, className: "dp-layer is-data" },
+  { key: "intel", i: 1, z: 2, className: "dp-layer" },
+  { key: "exp", i: 2, z: 3, className: "dp-layer" },
+  { key: "platform", i: 3, z: 4, className: "dp-layer is-top" },
+] as const;
 
-type Props = { locale: Locale };
+function buildLayers(s: SiteStrings["home"]) {
+  const labels = [s.dpL1, s.dpL2, s.dpL3, s.dpL4];
+  return LAYER_META.map((meta, i) => ({ ...meta, label: labels[i] }));
+}
 
-export function Hero({ locale }: Props) {
+// Counts only, for the scroll-driven effect below — buildChapters(s)/
+// buildLayers(s) return per-locale copy, so their arrays aren't stable
+// across renders and can't be an effect dependency, but the effect never
+// reads anything from them besides "how many" (chapter/layer index math,
+// no text) — these constants let it stay independent of `s` without
+// silencing react-hooks/exhaustive-deps.
+const CHAPTER_COUNT = 3;
+const LAYER_COUNT = LAYER_META.length;
+
+type Props = { locale: Locale; s: SiteStrings["home"] };
+
+export function Hero({ locale, s }: Props) {
+  const CHAPTERS = buildChapters(s);
+  const SCENES = [s.sc1, s.sc2, s.sc3];
+  const LAYERS = buildLayers(s);
   const storyRef = useRef<HTMLDivElement | null>(null);
   const stageRef = useRef<HTMLDivElement | null>(null);
   const deckRef = useRef<HTMLDivElement | null>(null);
@@ -110,16 +102,16 @@ export function Hero({ locale }: Props) {
 
     function paintChapters(p: number) {
       const pos = p * 2.5;
-      CHAPTERS.forEach((_, i) => {
+      for (let i = 0; i < CHAPTER_COUNT; i++) {
         const el = chapterRefs.current[i];
-        if (!el) return;
+        if (!el) continue;
         const d = pos - i;
         const o = clamp(1 - Math.abs(d) * 1.6);
         el.style.opacity = String(o);
         el.style.transform = `translateY(${-d * 30}px)`;
         el.style.pointerEvents = o > 0.5 ? "auto" : "none";
         el.setAttribute("aria-hidden", String(o < 0.5));
-      });
+      }
       if (p > 0.8) {
         const el = chapterRefs.current[2];
         if (el) {
@@ -154,7 +146,7 @@ export function Hero({ locale }: Props) {
         osum = 0,
         onIdx = 0,
         best = -1;
-      CHAPTERS.forEach((_, i) => {
+      for (let i = 0; i < CHAPTER_COUNT; i++) {
         const d = pos - i;
         const o = clamp(1 - Math.abs(d) * 1.6);
         wsum += i * o;
@@ -163,20 +155,20 @@ export function Hero({ locale }: Props) {
           best = o;
           onIdx = i;
         }
-      });
+      }
       if (p > 0.8) onIdx = 2;
-      const span = Math.max(1, CHAPTERS.length - 1);
+      const span = Math.max(1, CHAPTER_COUNT - 1);
       const prog = clamp((osum ? wsum / osum : 0) / span);
       const tail = clamp((p - 0.78) / 0.22);
 
-      LAYERS.forEach((layer, n) => {
+      for (let n = 0; n < LAYER_COUNT; n++) {
         const el = layerRefs.current[n];
-        if (!el) return;
+        if (!el) continue;
         let lz = prog * (n - 1.5) * 16;
-        if (n === LAYERS.length - 2) lz -= tail * 76;
+        if (n === LAYER_COUNT - 2) lz -= tail * 76;
         el.style.setProperty("--lz", `${lz.toFixed(1)}px`);
         el.classList.toggle("is-on", n === onIdx);
-      });
+      }
     }
 
     function render() {
@@ -228,15 +220,19 @@ export function Hero({ locale }: Props) {
   }
 
   return (
-    <div className="story" ref={storyRef} aria-label="Intelligence in motion">
+    <div className="story" ref={storyRef} aria-label={s.storyAriaLabel}>
       <div className="stage" ref={stageRef}>
         <div className="stage-visual" aria-hidden="true">
           <div className="hero-art">
             <HeroMark />
             <div className="cap">
+              {/* "Wave Intelligence" is the brand tagline — v3 never
+                  dictionary-izes it (no data-i), it's the same literal
+                  in both languages. See dictionary.generated.ts's own
+                  scan for how heroCap/scrollHint were harvested. */}
               <span>Wave Intelligence</span>
-              <span>데이터의 흐름이 W가 됩니다</span>
-              <span className="scroll-hint">스크롤하여 탐색 ↓</span>
+              <span>{s.heroCap}</span>
+              <span className="scroll-hint">{s.scrollHint}</span>
             </div>
           </div>
 
@@ -272,11 +268,11 @@ export function Hero({ locale }: Props) {
                 </div>
               ))}
             </div>
-            <p className="dp-caption">데이터 → 지능 → 경험</p>
+            <p className="dp-caption">{s.dpCap}</p>
           </div>
         </div>
 
-        <div className="node-tips" aria-label="W Labs snippets" />
+        <div className="node-tips" aria-label={s.snippetsAriaLabel} />
 
         <div className="wrap stage-grid">
           <div className="stage-copy">
@@ -290,26 +286,40 @@ export function Hero({ locale }: Props) {
                   }}
                 >
                   <span className="eyebrow">{chapter.eyebrow}</span>
-                  {chapter.heading}
+                  {i === 0 ? (
+                    <h1>
+                      {chapter.heading.lead}
+                      <br />
+                      <span className="accent">{chapter.heading.accent}</span>
+                      {chapter.heading.tail}
+                    </h1>
+                  ) : (
+                    <h2>
+                      {chapter.heading.lead}
+                      <br />
+                      <span className="accent">{chapter.heading.accent}</span>
+                      {chapter.heading.tail}
+                    </h2>
+                  )}
                   <p className="lead">{chapter.lead}</p>
                 </article>
               ))}
             </div>
             <div className="hero-cta">
               <Link className="btn btn-primary" href={withLocale("/contact", locale)}>
-                <span>프로젝트 상담하기</span>
+                <span>{s.ctaDiscuss}</span>
                 <span className="arr" aria-hidden="true">
                   ↗
                 </span>
               </Link>
               <Link className="btn btn-ghost" href={withLocale("/work", locale)}>
-                <span>하는 일 보기</span>
+                <span>{s.ctaWork}</span>
                 <span className="arr" aria-hidden="true">
                   →
                 </span>
               </Link>
             </div>
-            <nav className="timeline" aria-label="장면 이동">
+            <nav className="timeline" aria-label={s.scenesAriaLabel}>
               {SCENES.map((label, i) => (
                 <a
                   key={i}

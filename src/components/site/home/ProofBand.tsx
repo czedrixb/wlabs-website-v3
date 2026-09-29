@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import type { SiteStrings } from "@/lib/site/dictionary";
 
 // Real content + counter animation ported from site/index.html's
 // `.on-navy.proof` block, which lives inside Home's dark Field section
@@ -46,9 +47,18 @@ function animateRoll(el: HTMLElement) {
   requestAnimationFrame(step);
 }
 
-export function ProofBand() {
+type Props = { s: SiteStrings["proof"] };
+
+export function ProofBand({ s }: Props) {
   const rootRef = useRef<HTMLDivElement | null>(null);
   const ranRef = useRef(false);
+  // dictionary.ts's stat2 is "{year}년부터..." (ko) / "...since {year}" (en)
+  // — a literal "{year}" marker, not real interpolation, so each language's
+  // word order can put the animated <b data-count> counter on its own side
+  // of the sentence (the WOS-314 counter-fragment fix, plan Step 5: v3's
+  // own markup always put the number first, which only reads correctly in
+  // Korean).
+  const [stat2Before, stat2After] = s.stat2.split("{year}");
 
   useEffect(() => {
     const root = rootRef.current;
@@ -86,38 +96,41 @@ export function ProofBand() {
     <div ref={rootRef} className="on-navy proof">
       <div className="wrap">
         <div className="row-between" style={{ marginBottom: "var(--s3)" }}>
-          <span className="eyebrow">검증 가능한 사실만</span>
+          <span className="eyebrow">{s.eyebrow}</span>
         </div>
         <div className="proof-grid">
           <div className="proof-item">
             <b className="tnum" data-count="24">
               0
             </b>
-            <span>수행한 고객사 프로젝트</span>
+            <span>{s.stat1}</span>
           </div>
           <div className="proof-item">
-            <b className="tnum" data-count="2022" data-from="2000">
-              2000
-            </b>
-            <span>년부터 중단 없이 이어온 프로젝트 수행</span>
-          </div>
-          <div className="proof-item">
-            <b className="ok">
-              <i aria-hidden="true">✓</i>
-              <span style={{ font: "inherit", color: "inherit" }}>Verified</span>
-            </b>
-            <span>라이프사이언스 R&D 마켓플레이스 Science Exchange 인증 공급업체</span>
+            <span className="stat2">
+              {stat2Before}
+              <b className="tnum" data-count="2022" data-from="2000">
+                2000
+              </b>
+              {stat2After}
+            </span>
           </div>
           <div className="proof-item">
             <b className="ok">
               <i aria-hidden="true">✓</i>
-              <span style={{ font: "inherit", color: "inherit" }}>Approved</span>
+              <span style={{ font: "inherit", color: "inherit" }}>{s.stat3Badge}</span>
             </b>
-            <span>글로벌 제약사 승인 공급업체</span>
+            <span>{s.stat3}</span>
+          </div>
+          <div className="proof-item">
+            <b className="ok">
+              <i aria-hidden="true">✓</i>
+              <span style={{ font: "inherit", color: "inherit" }}>{s.stat4Badge}</span>
+            </b>
+            <span>{s.stat4}</span>
           </div>
         </div>
         <div className="proof-foot cap">
-          <span>헬스케어·라이프사이언스, 교육, 물류, 리테일·키오스크, 인쇄, 공공, 컨슈머 앱 전반.</span>
+          <span>{s.note}</span>
           <a href="https://www.scienceexchange.com" target="_blank" rel="noopener noreferrer">
             Science Exchange ↗
           </a>

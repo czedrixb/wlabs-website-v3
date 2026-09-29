@@ -5,10 +5,11 @@ import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import type { Locale } from "@/lib/locale";
 import { withLocale } from "@/lib/locale";
+import type { SiteStrings } from "@/lib/site/dictionary";
 import { isDarkAt } from "./lib/surfaceSampler";
-import { NAV_ITEMS } from "./siteNav";
+import { buildNav } from "./siteNav";
 
-type Props = { locale: Locale };
+type Props = { locale: Locale; s: SiteStrings["chrome"] };
 
 // Strip the /ko or /en prefix so nav matching is locale-agnostic — "/ko/work/services"
 // and "/en/work/services" both read as "/work/services".
@@ -23,9 +24,10 @@ function isActive(itemHref: string, relPath: string): boolean {
   return relPath === itemHref || relPath.startsWith(`${itemHref}/`);
 }
 
-export function Header({ locale }: Props) {
+export function Header({ locale, s }: Props) {
   const pathname = usePathname();
   const relPath = siteRelativePath(pathname, locale);
+  const navItems = buildNav(s);
 
   const headerRef = useRef<HTMLElement | null>(null);
   const ulRef = useRef<HTMLUListElement | null>(null);
@@ -111,10 +113,10 @@ export function Header({ locale }: Props) {
             aria-hidden="true"
           />
         </Link>
-        <nav aria-label="주 메뉴">
+        <nav aria-label={s.navMain}>
           <ul ref={ulRef}>
             <span className="sp-navpane" aria-hidden="true" />
-            {NAV_ITEMS.map((item) => {
+            {navItems.map((item) => {
               const active = isActive(item.href, relPath);
               const hasSub = Boolean(item.children?.length);
               return (
@@ -146,7 +148,7 @@ export function Header({ locale }: Props) {
                     {item.label}
                   </Link>
                   {hasSub && (
-                    <ul className="sub" aria-label={`${item.label} 하위 메뉴`}>
+                    <ul className="sub" aria-label={item.subAriaLabel}>
                       {item.children!.map((child) => (
                         <li key={child.href}>
                           <Link href={withLocale(child.href, locale)} onClick={() => setOpenSub(null)}>

@@ -172,6 +172,14 @@ main{padding-bottom:calc(var(--tabbar) + env(safe-area-inset-bottom,0px))}
 .proof-item{background:var(--navy);padding:20px 18px;display:grid;gap:6px;align-content:start;min-height:128px}
 .proof-item b{font:700 clamp(30px,8vw,40px)/1 var(--display);letter-spacing:-.03em;color:var(--cyan)}
 .proof-item span{font-size:13px;line-height:1.5;color:var(--on-navy-muted)}
+/* WOS-331: the "since {year}" stat reads as one sentence with the animated
+   counter inline (English needs the year AFTER "since", Korean needs it
+   BEFORE — see src/lib/site/dictionary.ts's stat2 template and
+   ProofBand.tsx), not as its own big/small two-row stat like the other
+   three. Neutralize the oversized standalone-counter style from the rule
+   above for just this one composed sentence. */
+.proof-item .stat2{display:inline}
+.proof-item .stat2 b{font:inherit;letter-spacing:inherit;color:inherit}
 .proof-item .ok{display:inline-flex;align-items:center;gap:8px;font-size:clamp(20px,5.6vw,26px);min-height:40px}
 .proof-item .ok i{width:26px;height:26px;border-radius:50%;background:var(--cyan-soft);display:grid;place-items:center;font-style:normal;color:var(--cyan);font-size:14px}
 .proof .ok i{transform:scale(.2);opacity:0;transition:transform var(--micro) cubic-bezier(.34,1.56,.64,1),opacity calc(var(--micro)*.6) ease-out}

@@ -5,8 +5,10 @@ import { usePathname } from "next/navigation";
 import { useEffect, useRef } from "react";
 import type { Locale } from "@/lib/locale";
 import { withLocale } from "@/lib/locale";
+import type { SiteStrings } from "@/lib/site/dictionary";
+import { buildTabbarItems } from "./siteNav";
 
-type Props = { locale: Locale };
+type Props = { locale: Locale; s: SiteStrings["chrome"] };
 
 function siteRelativePath(pathname: string, locale: Locale): string {
   const prefix = `/${locale}`;
@@ -19,10 +21,11 @@ function isActive(href: string, relPath: string): boolean {
   return relPath === href || relPath.startsWith(`${href}/`);
 }
 
-const TABS = [
-  {
-    href: "/",
-    label: "홈",
+// Icon + interactive-badge metadata, keyed by href — structural, not
+// translated. Labels come from buildTabbarItems(s) at render time and are
+// merged in below.
+const TAB_META: Record<string, { icon: React.ReactNode; interactive?: boolean }> = {
+  "/": {
     icon: (
       <>
         <path d="M3 11.5 12 4l9 7.5" />
@@ -30,9 +33,7 @@ const TABS = [
       </>
     ),
   },
-  {
-    href: "/work",
-    label: "하는 일",
+  "/work": {
     icon: (
       <>
         <rect x="3" y="7" width="18" height="13" rx="2" />
@@ -40,9 +41,7 @@ const TABS = [
       </>
     ),
   },
-  {
-    href: "/company",
-    label: "회사",
+  "/company": {
     icon: (
       <>
         <circle cx="9" cy="8" r="3.5" />
@@ -52,9 +51,7 @@ const TABS = [
       </>
     ),
   },
-  {
-    href: "/search",
-    label: "검색",
+  "/search": {
     icon: (
       <>
         <circle cx="11" cy="11" r="7" />
@@ -62,9 +59,7 @@ const TABS = [
       </>
     ),
   },
-  {
-    href: "/contact",
-    label: "문의",
+  "/contact": {
     interactive: true,
     icon: (
       <>
@@ -73,7 +68,7 @@ const TABS = [
       </>
     ),
   },
-];
+};
 
 /**
  * The mobile tab bar's own notch — same object as the desktop nav pill,
@@ -81,10 +76,11 @@ const TABS = [
  * out of its TOP edge. Ported from tabPane(); it needs a real element to
  * paint (.sp-tabpane) which JS measures against the active tab's label.
  */
-export function TabBar({ locale }: Props) {
+export function TabBar({ locale, s }: Props) {
   const pathname = usePathname();
   const relPath = siteRelativePath(pathname, locale);
   const barRef = useRef<HTMLElement | null>(null);
+  const tabs = buildTabbarItems(s).map((tab) => ({ ...tab, ...TAB_META[tab.href] }));
 
   useEffect(() => {
     const bar = barRef.current;
@@ -113,10 +109,10 @@ export function TabBar({ locale }: Props) {
   }, [relPath]);
 
   return (
-    <nav ref={barRef} className="tabbar" aria-label="주 메뉴">
+    <nav ref={barRef} className="tabbar" aria-label={s.navMain}>
       <span className="sp-tabpane" aria-hidden="true" />
       <ul>
-        {TABS.map((tab) => {
+        {tabs.map((tab) => {
           const active = isActive(tab.href, relPath);
           return (
             <li key={tab.href}>

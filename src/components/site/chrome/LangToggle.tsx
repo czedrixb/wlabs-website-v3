@@ -4,8 +4,9 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef } from "react";
 import type { Locale } from "@/lib/locale";
+import type { SiteStrings } from "@/lib/site/dictionary";
 
-type Props = { locale: Locale };
+type Props = { locale: Locale; s: SiteStrings["chrome"] };
 
 /**
  * The language toggle floats over the page, which is right everywhere
@@ -14,7 +15,7 @@ type Props = { locale: Locale };
  * own margin above .foot-legal's hairline instead, stopping exactly where
  * its own bottom edge would cross it.
  */
-export function LangToggle({ locale }: Props) {
+export function LangToggle({ locale, s }: Props) {
   const pathname = usePathname();
   const elRef = useRef<HTMLDivElement | null>(null);
 
@@ -53,7 +54,7 @@ export function LangToggle({ locale }: Props) {
   const hrefFor = (target: Locale) => `/${target}${rel === "" ? "" : rel}`;
 
   return (
-    <div ref={elRef} className="lang lang-float" role="group" aria-label="언어 선택">
+    <div ref={elRef} className="lang lang-float" role="group" aria-label={s.langGroup}>
       <Link href={hrefFor("en")} aria-pressed={locale === "en"} lang="en">
         EN
       </Link>
