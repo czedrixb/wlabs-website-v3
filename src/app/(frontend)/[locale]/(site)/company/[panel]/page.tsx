@@ -3,6 +3,7 @@ import Link from "next/link";
 import type { Locale } from "@/lib/locale";
 import { resolveLocale, withLocale } from "@/lib/locale";
 import { siteT } from "@/lib/site/dictionary";
+import { INSIGHTS } from "@/lib/site/content";
 import { SegNav } from "@/components/site/work/SegNav";
 import { TeamGrid } from "@/components/site/company/TeamGrid";
 import { NewsList } from "@/components/site/company/NewsList";
@@ -54,6 +55,14 @@ export default async function CompanyPanelPage({ params }: Props) {
     { h: company.v3h, p: company.v3p },
     { h: company.v4h, p: company.v4p },
   ];
+  const newsItems = INSIGHTS.map((n) => ({
+    id: n.id,
+    date: n.date,
+    kind: n.kind,
+    link: n.link,
+    heading: locale === "en" ? n.heading.en : n.heading.ko,
+    body: locale === "en" ? n.body.en : n.body.ko,
+  }));
 
   return (
     <>
@@ -79,7 +88,7 @@ export default async function CompanyPanelPage({ params }: Props) {
               {s.insights.insLead}
             </p>
           </div>
-          <NewsList locale={locale} s={s.insights} segProducts={chrome.segProducts} />
+          <NewsList locale={locale} items={newsItems} s={s.insights} segProducts={chrome.segProducts} />
         </div>
       )}
 

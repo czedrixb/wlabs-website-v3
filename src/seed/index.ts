@@ -7,6 +7,7 @@
 import { getPayload } from "payload";
 import config from "@payload-config";
 import type { Post } from "@/payload-types";
+import { seedSiteContent } from "./site";
 
 type NewPostData = Omit<Post, "id" | "createdAt" | "updatedAt" | "sizes">;
 
@@ -183,6 +184,8 @@ async function run() {
       _status: p.status,
     }));
   }
+
+  await seedSiteContent(payload);
 
   console.log("Seed complete.");
   process.exit(0);
