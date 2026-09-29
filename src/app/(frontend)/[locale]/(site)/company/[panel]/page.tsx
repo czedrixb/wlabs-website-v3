@@ -4,11 +4,12 @@ import type { Locale } from "@/lib/locale";
 import { resolveLocale, withLocale } from "@/lib/locale";
 import { siteT } from "@/lib/site/dictionary";
 import { siteMetadata } from "@/lib/site/metadata";
-import { INSIGHTS } from "@/lib/site/content";
+import { INSIGHTS, RAIL_ENTRIES } from "@/lib/site/content";
 import { SegNav } from "@/components/site/work/SegNav";
 import { TeamGrid } from "@/components/site/company/TeamGrid";
 import { NewsList } from "@/components/site/company/NewsList";
 import { StoryTimeline } from "@/components/site/company/StoryTimeline";
+import { StoryRail, type ResolvedRailEntry } from "@/components/site/company/StoryRail";
 import { CtaPanel } from "@/components/site/modules/CtaPanel";
 
 type Props = { params: Promise<{ locale: string; panel: string }> };
@@ -31,12 +32,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return siteMetadata({ locale, path: `/company/${panel}`, title: company.coH1, description: company.coLead2 });
 }
 
-// Company's three segmented panels. `story` ships prose + the 5-entry
-// timeline + values + partnership CTA; the interactive `sp-rail` "reading
-// log" timeline (src/mods/mod-rail.html, ~690 lines of SVG scrubber) is
-// deliberately NOT ported in this pass — see the WOS-332 plan's M5 note
-// and scripts/v3-content-manifest.mjs's header. `team`/`insights` are
-// fully ported. Replaces the WOS-314 stub.
+// Company's three segmented panels. `story` opens with the interactive
+// sp-rail "reading log" (WOS-336 — the piece WOS-332's plan deferred),
+// followed by the prose intro, the 5-entry timeline, values and the
+// partnership CTA — the same coexistence v3's #panel-story has
+// (index.html:2525-2640). `team`/`insights` are fully ported.
 export default async function CompanyPanelPage({ params }: Props) {
   const { locale: localeParam, panel } = await params;
   const locale: Locale = resolveLocale(localeParam);
@@ -65,6 +65,21 @@ export default async function CompanyPanelPage({ params }: Props) {
     { h: company.v3h, p: company.v3p },
     { h: company.v4h, p: company.v4p },
   ];
+  const railEntries: ResolvedRailEntry[] = RAIL_ENTRIES.map((e) => ({
+    id: e.id,
+    type: e.type,
+    t: e.t,
+    ...(e.total !== undefined ? { total: e.total } : {}),
+    datetime: e.datetime,
+    dateLabel: e.dateLabel,
+    circa: e.circa,
+    title: locale === "en" ? e.title.en : e.title.ko,
+    ...(e.meta ? { meta: locale === "en" ? e.meta.en : e.meta.ko } : {}),
+    para: locale === "en" ? e.para.en : e.para.ko,
+    ...(e.enote ? { enote: locale === "en" ? e.enote.en : e.enote.ko, enoteRuo: e.enoteRuo } : {}),
+    ...(e.breakLine ? { breakLine: e.breakLine } : {}),
+    ...(e.link ? { link: e.link } : {}),
+  }));
   const newsItems = INSIGHTS.map((n) => ({
     id: n.id,
     date: n.date,
@@ -103,7 +118,8 @@ export default async function CompanyPanelPage({ params }: Props) {
       )}
 
       {key === "story" && (
-        <div className="panel wrap" style={{ paddingBlock: "var(--s3) var(--sec)" }}>
+        <div className="panel wrap is-rail-host" id="panel-story" style={{ paddingBlock: "var(--s3) var(--sec)" }}>
+          <StoryRail s={s.rail} entries={railEntries} />
           <div className="story-intro">
             <div>
               <span className="eyebrow">{company.storyEyebrow}</span>

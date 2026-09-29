@@ -59,6 +59,12 @@ export const RAIL_MANIFEST = {
       ko: "비공개 = 이름 공개에 서면 동의하지 않은 고객사.",
       en: "Undisclosed = clients who did not give written consent to be named.",
     },
+    // JS-composed strings (the module's TXT table, index.html:4532-4543) —
+    // the axis' drawn "Today" label and the role=status count line.
+    // `{n}` is a literal marker StoryRail replaces, same convention as the
+    // search namespace's metaCount.
+    todayLabel: { ko: "오늘 2026-09", en: "Today 2026-09" },
+    status: { ko: "{n}개 항목 표시 · 최신순", en: "{n} entries shown · newest first" },
     // the 27 entries, newest → oldest (titles H, paragraphs P, notes N)
     teamH: { v3Key: "spRailTeamH" },
     teamP: { v3Key: "spRailTeamP" },
