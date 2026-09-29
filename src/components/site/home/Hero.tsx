@@ -5,6 +5,7 @@ import { useEffect, useRef } from "react";
 import type { Locale } from "@/lib/locale";
 import { withLocale } from "@/lib/locale";
 import type { SiteStrings } from "@/lib/site/dictionary";
+import type { SnippetPoolItem } from "@/lib/site/snippetPool";
 import { HeroMark } from "./HeroMark";
 
 // The scroll-driven hero: a sticky stage inside a tall .story, cross-fading
@@ -19,9 +20,10 @@ import { HeroMark } from "./HeroMark";
 // not React state — this runs on every scroll tick, well above the budget
 // a state update (and the render it triggers) is worth paying on each one.
 //
-// Not ported: node-tips, the floating snippet callouts that ride the wave
-// paths (HeroMark.tsx has the doc on why), and the pointer-parallax that
-// existed only to serve them.
+// node-tips (the floating snippet callouts riding the wave paths) is its
+// own effect below, once PROJECTS/PRODUCTS/TEAM/SERVICES existed as typed
+// constants to deal from (WOS-332) — deliberately skipped by WOS-314 for
+// the same reason.
 
 // Each chapter's `heading` is the {lead, accent, tail} triple
 // dictionary.ts splits heroH1/ch2h/ch3h into — see its HEADING_RE comment
@@ -59,9 +61,9 @@ function buildLayers(s: SiteStrings["home"]) {
 const CHAPTER_COUNT = 3;
 const LAYER_COUNT = LAYER_META.length;
 
-type Props = { locale: Locale; s: SiteStrings["home"] };
+type Props = { locale: Locale; s: SiteStrings["home"]; pool: SnippetPoolItem[] };
 
-export function Hero({ locale, s }: Props) {
+export function Hero({ locale, s, pool }: Props) {
   const CHAPTERS = buildChapters(s);
   const SCENES = [s.sc1, s.sc2, s.sc3];
   const LAYERS = buildLayers(s);
@@ -71,6 +73,7 @@ export function Hero({ locale, s }: Props) {
   const layerRefs = useRef<(HTMLDivElement | null)[]>([]);
   const chapterRefs = useRef<(HTMLElement | null)[]>([]);
   const timelineRefs = useRef<(HTMLAnchorElement | null)[]>([]);
+  const tipLayerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     const story = storyRef.current;
@@ -205,6 +208,246 @@ export function Hero({ locale, s }: Props) {
     };
   }, []);
 
+  // ── node-tips: snippet callouts riding the hero mark's wave paths ──────
+  // Ported from site/index.html's node system (`nodes()`/`nodesReact()`/
+  // `placeTips()`) and its snippet dealer (`buildPool()`/`draw()`/
+  // `fillTip()`/`swapTip()`). `pool` is already resolved to the active
+  // locale (buildSnippetPool, src/lib/site/snippetPool.ts) — unlike the
+  // source, nothing here needs a runtime language check.
+  //
+  // Kept as its own effect/closure rather than folded into the one above:
+  // the two systems don't share state in the source either (separate
+  // top-level IIFEs), and this one owns a continuous rAF loop for idle
+  // drift that the chapter/timeline/deck sync above doesn't need — it only
+  // repaints on scroll/resize. `progress()` is duplicated rather than
+  // shared for the same reason: each effect mounts/unmounts independently.
+  //
+  // Everything here is DOM-imperative (circles, .ntip divs built via
+  // document.createElement, never React state) exactly like the source —
+  // and unlike the chapter effect's JSX-rendered refs, that also means
+  // there is nothing to hydrate: the .node-tips layer renders empty on the
+  // server, so there is no SSR/client mismatch to guard against here, only
+  // client-only DOM writes after mount.
+  useEffect(() => {
+    const stage = stageRef.current;
+    const story = storyRef.current;
+    const tipLayer = tipLayerRef.current;
+    if (!stage || !story || !tipLayer || pool.length === 0) return;
+    const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    // v3 never builds the node/tip system at all under reduced motion
+    // (render() returns before reaching it) — CSS also hides `.node-tips`
+    // outright in that case, so skipping the setup here just avoids
+    // pointless work behind display:none.
+    if (motion.matches) return;
+
+    const markEl = stage.querySelector<SVGSVGElement>(".hero-mono");
+    const nodesGroup = markEl?.querySelector<SVGGElement>(".nodes") ?? null;
+    const paths = markEl ? [...markEl.querySelectorAll<SVGPathElement>(".wave-path")] : [];
+    if (!markEl || !nodesGroup || paths.length === 0) return;
+    // Rebind stage/story/mark to fresh, non-nullable consts: TS's narrowing
+    // above (the `if (!x) return` guards) doesn't carry into the nested
+    // function declarations below (progress/svgPoint/placeTips/loop) —
+    // shadowing with a binding whose type has no `null` in it sidesteps
+    // that rather than re-asserting non-null at every call site.
+    const stageEl: HTMLDivElement = stage;
+    const storyEl: HTMLDivElement = story;
+    const tipLayerEl: HTMLDivElement = tipLayer;
+    const mark: SVGSVGElement = markEl;
+
+    const clamp = (n: number, a = 0, b = 1) => Math.max(a, Math.min(b, n));
+    const NS = "http://www.w3.org/2000/svg";
+
+    // One leading + one trailing node per wave path.
+    const circles: SVGCircleElement[] = [];
+    paths.forEach((_, i) => {
+      for (const k of [0, 1]) {
+        const c = document.createElementNS(NS, "circle");
+        c.setAttribute("r", k ? "1.8" : "2.4");
+        c.dataset.path = String(i);
+        c.dataset.offset = String((i * 0.19 + k * 0.5) % 1);
+        circles.push(c);
+      }
+    });
+    nodesGroup.replaceChildren(...circles);
+
+    // The snippet dealer: a shuffled deck, no repeats until it's exhausted.
+    let deck: number[] = [];
+    const shown = new Set<number>();
+    function draw(): number {
+      if (!deck.length) {
+        deck = pool.map((_, i) => i);
+        for (let i = deck.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [deck[i], deck[j]] = [deck[j], deck[i]];
+        }
+      }
+      let k = deck.findIndex((i) => !shown.has(i));
+      if (k < 0) k = 0;
+      return deck.splice(k, 1)[0];
+    }
+    function fillTip(tip: HTMLDivElement, poolIndex: number) {
+      const item = pool[poolIndex];
+      tip.dataset.pool = String(poolIndex);
+      tip.innerHTML =
+        `<span class="ntip-lead"></span>` +
+        `<a class="ntip-box" href="${item.href}"><span class="k">${item.kind} <b>${item.title}</b></span>` +
+        `<span class="sub">${item.sub}</span></a>`;
+    }
+    function swapTip(tip: HTMLDivElement) {
+      const old = Number(tip.dataset.pool);
+      shown.delete(old);
+      const i = draw();
+      shown.add(i);
+      fillTip(tip, i);
+    }
+
+    const tips: HTMLDivElement[] = circles.map(() => {
+      const w = document.createElement("div");
+      w.className = "ntip";
+      const i = draw();
+      shown.add(i);
+      fillTip(w, i);
+      return w;
+    });
+    tipLayerEl.replaceChildren(...tips);
+
+    // Pointer parallax: nodes swell near the cursor; idle drift keeps the
+    // flow moving even without scroll or pointer input.
+    let ptr: { cx: number; cy: number } | null = null;
+    function onPointerMove(e: PointerEvent) {
+      ptr = { cx: e.clientX, cy: e.clientY };
+    }
+    function onPointerLeave() {
+      ptr = null;
+    }
+    stageEl.addEventListener("pointermove", onPointerMove, { passive: true });
+    stageEl.addEventListener("pointerleave", onPointerLeave);
+
+    function svgPoint(): DOMPoint | null {
+      if (!ptr) return null;
+      try {
+        const m = mark.getScreenCTM();
+        if (!m) return null;
+        const pt = mark.createSVGPoint();
+        pt.x = ptr.cx;
+        pt.y = ptr.cy;
+        return pt.matrixTransform(m.inverse());
+      } catch {
+        return null;
+      }
+    }
+
+    function progress(): number {
+      const rect = storyEl.getBoundingClientRect();
+      const top = parseFloat(getComputedStyle(stageEl).top) || 0;
+      const travel = storyEl.offsetHeight - stageEl.offsetHeight;
+      if (travel <= 0) return 0;
+      return clamp((top - rect.top) / travel);
+    }
+
+    let drift = 0;
+
+    function moveNodes(p: number) {
+      for (let idx = 0; idx < circles.length; idx++) {
+        const c = circles[idx];
+        const path = paths[Number(c.dataset.path)];
+        const L = path.getTotalLength();
+        const offset = Number(c.dataset.offset);
+        const t = (((offset + p * 0.25 + drift) % 1) + 1) % 1;
+        const pt = path.getPointAtLength(L * t);
+        c.setAttribute("cx", String(pt.x));
+        c.setAttribute("cy", String(pt.y));
+        const prevT = c.dataset.t === undefined ? t : Number(c.dataset.t);
+        c.dataset.t = String(t);
+        if (t < prevT - 0.5) swapTip(tips[idx]);
+      }
+    }
+
+    function nodesReact() {
+      const sp = svgPoint();
+      for (const c of circles) {
+        const base = Number(c.dataset.offset) >= 0.5 ? 1.8 : 2.4;
+        if (!sp) {
+          c.setAttribute("r", String(base));
+          c.classList.remove("near");
+          c.dataset.k = "0";
+          continue;
+        }
+        const cx = Number(c.getAttribute("cx"));
+        const cy = Number(c.getAttribute("cy"));
+        const d = Math.hypot(cx - sp.x, cy - sp.y);
+        const k = clamp(1 - d / 45);
+        c.setAttribute("r", String(base * (1 + k * 1.6)));
+        c.classList.toggle("near", k > 0.35);
+        c.dataset.k = k.toFixed(2);
+      }
+    }
+
+    function placeTips() {
+      let m: DOMMatrix | null;
+      try {
+        m = mark.getScreenCTM();
+      } catch {
+        return;
+      }
+      if (!m) return;
+      const sr = stageEl.getBoundingClientRect();
+      const wide = sr.width >= 744;
+      circles.forEach((c, i) => {
+        const pt = mark.createSVGPoint();
+        pt.x = Number(c.getAttribute("cx"));
+        pt.y = Number(c.getAttribute("cy"));
+        const sp = pt.matrixTransform(m!);
+        const x = sp.x - sr.left;
+        const y = sp.y - sr.top;
+        const k = Number(c.dataset.k || 0);
+        const zone = wide ? clamp((x / sr.width - 0.5) / 0.15) : clamp((y / sr.height - 0.55) / 0.15);
+        const edge = clamp((sr.width - x - 40) / 160) * clamp((y - 90) / 60);
+        const tip = tips[i];
+        tip.style.transform = `translate3d(${x}px,${y}px,0)`;
+        tip.style.setProperty("--vis", (Math.max(zone, k) * edge * 0.9).toFixed(2));
+      });
+    }
+
+    let paused = false;
+    function onPointerOver(e: PointerEvent) {
+      if ((e.target as HTMLElement).closest(".ntip-box")) paused = true;
+    }
+    function onPointerOut(e: PointerEvent) {
+      const stillInside = (e.relatedTarget as HTMLElement | null)?.closest?.(".ntip-box");
+      if ((e.target as HTMLElement).closest(".ntip-box") && !stillInside) paused = false;
+    }
+    tipLayerEl.addEventListener("pointerover", onPointerOver);
+    tipLayerEl.addEventListener("pointerout", onPointerOut);
+
+    let raf = 0;
+    let last = performance.now();
+    function loop(now: number) {
+      raf = requestAnimationFrame(loop);
+      const dt = Math.min(0.1, (now - last) / 1000);
+      last = now;
+      const rect = stageEl.getBoundingClientRect();
+      if (rect.bottom < 0 || rect.top > window.innerHeight) return;
+      if (!paused) drift += dt * 0.03;
+      const p = progress();
+      moveNodes(p);
+      nodesReact();
+      placeTips();
+    }
+    raf = requestAnimationFrame(loop);
+
+    return () => {
+      cancelAnimationFrame(raf);
+      stageEl.removeEventListener("pointermove", onPointerMove);
+      stageEl.removeEventListener("pointerleave", onPointerLeave);
+      tipLayerEl.removeEventListener("pointerover", onPointerOver);
+      tipLayerEl.removeEventListener("pointerout", onPointerOut);
+    };
+    // `pool` is built server-side once per request and stable for the
+    // component's lifetime — this effect only needs to (re)run if its
+    // identity actually changes.
+  }, [pool]);
+
   function goToScene(i: number) {
     const story = storyRef.current;
     const stage = stageRef.current;
@@ -272,7 +515,7 @@ export function Hero({ locale, s }: Props) {
           </div>
         </div>
 
-        <div className="node-tips" aria-label={s.snippetsAriaLabel} />
+        <div className="node-tips" aria-label={s.snippetsAriaLabel} ref={tipLayerRef} />
 
         <div className="wrap stage-grid">
           <div className="stage-copy">

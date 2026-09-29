@@ -2351,3 +2351,20 @@ html:lang(ko) .dp-caption{letter-spacing:.04em;text-transform:none}
 /* Drawn at 2x and set on the page's own ground, so a photograph shot on
    white does not cut a hard white disc out of a cream card. */
 .member img,.avatars img{background:var(--cream-2)}
+
+/* WOS-332: SegNav (Work/Company's `.seg` sub-nav) renders each segment as
+   a real route — a next/link `<a>` — not a client-side tab switch, so its
+   active state is `aria-current="page"` rather than v3's own
+   `aria-selected`/`role="tab"` on a `<button>`. Same visual contract as
+   the source's `.seg button` rules (line ~301 above), extended to `<a>`
+   since v3 never needed an anchor variant of this control. */
+.seg a{flex:none;min-height:40px;padding:0 18px;border-radius:var(--r-pill);display:inline-flex;align-items:center;text-decoration:none;font:600 14px/1 var(--body);color:var(--ink-2);transition:background .2s,color .2s}
+.seg a:hover{background:rgba(0,0,0,.05)}
+.seg a[aria-current="page"]{background:transparent;color:#fff}
+
+/* Project detail page's prev/next nav (`.proj-nav`) is a real link now,
+   not a `data-pdetail` sheet-opening `<button>` — same rules as v3's own
+   `.proj-nav button` (line ~289 above), extended to `<a>`. */
+.proj-nav a{display:grid;gap:6px;padding:18px 20px;border:1px solid var(--line);border-radius:var(--r-l);background:#fff;text-align:left;font:inherit;color:var(--ink);text-decoration:none}
+.proj-nav a.nxt{text-align:right}
+.proj-nav a:hover{border-color:var(--ink)}
