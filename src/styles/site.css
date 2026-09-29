@@ -2368,3 +2368,63 @@ html:lang(ko) .dp-caption{letter-spacing:.04em;text-transform:none}
 .proj-nav a{display:grid;gap:6px;padding:18px 20px;border:1px solid var(--line);border-radius:var(--r-l);background:#fff;text-align:left;font:inherit;color:var(--ink);text-decoration:none}
 .proj-nav a.nxt{text-align:right}
 .proj-nav a:hover{border-color:var(--ink)}
+
+/* WOS-335: the blog post body. No v3 counterpart — the design repo has no
+   blog — so unlike everything above this is written fresh, on the same
+   tokens as the rest of this sheet, rather than ported. It replaces
+   @tailwindcss/typography's `.prose` (Tailwind is gone from the app after
+   this ticket): the post body is Payload Lexical output rendered by
+   @payloadcms/richtext-lexical/react's default JSX converters, which emit
+   plain tags/classes it can't be handed v3 class names at the call site,
+   so this restates what the base above deliberately flattens for
+   everything else (h1-h4,p{margin:0}; a{text-decoration:none};
+   img{display:block}). Selector list below is exactly what those
+   converters emit — checked against
+   node_modules/@payloadcms/richtext-lexical/dist/features/converters/
+   lexicalToJSX/converter/converters/*.js, not guessed: heading.js (bare
+   h1-h6), text.js (strong/em/code/sub/sup, strikethrough/underline via
+   inline style), link.js (bare a), list.js (ul.list-bullet/ol.list-number,
+   li, li.list-item-checkbox), blockquote.js (bare blockquote),
+   horizontalRule.js (bare hr), table.js (div.lexical-table-container >
+   table.lexical-table > tr.lexical-table-row > td/th.lexical-table-cell),
+   upload.js (bare img, or picture>source+img for a sized upload). */
+.post-body{max-width:72ch;font-size:17px;line-height:1.75;color:var(--ink-2)}
+html:lang(ko) .post-body{line-height:1.85}
+.post-body>*+*{margin-top:var(--s2)}
+.post-body h1,.post-body h2,.post-body h3,.post-body h4,.post-body h5,.post-body h6{
+  margin-top:var(--s3);color:var(--ink);font-family:var(--display);font-weight:700;
+  letter-spacing:-.02em;line-height:1.25;text-wrap:balance}
+html:lang(ko) .post-body h1,html:lang(ko) .post-body h2,
+html:lang(ko) .post-body h3,html:lang(ko) .post-body h4{letter-spacing:-.03em;line-height:1.38}
+.post-body>:first-child{margin-top:0}
+/* An editor reaching for H1/H2 inside the body gets the page's own H2 size
+   — the post title above this block is already the page's real H1. */
+.post-body h1,.post-body h2{font-size:var(--fs-h2)}
+.post-body h3{font-size:var(--fs-h3)}
+.post-body h4,.post-body h5,.post-body h6{font-size:17px}
+.post-body strong{font-weight:700;color:var(--ink)}
+.post-body em{font-style:italic}
+.post-body a{color:var(--teal-2);text-decoration:underline;text-underline-offset:3px}
+.post-body a:hover{color:var(--teal)}
+.post-body ul,.post-body ol{margin:0;padding-left:1.4em;display:grid;gap:8px}
+.post-body li::marker{color:var(--teal)}
+.post-body li>ul,.post-body li>ol{margin-top:8px}
+.post-body li.list-item-checkbox{list-style:none;display:flex;gap:8px;align-items:baseline;margin-left:-1.4em}
+.post-body li.list-item-checkbox input{margin:0;accent-color:var(--teal)}
+.post-body blockquote{margin:0;padding:14px 18px;color:var(--ink-2);border-left:3px solid var(--teal-soft);background:var(--cream-2);border-radius:0 var(--r-s) var(--r-s) 0}
+.post-body code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.9em;background:var(--cream-2);border:1px solid var(--line);border-radius:var(--r-xs);padding:.1em .38em}
+.post-body hr{border:0;border-top:1px solid var(--line);margin-block:var(--s3)}
+.post-body img,.post-body picture{max-width:100%;height:auto;display:block;border-radius:var(--r-m);background:var(--cream-2)}
+.post-body .lexical-table-container{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.post-body .lexical-table{width:100%;font-size:var(--fs-small);color:var(--ink-2)}
+/* The converter sets an inline style={border,padding} on every cell (see
+   table.js), which beats any class selector — !important is the only way
+   to keep cells on this sheet's own tokens instead of its hardcoded #ccc. */
+.post-body .lexical-table-cell{border:1px solid var(--line)!important;padding:8px 12px!important;text-align:left}
+.post-body .lexical-table th{font-weight:700;color:var(--ink);background:var(--cream-2)}
+
+/* The blog list's thumbnail — .news-item (site.css:456, the model this
+   list was ported from, see src/components/site/company/NewsList.tsx) has
+   no image slot of its own, so this covers cropping the post banner to a
+   16:9 frame at any width next/image renders it at. */
+.post-thumb{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:var(--r-m)}

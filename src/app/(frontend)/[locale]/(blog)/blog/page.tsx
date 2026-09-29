@@ -5,7 +5,6 @@ import { getPostsPage } from "@/lib/cachedPosts";
 import { resolveLocale, withLocale } from "@/lib/locale";
 import { mediaPath } from "@/lib/mediaPath";
 import { siteMetadata } from "@/lib/site/metadata";
-import { SiteHeader } from "@/components/frontend/SiteHeader";
 import { t } from "@/lib/strings";
 
 // Force dynamic rendering — otherwise Next 16's production build can
@@ -20,7 +19,7 @@ type Props = {
 };
 
 // Canonical always points at the unpaginated /blog — no title/description
-// override, so [locale]/layout.tsx's own BLOG_METADATA still applies.
+// override, so (blog)/layout.tsx's own generateMetadata still applies.
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale: localeParam } = await params;
   return siteMetadata({ locale: resolveLocale(localeParam), path: "/blog" });
@@ -38,11 +37,18 @@ export default async function BlogListPage({ params, searchParams }: Props) {
 
   return (
     <>
-      <SiteHeader locale={locale} path={page > 1 ? `/blog?page=${page}` : "/blog"} />
-      <main className="mx-auto max-w-3xl px-6 pb-16">
-        {docs.length === 0 && <p className="text-gray-500">{strings.noPosts}</p>}
+      <div className="wrap page-head">
+        <div className="row-between">
+          <span className="eyebrow">{strings.blogEyebrow}</span>
+        </div>
+        <h1>{strings.blogTitle}</h1>
+        <p className="lead">{strings.blogLead}</p>
+      </div>
 
-        <ul className="space-y-8">
+      <div className="panel wrap" style={{ paddingBlock: "var(--s3) var(--sec)" }}>
+        {docs.length === 0 && <p className="note">{strings.noPosts}</p>}
+
+        <div className="news">
           {docs.map((post) => {
             const banner =
               typeof post.banner === "object" && post.banner ? post.banner : null;
@@ -50,50 +56,51 @@ export default async function BlogListPage({ params, searchParams }: Props) {
               typeof post.author === "object" && post.author ? post.author : null;
 
             return (
-              <li key={post.id} className="border-b pb-8">
-                <Link href={withLocale(`/blog/${post.slug}`, locale)} className="group block">
+              <article className="news-item" key={post.id}>
+                {post.publishedAt && (
+                  <time dateTime={post.publishedAt}>
+                    {new Date(post.publishedAt).toLocaleDateString(locale)}
+                  </time>
+                )}
+                <div>
                   {banner?.url && (
                     <Image
                       src={mediaPath(banner.url)}
                       alt={banner.alt ?? ""}
                       width={800}
                       height={450}
-                      className="mb-4 aspect-video w-full rounded-lg object-cover"
+                      className="post-thumb"
                     />
                   )}
-                  <h2 className="text-xl font-semibold group-hover:underline">
-                    {post.title}
-                  </h2>
-                </Link>
-                {post.excerpt && <p className="mt-2 text-gray-600">{post.excerpt}</p>}
-                <p className="mt-2 text-sm text-gray-400">
-                  {author?.name ?? strings.unknownAuthor}
-                  {post.publishedAt &&
-                    ` · ${new Date(post.publishedAt).toLocaleDateString(locale)}`}
-                </p>
-              </li>
+                  <h3>
+                    <Link href={withLocale(`/blog/${post.slug}`, locale)}>{post.title}</Link>
+                  </h3>
+                  {post.excerpt && <p>{post.excerpt}</p>}
+                  <p className="cap">{author?.name ?? strings.unknownAuthor}</p>
+                </div>
+              </article>
             );
           })}
-        </ul>
+        </div>
 
-        <nav className="mt-10 flex justify-between text-sm">
+        <nav className="row-between" style={{ marginTop: "var(--s4)" }}>
           {hasPrevPage ? (
-            <Link href={withLocale(`/blog?page=${page - 1}`, locale)} className="underline">
+            <Link className="link" href={withLocale(`/blog?page=${page - 1}`, locale)}>
               &larr; {strings.previous}
             </Link>
           ) : (
             <span />
           )}
-          <span className="text-gray-400">{strings.pageIndicator(page, totalPages || 1)}</span>
+          <span className="small tnum">{strings.pageIndicator(page, totalPages || 1)}</span>
           {hasNextPage ? (
-            <Link href={withLocale(`/blog?page=${page + 1}`, locale)} className="underline">
+            <Link className="link" href={withLocale(`/blog?page=${page + 1}`, locale)}>
               {strings.next} &rarr;
             </Link>
           ) : (
             <span />
           )}
         </nav>
-      </main>
+      </div>
     </>
   );
 }

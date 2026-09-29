@@ -2,11 +2,15 @@ import { test, expect } from "@playwright/test";
 
 // WOS-320 built the ko/en switch on ?locale=; WOS-314 moved every
 // reader-facing page under a /ko or /en path segment instead (no cookie, no
-// middleware — see src/lib/locale.ts). This toggle switches interface chrome
-// only (nav labels, pagination, empty state, byline fallback) — post
-// title/excerpt/body always render the Korean base fields, never the `*En`
-// admin fields. See src/lib/locale.ts `pick` for the API's (separate,
-// content-switching) use of the same *En fields.
+// middleware — see src/lib/locale.ts). WOS-335 then replaced the blog's own
+// Tailwind "한국어 | English" switcher with the v3 site's shared
+// <LangToggle> (the floating "EN"/"KO" pill, src/components/site/chrome/
+// LangToggle.tsx — same component site-shell.spec.ts already covers on
+// (site) routes). This toggle switches interface chrome only (nav labels,
+// pagination, empty state, byline fallback) — post title/excerpt/body
+// always render the Korean base fields, never the `*En` admin fields. See
+// src/lib/locale.ts `pick` for the API's (separate, content-switching) use
+// of the same *En fields.
 //
 // The old ?locale=kr / ?locale=garbage alias-and-fallback coverage doesn't
 // carry over: an unknown *path* segment 404s rather than falling back
@@ -22,22 +26,20 @@ test.describe("reader-facing language toggle", () => {
     await expect(page.getByRole("link", { name: "이전" })).toHaveCount(0);
     await expect(page.getByRole("link", { name: "다음" })).toHaveCount(0);
 
-    const koLink = page.getByRole("link", { name: "한국어" });
-    await expect(koLink).toHaveAttribute("aria-current", "true");
+    await expect(page.locator(".lang-float a[lang='ko']")).toHaveAttribute("aria-pressed", "true");
+    await expect(page.locator(".lang-float a[lang='en']")).toHaveAttribute("aria-pressed", "false");
   });
 
   test("switching to English changes chrome but not post content", async ({ page }) => {
     await page.goto("/ko/blog");
 
-    await page.getByRole("link", { name: "English" }).click();
+    await page.locator(".lang-float a[lang='en']").click();
     await expect(page).toHaveURL(/\/en\/blog/);
 
     // Chrome switched.
     await expect(page.getByText("Page 1 of 1")).toBeVisible();
-    await expect(page.getByRole("link", { name: "English" })).toHaveAttribute(
-      "aria-current",
-      "true",
-    );
+    await expect(page.locator(".lang-float a[lang='en']")).toHaveAttribute("aria-pressed", "true");
+    await expect(page.locator(".lang-float a[lang='ko']")).toHaveAttribute("aria-pressed", "false");
 
     // Content did not: the seeded post title stays Korean under /en.
     await expect(
@@ -54,11 +56,8 @@ test.describe("reader-facing language toggle", () => {
 
     await expect(page).toHaveURL(/\/en\/blog\/publishing-workflow-for-editors/);
 
-    // Chrome (the header toggle) reflects English on the detail page too.
-    await expect(page.getByRole("link", { name: "English" })).toHaveAttribute(
-      "aria-current",
-      "true",
-    );
+    // Chrome (the lang-float toggle) reflects English on the detail page too.
+    await expect(page.locator(".lang-float a[lang='en']")).toHaveAttribute("aria-pressed", "true");
 
     // Post heading and body remain Korean.
     await expect(

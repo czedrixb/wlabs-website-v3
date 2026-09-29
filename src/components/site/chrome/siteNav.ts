@@ -35,6 +35,12 @@ export function buildNav(s: SiteStrings["chrome"]): NavItem[] {
         { href: "/company/insights", label: s.insights, sub: s.subInsights },
       ],
     },
+    // WOS-335: a plain top-level item (no children), same shape as Search/
+    // Contact below — NOT nested under Company. isActive() and the notch
+    // placement (Header.tsx's `:scope>li>a[aria-current]`) only look at
+    // top-level nav links, so a child-only entry would never show as
+    // active while browsing /blog.
+    { href: "/blog", label: s.tabBlog },
     { href: "/search", label: s.tabSearch },
     { href: "/contact", label: s.tabContact },
   ];

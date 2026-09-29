@@ -7,11 +7,12 @@ import { useEffect } from "react";
 // production 500. Rendered client-side without a locale, so the copy is
 // bilingual ko-first like the rest of the site chrome.
 //
-// Lives beside (blog)'s own layout.tsx (which imports globals.css) rather
-// than up at [locale] — an error boundary swaps out its layout's subtree,
-// so if it sat above (blog)/layout.tsx it would render without Tailwind's
-// generated CSS ever having loaded. Once WOS-314's v3 port adds a (site)
-// group, it gets its own error.tsx styled with the site's own tokens.
+// Lives beside (blog)'s own layout.tsx rather than up at [locale] — an
+// error boundary swaps out its layout's subtree, so if it sat above
+// (blog)/layout.tsx it would render without site.css (or <SiteChrome>)
+// ever having loaded. Because it replaces the *page*, not the layout,
+// <SiteChrome>'s own <main id="main"> is already on screen — this renders
+// a plain <div>, not another <main>, so the two don't nest (WOS-335).
 export default function BlogError({
   error,
   retry,
@@ -24,22 +25,14 @@ export default function BlogError({
   }, [error]);
 
   return (
-    <main className="mx-auto flex min-h-screen max-w-3xl flex-col items-center justify-center px-6 text-center">
-      <h1 className="text-2xl font-bold">일시적인 오류가 발생했습니다</h1>
-      <p className="mt-2 text-gray-600">Something went wrong while loading the blog.</p>
-      <p className="mt-1 text-sm text-gray-400">
-        잠시 후 다시 시도해 주세요. / Please try again in a moment.
-      </p>
-      <button
-        type="button"
-        onClick={() => retry()}
-        className="mt-6 rounded-lg border px-4 py-2 text-sm font-medium hover:bg-gray-50"
-      >
+    <div className="wrap section" style={{ display: "grid", justifyItems: "center", gap: "var(--s2)", textAlign: "center" }}>
+      <h1 style={{ fontSize: "var(--fs-h2)" }}>일시적인 오류가 발생했습니다</h1>
+      <p className="lead">Something went wrong while loading the blog.</p>
+      <p className="cap">잠시 후 다시 시도해 주세요. / Please try again in a moment.</p>
+      <button type="button" onClick={() => retry()} className="btn btn-primary">
         다시 시도 / Try again
       </button>
-      {error.digest && (
-        <p className="mt-6 text-xs text-gray-300">Error {error.digest}</p>
-      )}
-    </main>
+      {error.digest && <p className="cap">Error {error.digest}</p>}
+    </div>
   );
 }

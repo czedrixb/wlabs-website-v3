@@ -73,11 +73,19 @@ function parseRcNote(html: string): RcNote {
 // they're literals here instead of coming from dictionary.generated.ts.
 const STORY_ARIA_LABEL = "Intelligence in motion";
 
+// WOS-335: the blog's nav/footer label. v3 has no blog, so — same as
+// STORY_ARIA_LABEL above — there's no source key in dictionary.generated.ts
+// to harvest; hand-authored here instead.
+const BLOG_LABELS: Record<Locale, { tabBlog: string }> = {
+  ko: { tabBlog: "블로그" },
+  en: { tabBlog: "Blog" },
+};
+
 function build(locale: Locale) {
   const v3 = V3_STRINGS[locale];
 
   return {
-    chrome: v3.chrome,
+    chrome: { ...v3.chrome, ...BLOG_LABELS[locale] },
     home: {
       ...v3.home,
       heading1: parseHeading(v3.home.heroH1),

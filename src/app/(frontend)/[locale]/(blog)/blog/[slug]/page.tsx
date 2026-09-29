@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { RichText } from "@payloadcms/richtext-lexical/react";
 import { getPostBySlug } from "@/lib/cachedPosts";
-import { resolveLocale } from "@/lib/locale";
+import { resolveLocale, withLocale } from "@/lib/locale";
 import { mediaPath } from "@/lib/mediaPath";
 import { siteMetadata } from "@/lib/site/metadata";
-import { SiteHeader } from "@/components/frontend/SiteHeader";
+import { siteT } from "@/lib/site/dictionary";
 import { t } from "@/lib/strings";
 
 export const dynamic = "force-dynamic";
@@ -37,31 +38,41 @@ export default async function PostDetailPage({ params }: Props) {
   const banner = typeof post.banner === "object" && post.banner ? post.banner : null;
   const author = typeof post.author === "object" && post.author ? post.author : null;
   const strings = t(locale);
+  const { chrome } = siteT(locale);
 
   return (
     <>
-      <SiteHeader locale={locale} path={`/blog/${slug}`} />
-      <main className="mx-auto max-w-3xl px-6 pb-16">
+      <div className="wrap">
+        <nav className="crumbs" aria-label="breadcrumb">
+          <Link href={withLocale("/blog", locale)}>{chrome.tabBlog}</Link>
+          <span>/</span>
+          <b>{post.title}</b>
+        </nav>
+      </div>
+
+      <div className="wrap page-head">
+        <h1>{post.title}</h1>
+        <p className="cap">
+          {author?.name ?? strings.unknownAuthor}
+          {post.publishedAt &&
+            ` · ${new Date(post.publishedAt).toLocaleDateString(locale)}`}
+        </p>
+      </div>
+
+      <div className="wrap" style={{ paddingBottom: "var(--sec)" }}>
         {banner?.url && (
           <Image
             src={mediaPath(banner.url)}
             alt={banner.alt ?? ""}
             width={1600}
             height={900}
-            className="mb-8 aspect-video w-full rounded-lg object-cover"
+            className="post-thumb"
+            style={{ marginBottom: "var(--s4)" }}
             priority
           />
         )}
-        <h1 className="text-3xl font-bold">{post.title}</h1>
-        <p className="mt-2 text-sm text-gray-400">
-          {author?.name ?? strings.unknownAuthor}
-          {post.publishedAt &&
-            ` · ${new Date(post.publishedAt).toLocaleDateString(locale)}`}
-        </p>
-        <article className="prose mt-8 max-w-none">
-          {post.content && <RichText data={post.content} />}
-        </article>
-      </main>
+        <article className="post-body">{post.content && <RichText data={post.content} />}</article>
+      </div>
     </>
   );
 }

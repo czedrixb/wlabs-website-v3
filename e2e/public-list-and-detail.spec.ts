@@ -4,7 +4,14 @@ import { test, expect } from "@playwright/test";
 test.describe("public blog list and detail", () => {
   test("list shows published posts, links to detail", async ({ page }) => {
     await page.goto("/ko/blog");
-    await expect(page.getByRole("heading", { name: "W Labs Blog" })).toBeVisible();
+    // WOS-335: the blog's own "W Labs Blog" h1 was replaced by the v3 site
+    // chrome + a page-head heading using the blog's own dictionary copy.
+    // exact + level:1 — some seeded post titles contain "블로그" as a
+    // substring (e.g. "블로그를 다시 만든 이유"), which a loose name match
+    // would also pick up.
+    await expect(
+      page.getByRole("heading", { name: "블로그", exact: true, level: 1 }),
+    ).toBeVisible();
 
     const firstPostLink = page.locator("a", { hasText: "편집자를 위한 발행 워크플로우" });
     await expect(firstPostLink).toBeVisible();

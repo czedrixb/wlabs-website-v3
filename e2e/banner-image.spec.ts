@@ -63,7 +63,12 @@ test("post banner renders through next/image", async ({ page, baseURL }) => {
 
     // The list page 500'd on the same error — it must render the banner too.
     await page.goto("/ko/blog");
-    await expect(page.getByRole("heading", { name: "W Labs Blog" })).toBeVisible();
+    // exact + level:1 — some seeded post titles contain "블로그" as a
+    // substring (e.g. "블로그를 다시 만든 이유"), which a loose name match
+    // would also pick up.
+    await expect(
+      page.getByRole("heading", { name: "블로그", exact: true, level: 1 }),
+    ).toBeVisible();
     await expect(page.locator('img[src*="/_next/image"]').first()).toBeVisible();
   } finally {
     await api.delete(`/api/posts/${postId}`, { headers: origin });
