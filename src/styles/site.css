@@ -1,0 +1,2353 @@
+/* ─────────────────────────────────────────────────────────────────────
+ * W Labs v3 site design — ported stylesheet (WOS-314)
+ *
+ * Source: D:\Submit\W Labs Website v3\site\index.html (concept "08 Depth"),
+ * lines 13-1773 (base shell) + 5608-6182 (Depth's additive layer), copied
+ * near-verbatim per docs/PIPELINE.md's anchored-string-surgery pipeline —
+ * see that file before changing anything structural here.
+ *
+ * Deliberately global (bare :root/html/body/h1 selectors, no scoping
+ * wrapper): imported only by the (site) route group's own layout, the
+ * same pattern already used for the blog group's Tailwind globals.css.
+ * Next's per-segment CSS loading is what keeps the two isolated — this is
+ * the documented "different design system per route group" pattern, not
+ * something bolted on here.
+ *
+ * Two changes from the source file, both explained inline below: the
+ * wireframe/"wire mode" content-review toggle is dropped entirely (with
+ * one exception — the monogram fallback it also gated is restored as a
+ * plain default), and --display/--body reference next/font/google's CSS
+ * variables (src/lib/fonts.ts) instead of literal font-family names.
+ * ───────────────────────────────────────────────────────────────────── */
+
+/* ─────────────────────────────────────────────────────────────
+   W LABS · WAVE INTELLIGENCE · token layer
+   Cream ground, deep-teal mark, navy panels with cyan.
+   Authored mobile-first: every rule below the base ADDS.
+   ───────────────────────────────────────────────────────────── */
+:root{
+  color-scheme:light;
+  --cream:#FBF6EE; --cream-2:#F3ECDF; --cream-3:#EAE1D0;
+  --ink:#2A2430; --ink-2:#3F3947; --wordmark:#483A3A; --muted:#5F6B78; --muted-2:#8A94A0;
+  --teal:#034F5E; --teal-2:#137A8F; --teal-3:#1A9BB1; --teal-soft:#D6EBEF;
+  --navy:#0A0D2E; --navy-2:#12173F; --navy-3:#1B2152;
+  --cyan:#00D4FF; --cyan-2:#7FE1F5; --cyan-soft:rgba(25,199,238,.16);
+  --on-navy:#EEF3F7; --on-navy-muted:#9AA6C4;
+  --line:rgba(20,26,46,.12); --line-strong:rgba(20,26,46,.28); --line-navy:rgba(255,255,255,.14);
+  --ok:#2E8B57;
+  --display:var(--font-quicksand),var(--font-noto-sans-kr),system-ui,sans-serif;
+  --body:var(--font-raleway),var(--font-noto-sans-kr),system-ui,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --r-xs:6px; --r-s:10px; --r-m:16px; --r-l:24px; --r-pill:999px;
+  --s1:8px; --s2:16px; --s3:24px; --s4:40px; --s5:64px; --s6:96px;
+  --micro:1400ms; /* one duration for every reveal micro-animation: counters, letter rolls, icon pop-ins */
+  --gutter:16px; --container:560px; --tabbar:64px; --sec:64px;
+  --fs-body:16px;
+  --fs-h1:clamp(34px,9vw,44px); --fs-h2:clamp(26px,6.4vw,32px); --fs-h3:20px; --fs-eyebrow:11px; --fs-small:14px; --fs-cap:12px;
+  --shadow-1:0 1px 2px rgba(20,26,46,.06),0 8px 24px -12px rgba(20,26,46,.18);
+  --shadow-2:0 24px 60px -24px rgba(10,13,46,.45);
+  --ease:cubic-bezier(.2,.7,.2,1);
+}
+html:lang(ko){--body:var(--font-noto-sans-kr),var(--font-raleway),system-ui,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--cream);color:var(--ink);font:400 var(--fs-body)/1.65 var(--body);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+html:lang(ko) body{word-break:keep-all}
+h1,h2,h3,h4,p{margin:0}
+h1,h2,h3{font-family:var(--display);font-weight:700;letter-spacing:-.02em;line-height:1.15;text-wrap:balance}
+html:lang(ko) h1,html:lang(ko) h2,html:lang(ko) h3{letter-spacing:-.03em;line-height:1.28}
+a{color:inherit;text-decoration:none}
+button{font:inherit;color:inherit;cursor:pointer;background:none;border:0;padding:0;-webkit-tap-highlight-color:transparent}
+input,select,textarea{font:inherit;font-size:16px}
+img,svg{max-width:100%;display:block}
+:focus-visible{outline:2px solid var(--teal-3);outline-offset:3px;border-radius:4px}
+::selection{background:var(--teal);color:#fff}
+.on-navy ::selection{background:var(--cyan);color:var(--navy)}
+[hidden]{display:none!important}
+.vh{position:absolute;clip:rect(0 0 0 0);width:1px;height:1px;overflow:hidden;white-space:nowrap}
+.skip{position:fixed;left:12px;top:-60px;z-index:100;background:var(--ink);color:#fff;padding:10px 14px;border-radius:var(--r-s)}
+.skip:focus{top:12px}
+
+/* type roles */
+.eyebrow{font:600 var(--fs-eyebrow)/1.4 var(--body);letter-spacing:.14em;text-transform:uppercase;color:var(--teal);display:inline-flex;align-items:center;gap:10px}
+.eyebrow::before{content:"";width:18px;height:2px;border-radius:2px;background:currentColor}
+.on-navy .eyebrow{color:var(--cyan)}
+.lead{font-size:17px;line-height:1.7;color:var(--ink-2);max-width:36em}
+.small{font-size:var(--fs-small);color:var(--muted)}
+.cap{font-size:var(--fs-cap);line-height:1.5;color:var(--muted)}
+.on-navy{background:var(--navy);color:var(--on-navy)}
+.on-navy .small,.on-navy .cap,.on-navy .lead{color:var(--on-navy-muted)}
+.tnum{font-variant-numeric:tabular-nums}
+
+/* layout */
+.wrap{width:100%;max-width:var(--container);margin-inline:auto;padding-inline:var(--gutter)}
+.section{padding-block:var(--sec)}
+.section-head{display:grid;gap:var(--s2);margin-bottom:var(--s4)}
+.section-head h2{font-size:var(--fs-h2)}
+.section-head .lead{font-size:16px}
+.row-between{display:flex;justify-content:space-between;align-items:center;gap:var(--s2)}
+.stack{display:grid;gap:var(--s2)}
+main{padding-bottom:calc(var(--tabbar) + env(safe-area-inset-bottom,0px))}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:12px;min-height:48px;padding:0 22px;border-radius:var(--r-pill);font:600 15px/1 var(--body);border:1.5px solid transparent;transition:transform .2s var(--ease),background .2s,border-color .2s,color .2s}
+.btn:active{transform:scale(.98)}
+.btn-primary{background:var(--teal);color:#fff;border-color:var(--teal)}
+.btn-primary:hover{background:var(--teal-2);border-color:var(--teal-2)}
+.btn-ghost{border-color:var(--line-strong);color:var(--ink)}
+.btn-ghost:hover{border-color:var(--ink)}
+.on-navy .btn-primary{background:var(--cyan);color:var(--navy);border-color:var(--cyan)}
+.on-navy .btn-primary:hover{background:var(--cyan-2);border-color:var(--cyan-2)}
+.on-navy .btn-ghost{border-color:var(--line-navy);color:var(--on-navy)}
+.on-navy .btn-ghost:hover{border-color:var(--on-navy)}
+.btn-full{width:100%}
+.btn{max-width:450px}
+.form .full .btn-full{justify-self:start}
+.btn .arr{font-size:18px;line-height:1;transition:transform .2s var(--ease)}
+.btn:hover .arr{transform:translate(2px,-2px)}
+.link{display:inline-flex;align-items:center;gap:8px;font-weight:600;color:var(--teal);border-bottom:1.5px solid transparent;padding-bottom:2px;min-height:44px}
+.link:hover{border-color:currentColor}
+.on-navy .link{color:var(--cyan)}
+
+/* brand lockup */
+.lockup{display:inline-flex;align-items:center}
+.logo-h{width:126px;height:32px;flex:none}
+.hero-logo{width:min(100%,520px);height:auto;margin-inline:auto;filter:drop-shadow(0 18px 30px rgba(72,58,58,.12));animation:float 9s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.wmark{overflow:visible}
+
+/* header (≥744) */
+.header{display:none}
+/* tab bar (<744) */
+.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:50;background:rgba(251,246,238,.92);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px)}
+.tabbar ul{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(5,1fr);height:var(--tabbar)}
+.tab{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;height:100%;min-width:44px;color:var(--muted);font:600 11px/1 var(--body);letter-spacing:.02em;position:relative}
+.tab svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.tab[aria-current]{color:var(--teal)}
+.tab[aria-current]::before{content:"";position:absolute;top:0;width:28px;height:3px;border-radius:0 0 3px 3px;background:linear-gradient(90deg,var(--teal),var(--teal-3))}
+.tab.interactive[aria-current]{color:var(--teal)}
+.tab .badge{position:absolute;top:8px;right:calc(50% - 22px);width:6px;height:6px;border-radius:50%;background:var(--teal-3)}
+
+/* screens */
+.screen[hidden]{display:none}
+.screen{animation:fade .35s var(--ease)}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+/* mode badge */
+.mode{display:inline-flex;align-items:center;gap:6px;font:600 11px/1 var(--body);letter-spacing:.08em;text-transform:uppercase;padding:6px 10px;border-radius:var(--r-pill);border:1px solid var(--line)}
+.mode::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--muted-2)}
+.mode.interactive{border-color:var(--teal-soft);color:var(--teal)}
+.mode.interactive::before{background:var(--teal-3)}
+.on-navy .mode{border-color:var(--line-navy);color:var(--on-navy-muted)}
+
+/* ── HOME ─────────────────────────────────────────────────── */
+.hero{position:relative;overflow:hidden;padding-block:var(--s4) var(--s5)}
+.hero-top{display:flex;justify-content:space-between;align-items:center;gap:var(--s2);margin-bottom:var(--s4)}
+.hero-top .lang{margin-left:auto}
+.hero h1{font-size:var(--fs-h1);margin-top:var(--s2)}
+.hero h1 .accent{color:var(--teal)}
+.hero .lead{margin-top:var(--s3)}
+.hero-cta{display:flex;flex-wrap:wrap;gap:10px}
+.story .hero-cta .btn{min-height:44px;padding:0 18px;font-size:14px}
+.hero-art{margin-top:var(--s4);position:relative}
+.hero-art{display:grid;justify-items:center;padding-block:var(--s2)}
+.hero-art .cap{width:100%;display:flex;justify-content:space-between;margin-top:8px;font-family:var(--body);letter-spacing:.06em;text-transform:uppercase;font-size:10px}
+.hero-bg{position:absolute;inset:auto -20% -30% -20%;height:60%;background:radial-gradient(ellipse at 50% 100%,var(--teal-soft),transparent 70%);z-index:-1;pointer-events:none}
+
+/* language toggle */
+.lang{display:inline-flex;border:1px solid var(--line-strong);border-radius:var(--r-pill);padding:3px;gap:2px;background:var(--cream)}
+/* v3 used <button data-lang> (one page, JS-switched text); the port
+   navigates to the other /ko or /en route instead, so these are real
+   links — same rule, extended to match <a>, not rewritten. */
+.lang button,.lang a{min-width:40px;min-height:32px;padding:0 10px;border-radius:var(--r-pill);font:700 12px/1 var(--body);letter-spacing:.04em;color:var(--muted);display:inline-flex;align-items:center;justify-content:center;text-decoration:none}
+.lang button[aria-pressed="true"],.lang a[aria-pressed="true"]{background:var(--ink);color:#fff}
+.lang-float{position:fixed;left:max(var(--gutter),env(safe-area-inset-left,0px));bottom:calc(var(--tabbar) + 12px + env(safe-area-inset-bottom,0px));z-index:45;box-shadow:0 2px 4px rgba(20,26,46,.06),0 10px 24px -10px rgba(20,26,46,.25);opacity:.92;transition:opacity .2s,transform .2s var(--ease)}
+.lang-float:hover,.lang-float:focus-within{opacity:1;transform:translateY(-1px)}
+.on-navy .lang{border-color:var(--line-navy);background:transparent}
+.on-navy .lang button,.on-navy .lang a{color:var(--on-navy-muted)}
+.on-navy .lang button[aria-pressed="true"],.on-navy .lang a[aria-pressed="true"]{background:var(--cyan);color:var(--navy)}
+
+/* proof band */
+.proof{padding-block:var(--s5)}
+.proof-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line-navy);border:1px solid var(--line-navy);border-radius:var(--r-m);overflow:hidden}
+.proof-item{background:var(--navy);padding:20px 18px;display:grid;gap:6px;align-content:start;min-height:128px}
+.proof-item b{font:700 clamp(30px,8vw,40px)/1 var(--display);letter-spacing:-.03em;color:var(--cyan)}
+.proof-item span{font-size:13px;line-height:1.5;color:var(--on-navy-muted)}
+/* WOS-331: the "since {year}" stat reads as one sentence with the animated
+   counter inline (English needs the year AFTER "since", Korean needs it
+   BEFORE — see src/lib/site/dictionary.ts's stat2 template and
+   ProofBand.tsx), not as its own big/small two-row stat like the other
+   three. Neutralize the oversized standalone-counter style from the rule
+   above for just this one composed sentence. */
+.proof-item .stat2{display:inline}
+.proof-item .stat2 b{font:inherit;letter-spacing:inherit;color:inherit}
+.proof-item .ok{display:inline-flex;align-items:center;gap:8px;font-size:clamp(20px,5.6vw,26px);min-height:40px}
+.proof-item .ok i{width:26px;height:26px;border-radius:50%;background:var(--cyan-soft);display:grid;place-items:center;font-style:normal;color:var(--cyan);font-size:14px}
+.proof .ok i{transform:scale(.2);opacity:0;transition:transform var(--micro) cubic-bezier(.34,1.56,.64,1),opacity calc(var(--micro)*.6) ease-out}
+.proof.seen .ok i{transform:scale(1);opacity:1}
+@media (prefers-reduced-motion:reduce){.proof .ok i{transform:none;opacity:1;transition:none}}
+.proof-foot{margin-top:var(--s2);display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.proof-foot a{color:var(--cyan)}
+
+/* service list */
+.svc-list{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
+.svc{display:grid;grid-template-columns:1fr auto;gap:6px 16px;padding:18px 0;border-bottom:1px solid var(--line);align-items:center;position:relative}
+.svc .num{grid-column:1/-1;font:500 11px/1 var(--body);letter-spacing:.12em;color:var(--muted)}
+.svc .num b{font-weight:600;color:var(--teal)}
+.svc h3{font-size:18px}
+.svc p{grid-column:1;font-size:14px;color:var(--muted);line-height:1.55}
+.svc .go{grid-column:2;grid-row:2/4;width:40px;height:40px;border-radius:50%;border:1.5px solid var(--line-strong);display:grid;place-items:center;color:var(--teal);transition:background .2s,color .2s,border-color .2s}
+.svc a{position:absolute;inset:0}
+.svc:hover .go{background:var(--teal);color:#fff;border-color:var(--teal)}
+
+/* product cards */
+.cards{display:grid;gap:var(--s2)}
+.card{background:#fff;border:1px solid var(--line);border-radius:var(--r-l);padding:22px;display:grid;gap:12px;box-shadow:var(--shadow-1);transition:transform .25s var(--ease),box-shadow .25s}
+.card:hover{transform:translateY(-3px);box-shadow:var(--shadow-2)}
+.card .tag{display:inline-flex;gap:8px;align-items:center;font:600 11px/1 var(--body);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.card .tag .ruo{color:var(--teal);border:1px solid var(--teal-soft);background:var(--teal-soft);padding:4px 8px;border-radius:var(--r-pill);letter-spacing:.06em}
+.card h3{font-size:22px}
+.card p{font-size:15px;color:var(--ink-2);line-height:1.6}
+.card .art{height:140px;border-radius:var(--r-m);background:var(--cream-2);position:relative;overflow:hidden;display:grid;place-items:center}
+.card .art svg{width:90%;height:auto}
+.card .foot{display:flex;justify-content:space-between;align-items:center;gap:12px;border-top:1px solid var(--line);padding-top:12px;margin-top:4px}
+.card .foot .small{font-weight:500}
+
+/* project categories */
+.cats{display:grid;gap:var(--s2)}
+.cat{border:1px solid var(--line);border-radius:var(--r-l);padding:20px;background:var(--cream-2);display:grid;gap:10px}
+.cat h3{font-size:19px}
+.cat .names{display:flex;flex-wrap:wrap;gap:8px}
+.cat .names span{font:600 13px/1 var(--body);padding:8px 12px;border-radius:var(--r-pill);background:#fff;border:1px solid var(--line)}
+.cat p{font-size:14px;color:var(--muted)}
+
+/* company teaser */
+.company-teaser{display:grid;gap:var(--s3)}
+.team-strip{display:flex;gap:-6px}
+.avatars{display:flex}
+.avatars img,.avatars span{width:40px;height:40px;border-radius:50%;background:var(--teal-soft);color:var(--teal);border:2px solid var(--cream);margin-left:-8px;display:grid;place-items:center;font:700 12px/1 var(--display);object-fit:cover}
+.avatars img:first-child{margin-left:0}
+.team-groups{display:grid;gap:var(--s4)}
+.team-group-title{display:flex;align-items:baseline;gap:12px;font-size:20px;margin-bottom:var(--s2);padding-bottom:10px;border-bottom:1px solid var(--line)}
+.team-group-title .cap{font-weight:600}
+.team{display:grid;grid-template-columns:repeat(2,1fr);gap:var(--s2)}
+.member{display:grid;gap:10px;padding:16px;border:1px solid var(--line);border-radius:var(--r-m);background:#fff}
+.member img{width:64px;height:64px;border-radius:50%;object-fit:cover;background:var(--cream-2)}
+.member h3{font-size:16px}
+.member h3 small{display:block;font:500 12px/1.4 var(--body);color:var(--muted);margin-top:2px}
+.member p{font-size:13px;color:var(--ink-2);line-height:1.4;min-height:1.4em}
+html:lang(en) [lang="ko"].alt,html:lang(ko) [lang="en"].alt{display:none}
+
+/* CTA panel */
+.cta-panel{border-radius:var(--r-l);padding:var(--s4) var(--s3);display:grid;gap:var(--s3);position:relative;overflow:hidden}
+.cta-panel .wmark{position:absolute;right:-8%;bottom:-18%;width:64%;opacity:.12;pointer-events:none}
+.cta-panel h2{font-size:var(--fs-h2);position:relative}
+.cta-panel .btns{display:grid;gap:12px;position:relative}
+
+/* footer */
+footer{border-top:1px solid var(--line);padding-block:var(--s5) var(--s4);background:var(--cream-2)}
+.foot-lockup{margin-bottom:var(--s4)}
+.sitemap{display:grid;grid-template-columns:1fr 1fr;gap:var(--s4) var(--s3)}
+.sitemap div{display:grid;gap:10px;align-content:start;justify-items:start}
+.sitemap h4{margin:0 0 4px;font:700 15px/1.3 var(--display);color:var(--ink)}
+.sitemap h4 a{font:inherit;color:inherit;min-height:0}
+.sitemap a,.sitemap button{font:500 15px/1.4 var(--body);color:var(--ink-2);min-height:32px;display:inline-flex;align-items:center;text-align:left}
+.sitemap a:hover,.sitemap button:hover{color:var(--teal);text-decoration:underline;text-underline-offset:4px}
+.foot-legal{margin-top:var(--s6);padding-top:var(--s3);border-top:1px solid var(--line);display:grid;gap:var(--s2);font-size:13px;color:var(--muted);line-height:1.6}
+.foot-biz{display:grid;gap:4px}
+.foot-meta{display:flex;flex-wrap:wrap;gap:12px 20px;align-items:center}
+
+/* ── WORK ─────────────────────────────────────────────────── */
+.page-head{padding-block:var(--s4) var(--s3);display:grid;gap:var(--s2)}
+/* product single page */
+.crumbs{display:flex;flex-wrap:wrap;gap:6px 10px;font:500 12px/1.4 var(--body);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding-top:var(--s3)}
+.crumbs a{color:var(--muted)}.crumbs a:hover{color:var(--ink)}.crumbs b{font-weight:600;color:var(--ink)}
+.prod-head{display:grid;gap:var(--s3);padding-block:var(--s3) var(--s5)}
+.prod-head .tag{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.prod-head h1{font-size:var(--fs-h1);line-height:1.05;letter-spacing:-.02em}
+.prod-head .cta{display:flex;flex-wrap:wrap;gap:10px}
+.prod-visual{border-radius:var(--r-l);overflow:hidden;position:relative;background:var(--cream-2);aspect-ratio:16/10}
+.prod-visual.pvis{height:auto}
+.prod-sec{padding-block:var(--s5);border-top:1px solid var(--line)}
+.prod-sec .section-head{margin-bottom:var(--s3)}
+.feats{display:grid;gap:var(--s2)}
+.feat{display:grid;gap:8px;padding:22px;border:1px solid var(--line);border-radius:var(--r-l);background:#fff}
+.feat .num{font:600 11px/1 var(--body);letter-spacing:.12em;color:var(--muted)}
+.feat h3{font-size:18px}.feat p{font-size:15px;color:var(--ink-2);line-height:1.65}
+.steps{display:grid;gap:var(--s2);counter-reset:step}
+.step{display:grid;grid-template-columns:44px 1fr;gap:14px;align-items:start}
+.step::before{counter-increment:step;content:"0" counter(step);display:grid;place-items:center;width:44px;height:44px;border-radius:50%;border:1.5px solid var(--ink);font:700 13px/1 var(--display)}
+.step h3{font-size:17px;margin-bottom:4px}.step p{font-size:15px;color:var(--ink-2);line-height:1.65}
+.facts{display:grid;gap:0;margin:0;border-top:1px solid var(--line)}
+.facts div{display:grid;gap:4px;padding:16px 0;border-bottom:1px solid var(--line)}
+.facts dt{font:600 11px/1.4 var(--body);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.facts dd{margin:0;font-size:15px;color:var(--ink);line-height:1.6}
+.prod-cta{display:grid;gap:var(--s2);padding:var(--s4);border:1.5px solid var(--ink);border-radius:var(--r-l);margin-block:var(--s5) var(--sec)}
+.prod-cta h2{font-size:var(--fs-h2)}
+.prod-cta .cta{display:flex;flex-wrap:wrap;gap:10px}
+.prod-rel{display:grid;gap:var(--s2)}
+.proj-nav{display:grid;grid-template-columns:1fr 1fr;gap:var(--s2);margin-bottom:var(--sec)}
+.proj-nav button{display:grid;gap:6px;padding:18px 20px;border:1px solid var(--line);border-radius:var(--r-l);background:#fff;text-align:left;font:inherit;color:var(--ink);cursor:pointer}
+.proj-nav button.nxt{text-align:right}
+.proj-nav button:hover{border-color:var(--ink)}
+.proj-nav b{font:700 16px/1.3 var(--display)}
+.prod-cta{margin-bottom:var(--s4)}
+.card h3 a{color:inherit;text-decoration:none}.card h3 a:hover{text-decoration:underline;text-underline-offset:4px}
+.page-head h1{font-size:var(--fs-h2)}
+.seg{position:sticky;top:env(safe-area-inset-top,0px);z-index:30;background:none;padding-block:10px;pointer-events:none}
+.seg .seg-track{pointer-events:auto}
+.seg .wrap{display:flex;overflow-x:auto;scrollbar-width:none}
+.seg .wrap::-webkit-scrollbar{display:none}
+.seg-track{--track-pad:4px;display:inline-flex;gap:4px;padding:4px;border-radius:var(--r-pill);background:var(--cream-3);border:1px solid var(--line);flex:none}
+.seg button{flex:none;min-height:40px;padding:0 18px;border-radius:var(--r-pill);border:0;background:transparent;font:600 14px/1 var(--body);color:var(--ink-2);transition:background .2s,color .2s}
+.seg button:hover{background:rgba(0,0,0,.05)}
+.seg button[aria-selected="true"]{background:transparent;color:#fff}
+/* sliding indicator shared by segmented tabs and filter bars */
+.seg-track,.filters-track{position:relative;isolation:isolate}
+.seg-track>button,.filters-track>button{position:relative;z-index:1}
+/* liquid pill: both edges are animated separately — the edge facing the target moves first, the trailing edge follows, so the pill stretches then contracts */
+.track-pill{--lead:.34s;--lag:.14s;--ease:cubic-bezier(.2,.8,.2,1);position:absolute;top:var(--track-pad,4px);left:var(--l,0px);right:var(--r,0px);height:calc(100% - 2*var(--track-pad,4px));border-radius:var(--r-pill);background:var(--ink);z-index:0;pointer-events:none;opacity:var(--on,0);transition:left var(--lead) var(--ease),right var(--lead) var(--ease)}
+.track-pill.to-right{transition:right var(--lead) var(--ease),left var(--lead) var(--ease) var(--lag)}
+.track-pill.to-left{transition:left var(--lead) var(--ease),right var(--lead) var(--ease) var(--lag)}
+.track-pill.no-anim{transition:none}
+@media (prefers-reduced-motion:reduce){.track-pill{transition:none}}
+.panel[hidden]{display:none}
+.svc-detail{border-top:1px solid var(--line);padding-block:var(--s3);display:grid;gap:14px}
+.svc-detail .num{font:500 11px/1.4 var(--body);letter-spacing:.12em;color:var(--muted)}
+.svc-detail .num b{font-weight:600;color:var(--teal)}
+.svc-detail h2{font-size:22px}
+.svc-detail p{color:var(--ink-2);font-size:15px}
+.svc-detail .chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{font:600 12px/1 var(--body);padding:7px 11px;border-radius:var(--r-pill);background:var(--cream-2);border:0;color:var(--ink-2)}
+/* glossary tooltips: any non-interactive chip with a definition gets a dotted hint and a bubble on hover / focus */
+.chip[data-tip]{cursor:help}
+.chip[data-tip]:hover,.chip[data-tip]:focus-visible{background:var(--cream-3);color:var(--ink);outline:none}
+.tipbox{position:fixed;left:0;top:0;z-index:80;max-width:280px;padding:10px 12px;border-radius:10px;background:var(--ink);color:var(--cream);font:500 13px/1.45 var(--body);letter-spacing:0;box-shadow:var(--shadow-2);opacity:0;transform:translate(var(--tx,0px),var(--ty,0px)) translateY(4px);transition:opacity .16s,transform .16s;pointer-events:none}
+.tipbox.on{opacity:1;transform:translate(var(--tx,0px),var(--ty,0px))}
+.tipbox b{display:block;font:600 11px/1.3 var(--body);letter-spacing:.1em;text-transform:uppercase;color:var(--muted-2);margin-bottom:4px}
+.tipbox::after{content:"";position:absolute;left:var(--ax,50%);top:100%;width:10px;height:10px;background:var(--ink);transform:translate(-50%,-5px) rotate(45deg)}
+.tipbox.below::after{top:auto;bottom:100%;transform:translate(-50%,5px) rotate(45deg)}
+@media (prefers-reduced-motion:reduce){.tipbox{transition:none}}
+.related{display:grid;gap:6px;padding:14px 16px;border-radius:var(--r-m);background:var(--cream-2)}
+.card.flash,.svc-detail.flash,.news-item.flash{outline:2px solid var(--ink);outline-offset:4px;border-radius:var(--r-m);transition:outline-color .6s}
+.related .cap{letter-spacing:.08em;text-transform:uppercase;font-weight:600}
+.related b{font-weight:600;color:var(--ink)}
+.rel-list{display:grid;gap:4px;margin-top:4px}
+.rel-item{display:flex;align-items:center;gap:10px;padding:6px 8px 6px 6px;margin:0 -6px;border-radius:999px;font:600 14px/1.2 var(--body);color:var(--ink);background:none;border:0;text-align:left;cursor:pointer;text-decoration:none;min-height:44px}
+.rel-item:not(.is-static):hover,.rel-item:not(.is-static):focus-visible{background:var(--cream)}
+.rel-item .initial{display:grid;width:32px;height:32px;flex:none;font-size:11px;border:1.5px solid var(--line-strong);background:var(--cream);color:var(--ink-2)}
+.rel-item.is-static{cursor:default;color:var(--ink-2)}
+.rel-item.is-static .initial{border-style:dashed}
+.related .small{color:var(--muted);margin-top:2px}
+.svc-detail .btn{justify-self:start}
+.proj-block{border-top:1px solid var(--line);padding-block:var(--s3);display:grid;gap:14px}
+.proj-block h2{font-size:22px}
+.proj-list{display:grid;gap:10px}
+.proj{background:#fff;border:1px solid var(--line);border-radius:var(--r-m);padding:16px;display:grid;grid-template-columns:44px 1fr;gap:12px;align-items:start}
+.proj .glyph{width:44px;height:44px;border-radius:12px;background:var(--teal-soft);color:var(--teal);display:grid;place-items:center;font:700 16px/1 var(--display)}
+.proj h3{font-size:16px;margin-bottom:2px}
+.proj p{font-size:14px;color:var(--muted);line-height:1.5}
+.note{font-size:13px;color:var(--muted);padding:12px 14px;border-left:3px solid var(--teal-soft);background:var(--cream-2);border-radius:0 var(--r-s) var(--r-s) 0}
+
+
+/* ── scroll story hero ─────────────────────────────────────── */
+.story{height:280dvh;position:relative}
+.stage{position:sticky;top:0;height:calc(100dvh - var(--tabbar) - env(safe-area-inset-bottom,0px));min-height:560px;overflow:hidden;display:flex;align-items:center;background:var(--cream)}
+.stage-grid{display:grid;grid-template-rows:auto;gap:var(--s2);height:100%;padding-block:var(--s2) 72px;align-content:center;position:relative}
+.story .hero-top{display:none}
+.stage-visual{position:absolute;inset:0;z-index:0;display:block;pointer-events:none;overflow:hidden}
+.stage-visual .hero-art{position:absolute;inset:0;width:100%;height:100%;max-width:none;margin:0;padding:0;display:block}
+.stage-visual .hero-mono{position:absolute;inset:0;width:100%;height:100%;max-width:none;margin:0;display:block;transform:none!important}
+/* background uses the traced wave centrelines only — the logo's static nodes would compete with the moving ones */
+.stage-visual .mark-fill{display:none}
+.stage-visual .wave-path{stroke:currentColor;stroke-width:.7;stroke-linejoin:round;stroke-linecap:round;opacity:.28}
+.stage::after{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(180deg,color-mix(in srgb,var(--cream) 92%,transparent) 0 38%,color-mix(in srgb,var(--cream) 55%,transparent) 62%,transparent 90%)}
+.stage-visual .cap>span:first-child{display:none}
+.stage-visual .cap{position:absolute;left:0;right:0;bottom:calc(14px + env(safe-area-inset-bottom,0px));margin:0;padding-inline:var(--gutter);z-index:2;flex-wrap:wrap;justify-content:flex-end;gap:0 18px}
+.stage-visual .scroll-hint{flex-basis:100%;text-align:right;margin-top:4px;font:600 10px/1 var(--body);letter-spacing:.1em;text-transform:uppercase;color:var(--muted);transition:opacity .3s}
+.stage-copy{display:grid;gap:var(--s2);align-content:start;min-height:0;position:relative;z-index:2}
+.chapters{position:relative;min-height:262px}
+.chapter{position:absolute;inset:0 auto auto 0;width:100%;display:grid;gap:14px;align-content:start;opacity:0;transform:translateY(24px);pointer-events:none;will-change:opacity,transform}
+.chapter:first-child{opacity:1;transform:none;pointer-events:auto}
+.chapter h1,.chapter h2{font-size:clamp(26px,7vw,34px);line-height:1.15}
+.chapter .accent{color:var(--teal)}
+.chapter .lead{font-size:15px}
+nav.timeline{display:flex;gap:18px;font:600 11px/1 var(--body);letter-spacing:.1em;color:var(--muted)}
+nav.timeline a{display:grid;gap:8px;min-height:44px;padding-top:6px;position:relative;flex:1;max-width:150px}
+nav.timeline a::before{content:"";height:2px;background:linear-gradient(90deg,var(--ink) calc(var(--fill,0)*100%),var(--line) 0)}
+nav.timeline a b{font-weight:600;text-transform:none;letter-spacing:0;font-size:12px;color:var(--ink-2)}
+nav.timeline a.active{color:var(--ink)}
+.hero-mono{color:var(--ink)}
+/* node snippets: a small labelled pill tethered to a travelling node — hover to read, click to go */
+.stage>.node-tips{position:absolute;inset:0;z-index:3;pointer-events:none;overflow:hidden}
+.ntip{position:absolute;left:0;top:0;opacity:var(--vis,0);transition:opacity .25s;will-change:transform}
+.ntip-lead{position:absolute;left:0;top:0;width:64px;height:1px;background:var(--ink);opacity:.55;transform-origin:0 0;transform:rotate(-46deg)}
+.ntip-box{position:absolute;left:44px;top:-46px;transform:translateY(-100%);pointer-events:auto;text-decoration:none;display:grid;gap:2px;padding:9px 14px 9px 12px;border:1px solid var(--line-strong);border-radius:12px;background:color-mix(in srgb,var(--cream) 82%,transparent);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);color:var(--ink);text-align:left;cursor:pointer;font:600 11px/1 var(--body);letter-spacing:.1em;text-transform:uppercase;white-space:nowrap;transition:border-color .2s,background-color .2s}
+.ntip-box .k{display:flex;align-items:center;gap:8px;color:var(--ink-2)}
+.ntip-box .k::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--ink)}
+.ntip-box .k b{color:var(--ink);font-weight:700}
+.ntip-box .sub{font:500 12px/1.3 var(--body);letter-spacing:0;text-transform:none;color:var(--muted);max-height:0;overflow:hidden;white-space:normal;max-width:200px;transition:max-height .25s,margin .25s}
+.ntip-box:hover,.ntip-box:focus-visible{border-color:var(--ink);background:var(--cream)}
+.ntip-box:hover .sub,.ntip-box:focus-visible .sub{max-height:48px;margin-top:4px}
+.ntip:has(.ntip-box:hover),.ntip:has(.ntip-box:focus-visible){opacity:1;z-index:1}
+@media (prefers-reduced-motion:reduce){.node-tips{display:none}}
+.nodes circle{fill:var(--cream);stroke:var(--ink);stroke-width:.7;transition:r .25s}
+.nodes circle.near{fill:var(--ink)}
+@media (prefers-reduced-motion:reduce){.story{height:auto}.stage{position:static;height:auto;min-height:0}.chapters{min-height:0;display:grid;gap:var(--s4)}.chapter{position:static;opacity:1!important;transform:none!important;pointer-events:auto}.stage-visual .hero-mono{transform:none!important}.stage-visual{position:relative;height:40vh;order:-1}.stage::after{display:none}}
+
+/* ── projects showcase ─────────────────────────────────────── */
+.filters{display:flex;overflow-x:auto;scrollbar-width:none;padding-bottom:2px;margin-bottom:var(--s3)}
+.filters::-webkit-scrollbar{display:none}
+.filters::before{content:"";display:none}
+.filters>*{flex:none}
+.filters{gap:0}
+.filters-track,.filters{--track-pad:4px}
+.filters button{flex:none;min-height:40px;padding:0 18px;border-radius:var(--r-pill);border:0;background:transparent;font:600 14px/1 var(--body);color:var(--ink-2);transition:background .2s,color .2s}
+.filters button:hover{background:rgba(0,0,0,.05)}
+.filters button[aria-pressed="true"]{background:transparent;color:#fff}
+.filters-track{display:inline-flex;gap:4px;padding:4px;border-radius:var(--r-pill);background:var(--cream-3);border:1px solid var(--line);flex:none}
+.pgrid{display:grid;gap:var(--s2)}
+.pcard{background:#fff;border:1px solid var(--line);border-radius:var(--r-l);overflow:hidden;display:flex;flex-direction:column;transition:transform .25s var(--ease),box-shadow .25s}
+.pcard:hover{transform:translateY(-3px);box-shadow:var(--shadow-2)}
+.pcard[hidden]{display:none}
+.pvis{height:172px;display:grid;place-items:center;overflow:hidden;position:relative;background:var(--tint,var(--cream-2))}
+.pvis svg{width:min(70%,240px);height:auto;overflow:visible}
+.pvis .chiplet{position:absolute;right:16px;bottom:14px;font:600 10px/1 var(--body);letter-spacing:.08em;text-transform:uppercase;background:#fff;border:1px solid var(--line);border-radius:6px;padding:6px 8px;color:var(--ink-2)}
+.pbody{padding:22px;display:flex;flex-direction:column;gap:10px;flex:1}
+.pbody>*{margin:0}
+.pcat{font:600 11px/1.4 var(--body);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.pbody h3{font-size:20px}
+.pbody p{font-size:14px;color:var(--muted);line-height:1.6}
+.pfoot{margin-top:auto;border-top:1px solid var(--line);padding-top:14px;display:flex;justify-content:space-between;align-items:center;width:100%;text-align:left;font:700 14px/1 var(--body);color:var(--ink);min-height:44px}
+.pfoot span:last-child{color:var(--teal);font-size:18px}
+/* invitation card mirrors the project card's anatomy: visual band, then the same body stack, so titles and copy line up */
+.pcta{border:1.5px dashed var(--line-strong);border-radius:var(--r-l);padding:0;background:var(--cream-2);display:flex;flex-direction:column;overflow:hidden}
+.pcta-vis{height:172px;display:grid;place-items:center;border-bottom:1px dashed var(--line-strong)}
+.pcta .plus{font:500 34px/1 var(--display);color:var(--teal)}
+.pcta .pbody h3{font-size:20px}
+.pcta .pbody p{font-size:14px;color:var(--muted);line-height:1.6}
+.pcta .btn{align-self:flex-start;margin-top:auto;min-height:44px}
+.pempty{grid-column:1/-1;padding:var(--s4);text-align:center;color:var(--muted);border:1px dashed var(--line-strong);border-radius:var(--r-l)}
+.sheet-card.pdetail{background:var(--cream);color:var(--ink)}
+.sheet-card.pdetail .sheet-close{border-color:var(--line-strong)}
+.pdetail ul{margin:0;padding-left:18px;display:grid;gap:6px;font-size:15px;color:var(--ink-2)}
+.pdetail .pvis{border-radius:var(--r-m);margin-bottom:var(--s2)}
+
+/* ── company: story + insights ─────────────────────────────── */
+.story-intro{display:grid;gap:var(--s2);margin-bottom:var(--s4)}
+/* Our story: vertical timeline — a spine that fills as you scroll, circular nodes, entries that arrive on scroll */
+ol.timeline{list-style:none;margin:0;padding:var(--s2) 0;position:relative;display:grid;gap:var(--s4)}
+ol.timeline::before,ol.timeline::after{content:"";position:absolute;left:19px;top:0;width:1.5px;background:var(--line);height:100%}
+ol.timeline::after{background:var(--ink);height:var(--tl-fill,0%);transition:height .2s linear}
+ol.timeline li{position:relative;display:grid;gap:8px;padding-left:56px;opacity:0;transform:translateY(24px);transition:opacity .6s var(--ease),transform .6s var(--ease)}
+ol.timeline li.in{opacity:1;transform:none}
+ol.timeline li::before{content:"";position:absolute;left:11px;top:4px;width:18px;height:18px;border-radius:50%;border:1.5px solid var(--ink);background:var(--cream);transition:background .4s,box-shadow .4s}
+ol.timeline li.in::before{background:var(--ink);box-shadow:0 0 0 5px var(--cream),0 0 0 6.5px var(--line-strong)}
+ol.timeline li.in.lit::before{box-shadow:0 0 0 5px var(--cream),0 0 0 6.5px var(--ink)}
+@media (prefers-reduced-motion:reduce){ol.timeline li{opacity:1;transform:none;transition:none}}
+.tl-year{font:700 20px/1.2 var(--display);color:var(--teal);letter-spacing:-.02em}
+ol.timeline h3{font-size:18px;margin-bottom:6px}
+ol.timeline p{font-size:15px;color:var(--ink-2);line-height:1.65}
+.values{display:grid;gap:var(--s2);margin-top:var(--s4)}
+.values article{border-top:2px solid var(--ink);padding-top:14px;display:grid;gap:8px}
+.values .pcat{color:var(--teal)}
+.values h3{font-size:17px}
+.values p{font-size:14px;color:var(--muted);line-height:1.6}
+.news{display:grid;gap:var(--s2)}
+.news-item{display:grid;grid-template-columns:1fr;gap:10px;padding:20px;background:#fff;border:1px solid var(--line);border-radius:var(--r-l)}
+.news-item[hidden]{display:none}
+.news-item time{font:600 12px/1 var(--body);letter-spacing:.08em;color:var(--muted);font-variant-numeric:tabular-nums}
+.news-item>div{display:grid;gap:8px}
+.news-item h3{font-size:19px}
+.news-item p{font-size:15px;color:var(--ink-2);line-height:1.65}
+.news-item .link{min-height:32px}
+
+/* The v3 design repo's shipped index.html sets WIRE_DEFAULT=true, so the
+   checked-in copy actually renders in monochrome content-review mode by
+   default (?mode=full is what shows the real Depth visuals) — this port
+   drops the whole wireframe toggle, which has no place in production. The
+   one real behaviour it also gated, .initial's monogram fallback for a
+   team member with no photo, is restored below as a plain default instead
+   of a wire-mode-only override — see docs/README.md's "a member without a
+   file keeps a monogram", which was never actually true without it. */
+.hero-mono{display:none}
+.wordmark-text{display:none}
+.ph{display:none}
+.initial{display:grid;place-items:center;width:64px;height:64px;border-radius:50%;border:1.5px dashed var(--line-strong);color:var(--muted);font:700 18px/1 var(--display)}
+.avatars .initial{width:40px;height:40px;font-size:13px;border-style:solid;border-width:2px;border-color:var(--cream);background:var(--cream-2);margin-left:-8px}
+.wire-note{display:none}
+
+/* ── stubs ────────────────────────────────────────────────── */
+.stub-list{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
+.stub-list li{border-bottom:1px solid var(--line)}
+.stub-list a,.stub-list button{display:flex;justify-content:space-between;align-items:center;width:100%;min-height:56px;padding:12px 0;text-align:left;font-weight:600}
+.stub-list .cap{font-weight:400}
+/* search states */
+.results{display:grid;gap:var(--s3)}
+.results .meta{font:600 11px/1.4 var(--body);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.results .group{display:grid;gap:8px}
+.results .group h2{font:600 11px/1.4 var(--body);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.results .hit{display:grid;gap:4px;padding:14px 0;border-bottom:1px solid var(--line);text-decoration:none;color:var(--ink)}
+.results .hit:first-of-type{border-top:1px solid var(--line)}
+.results .hit b{font:600 16px/1.35 var(--body)}
+.results .hit p{font-size:14px;color:var(--ink-2);line-height:1.55;margin:0}
+.results .hit .cap{color:var(--muted)}
+.results .hit:hover b,.results .hit:focus-visible b{text-decoration:underline;text-underline-offset:4px}
+.results .hit.sel{background:var(--cream-2);margin:0 -12px;padding-inline:12px;border-radius:var(--r-s)}
+.results mark{background:none;color:var(--ink);font-weight:700;text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:3px}
+.results .empty{display:grid;gap:12px;padding:var(--s4) 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.results .empty h2{font-size:22px}
+.results .empty p{color:var(--ink-2);font-size:15px;line-height:1.6;margin:0}
+.results .empty .cta{display:flex;flex-wrap:wrap;gap:10px;margin-top:4px}
+.results .hint{font-size:14px;color:var(--muted)}
+.search-field.busy svg{animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.search-field{display:flex;align-items:center;gap:12px;min-height:52px;padding:0 16px;border-radius:var(--r-pill);border:1.5px solid var(--line-strong);background:#fff}
+.search-field input{flex:1;border:0;outline:0;background:none;min-width:0}
+.search-field svg{width:20px;height:20px;stroke:var(--muted);fill:none;stroke-width:1.8;flex:none}
+
+/* ── forms / contact ─────────────────────────────────────── */
+.form{display:grid;gap:14px}
+.field{display:grid;gap:6px;align-content:start;grid-template-rows:auto auto auto}
+.field>label{grid-row:1}.field>input,.field>select,.field>textarea{grid-row:2}
+.field .ferr{grid-row:3;min-height:16px;display:block;visibility:hidden}.field.err .ferr{visibility:visible}
+.field label{font:600 13px/1.3 var(--body);color:var(--ink-2)}
+.field.req label::after{content:" *";color:var(--teal)}
+.on-navy .field.req label::after{color:var(--cyan)}
+.req-note{font-size:13px;color:var(--muted);margin:0}.req-note b{color:var(--teal);font-weight:700}.on-navy .req-note b{color:var(--cyan)}
+.field.err input,.field.err select,.field.err textarea{border-color:#c0392b!important}
+.field .ferr{font-size:12px;line-height:16px;color:#e07b6f}
+.form-status.ok{background:var(--teal-soft);color:var(--teal)}.on-navy .form-status.ok{background:var(--cyan-soft);color:var(--cyan-2)}
+.form-status.err{background:rgba(192,57,43,.12);color:#e07b6f}
+.form.sending .btn{opacity:.6;pointer-events:none}
+.rc-note{font-size:12px;color:var(--muted);margin:0}.rc-note a{color:inherit}
+/* toast: one at a time, bottom centre, above the mobile tab bar */
+.toast{position:fixed;left:50%;bottom:calc(var(--tabbar) + env(safe-area-inset-bottom,0px) + 16px);z-index:90;display:flex;align-items:flex-start;gap:12px;max-width:min(92vw,520px);padding:14px 16px 14px 14px;border-radius:14px;background:var(--ink);color:var(--cream);box-shadow:var(--shadow-2);font:500 14px/1.5 var(--body);transform:translate(-50%,16px);opacity:0;transition:transform .35s cubic-bezier(.2,.8,.2,1),opacity .3s;pointer-events:none}
+.toast.on{transform:translate(-50%,0);opacity:1;pointer-events:auto}
+.toast .ico{flex:none;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-size:14px;font-weight:700;background:var(--cream);color:var(--ink)}
+.toast.err .ico{background:#e07b6f;color:#fff}
+.toast b{display:block;font-weight:700;margin-bottom:2px}
+.toast .body{flex:1;min-width:0}
+.toast .x{flex:none;background:none;border:0;color:inherit;opacity:.7;font-size:18px;line-height:1;padding:0 2px;cursor:pointer;min-height:auto}
+.toast .x:hover{opacity:1}
+.on-navy .toast,.toast.on-dark{background:var(--cream);color:var(--ink)}.toast.on-dark .ico{background:var(--ink);color:var(--cream)}
+@media (prefers-reduced-motion:reduce){.toast{transition:none}}
+.field input,.field select,.field textarea{width:100%;min-height:48px;padding:12px 14px;border-radius:var(--r-s);border:1.5px solid var(--line-strong);background-color:#fff;color:var(--ink)}
+.field textarea{min-height:110px;resize:vertical}
+.field input:focus,.field select:focus,.field textarea:focus{outline:2px solid var(--teal-3);outline-offset:0;border-color:transparent}
+/* dropdowns: custom chevron so the icon can breathe from the edge */
+.field select{appearance:none;-webkit-appearance:none;padding-right:48px;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23333333' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='m6 9 6 6 6-6'/></svg>");background-repeat:no-repeat;background-position:right 18px center;background-size:16px;cursor:pointer}
+.on-navy .field select,.sheet .field select{background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23dddddd' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='m6 9 6 6 6-6'/></svg>")}
+.field select::-ms-expand{display:none}
+.check{display:grid;grid-template-columns:22px 1fr;gap:10px;align-items:start;font-size:14px;color:var(--ink-2);min-height:44px}
+.check input{width:22px;height:22px;margin:0;accent-color:var(--teal)}
+.check{align-items:center}
+.check span{padding-top:1px;line-height:1.5}
+.btn:disabled,.btn[aria-disabled="true"]{opacity:.45;cursor:not-allowed;transform:none!important;box-shadow:none}
+.on-navy .btn-primary:disabled{background:var(--cyan);color:var(--navy)}
+.form-status{border-radius:var(--r-s);padding:12px 14px;font-size:14px;background:var(--teal-soft);color:var(--teal)}
+.on-navy .field input,.on-navy .field select,.on-navy .field textarea{background-color:var(--navy-2);border-color:var(--line-navy);color:var(--on-navy)}
+.on-navy .field label,.on-navy .check{color:var(--on-navy)}
+.on-navy .form-status{background:var(--cyan-soft);color:var(--cyan-2)}
+
+/* sheet */
+.sheet{position:fixed;inset:0;z-index:80;display:grid;align-items:end;background:rgba(10,13,46,.55);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
+.sheet[hidden]{display:none}
+.sheet-card{background:var(--navy);color:var(--on-navy);border-radius:var(--r-l) var(--r-l) 0 0;max-height:min(92dvh,900px);overflow:auto;padding:12px var(--gutter) calc(var(--s3) + env(safe-area-inset-bottom,0px));animation:rise .35s var(--ease)}
+@keyframes rise{from{transform:translateY(40px);opacity:0}to{transform:none;opacity:1}}
+.sheet-grip{width:44px;height:5px;border-radius:3px;background:var(--line-navy);margin:0 auto 12px}
+.sheet-head{display:flex;justify-content:space-between;align-items:start;gap:12px;margin-bottom:var(--s2)}
+.sheet-head h2{font-size:24px}
+.sheet-close{width:44px;height:44px;border-radius:50%;border:1px solid var(--line-navy);display:grid;place-items:center;font-size:20px;flex:none}
+.sheet .field input,.sheet .field select,.sheet .field textarea{background-color:var(--navy-2);border-color:var(--line-navy);color:var(--on-navy)}
+.sheet .field label,.sheet .check{color:var(--on-navy)}
+.sheet .form-status{background:var(--cyan-soft);color:var(--cyan-2)}
+
+/* motion */
+@keyframes pulse{0%,100%{transform:scale(1);opacity:.85}50%{transform:scale(1.6);opacity:1}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}html{scroll-behavior:auto}}
+
+/* ─────────────────────────── ≥744: header, two columns ─── */
+@media (min-width:744px){
+  :root{--gutter:40px;--container:900px;--tabbar:0px;--sec:96px;--fs-h1:clamp(44px,5.6vw,56px);--fs-h2:36px}
+  .tabbar{display:none}
+  .header{display:block;position:sticky;top:env(safe-area-inset-top,0px);z-index:50;background:none;border-bottom:0;margin-bottom:-72px}
+  .screen{padding-top:72px}
+  .seg{top:calc(72px + env(safe-area-inset-top,0px))}
+  /* header inverts while a dark (.on-navy) section sits behind it */
+  .header .wrap{transition:filter .25s}
+  .header.is-dark .wrap{filter:invert(1)}
+  .header.is-dark .sub{filter:invert(1)}
+  .header .wrap{display:flex;align-items:center;justify-content:space-between;gap:var(--s3);height:72px}
+  .logo-h{width:150px;height:38px}
+  .header nav ul{list-style:none;margin:0;padding:0;display:flex;gap:4px}
+  .header nav>ul{position:relative;gap:8px;padding:4px 24px;border:1.5px solid transparent;border-radius:999px}
+  .header nav>ul::before{content:"";position:absolute;inset:-1.5px;border:1.5px solid var(--ink);border-radius:999px;pointer-events:none;clip-path:polygon(0 0,100% 0,100% 100%,calc(var(--x,0px) + var(--w,0px) + 16px) 100%,calc(var(--x,0px) + var(--w,0px) + 16px) calc(100% - 9px),calc(var(--x,0px) - 16px) calc(100% - 9px),calc(var(--x,0px) - 16px) 100%,0 100%)}
+  .header nav a{display:inline-flex;align-items:center;min-height:40px;padding:0 16px;border-radius:var(--r-pill);font:600 14px/1 var(--body);color:var(--ink)}
+  /* opacity play: idle items sit at 55%; hovering the bar dims everything except the hovered item */
+  .header nav>ul>li>a{opacity:.55;transition:opacity .2s}
+  .header nav>ul>li>a[aria-current],.header nav>ul>li>a:hover,.header nav>ul>li>a:focus-visible,.header nav>ul>li.open>a{opacity:1}
+  .header nav>ul:hover>li>a[aria-current]:not(:hover){opacity:.55}
+  .header nav a.interactive{font-weight:700}
+  /* the notch: a rounded indent cut into the bottom edge under the active item, slides between items */
+  /* the notch is one continuous SVG stroke; the pill border is clipped away beneath it */
+  .header nav li.nav-notch{--lead:.36s;--lag:.14s;--ease:cubic-bezier(.2,.8,.2,1);position:absolute;left:calc(var(--x,0px) - 17.5px);right:calc(var(--rx,0px) - 17.5px);bottom:-1.5px;height:7px;pointer-events:none;opacity:var(--on,0);transition:left var(--lead) var(--ease),right var(--lead) var(--ease),opacity .2s}
+  .header nav li.nav-notch.to-right{transition:right var(--lead) var(--ease),left var(--lead) var(--ease) var(--lag),opacity .2s}
+  .header nav li.nav-notch.to-left{transition:left var(--lead) var(--ease),right var(--lead) var(--ease) var(--lag),opacity .2s}
+  .nav-notch svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+  .nav-notch path{fill:none;stroke:var(--ink);stroke-width:1.5;vector-effect:non-scaling-stroke;shape-rendering:geometricPrecision}
+  .header nav li{position:relative}
+  .header nav .has-sub>a::after{content:"";display:inline-block;width:6px;height:6px;border-right:1.5px solid currentColor;border-bottom:1.5px solid currentColor;transform:rotate(45deg) translateY(-2px);margin-left:8px;opacity:.7}
+  .header nav .sub{position:absolute;top:calc(100% + 10px);left:0;min-width:260px;display:grid;gap:2px;padding:8px;margin:0;list-style:none;background:#fff;border:1px solid var(--line);border-radius:var(--r-m);box-shadow:var(--shadow-2);opacity:0;visibility:hidden;transform:translateY(-6px);transition:opacity .18s var(--ease),transform .18s var(--ease),visibility .18s}
+  .header nav .sub::before{content:"";position:absolute;left:0;right:0;top:-12px;height:12px}
+  .header nav .has-sub.open .sub{opacity:1;visibility:visible;transform:none}
+  .header nav .sub a{display:grid;gap:2px;padding:10px 12px;border-radius:var(--r-s);min-height:44px;font-weight:600;color:var(--ink)}
+  .header nav .sub a b{font-weight:700}
+  .header nav .sub a .cap{font-weight:500}
+  .header nav .sub a:hover,.header nav .sub a:focus-visible{background:var(--cream-2)}
+
+  .header nav a.interactive[aria-current]{opacity:1}
+  .hero-top{display:none}
+  .stage{top:72px;height:calc(100dvh - 72px)}
+  .stage-grid{grid-template-columns:1.05fr 1fr;grid-template-rows:none;align-items:center;align-content:center;gap:var(--s5);padding-block:0}
+  .stage::after{background:linear-gradient(90deg,color-mix(in srgb,var(--cream) 90%,transparent) 0 34%,color-mix(in srgb,var(--cream) 45%,transparent) 56%,transparent 78%)}
+  .stage-visual .wave-path{opacity:.4}
+  .stage-copy{gap:var(--s3)}
+  .chapter h1,.chapter h2{font-size:clamp(36px,4.4vw,60px)}
+  .chapter .lead{font-size:17px}
+  .stage-visual .cap{padding-inline:max(var(--gutter),calc((100% - var(--container))/2))}
+  .stage-visual .cap>span:first-child{display:inline}
+  .chapters{min-height:400px}
+  .story{height:320dvh}
+  .lang-float{left:16px;bottom:16px}
+  .hero .wrap{display:grid;grid-template-columns:1.1fr 1fr;gap:var(--s4);align-items:center}
+  .hero-art{margin-top:0}
+  .hero-copy{display:contents}
+  .proof-grid{grid-template-columns:repeat(4,1fr)}
+  .cards{grid-template-columns:1fr 1fr}
+  .cats{grid-template-columns:1fr 1fr}
+  .pgrid{grid-template-columns:1fr 1fr}
+  .story-intro{grid-template-columns:1fr 1fr;align-items:end}
+  ol.timeline{gap:var(--s5)}
+  ol.timeline::before,ol.timeline::after{left:50%;transform:translateX(-50%)}
+  ol.timeline li{width:calc(50% - 44px);padding-left:0}
+  ol.timeline li::before{left:auto;right:-53px;top:6px}
+  ol.timeline li:nth-child(odd){justify-self:start;text-align:right}
+  ol.timeline li:nth-child(even){justify-self:end;text-align:left}
+  ol.timeline li:nth-child(even)::before{right:auto;left:-53px}
+  .tl-year{font-size:28px}
+  .values{grid-template-columns:1fr 1fr}
+  .news-item{grid-template-columns:110px 1fr;padding:24px}
+  .team{grid-template-columns:repeat(3,1fr)}
+  .section-head{grid-template-columns:1fr 1fr;align-items:end}
+  .company-teaser{grid-template-columns:1fr 1fr;align-items:center}
+  .cta-panel{padding:var(--s5)}
+  .cta-panel .btns{grid-template-columns:auto auto;justify-content:start}
+  .sitemap{grid-template-columns:repeat(4,1fr)}
+  .foot-legal{grid-template-columns:1fr auto;align-items:end}
+  footer{padding-block:var(--s6) var(--s4)}
+  .svc{grid-template-columns:150px 1fr auto;gap:8px 24px;padding:24px 0}
+  .svc .num{grid-column:1;grid-row:1/3;align-self:start;padding-top:6px}
+  .svc h3{grid-column:2}.svc p{grid-column:2}.svc .go{grid-column:3;grid-row:1/3}
+  .svc-detail{grid-template-columns:160px 1fr;gap:12px 32px}
+  .prod-head{grid-template-columns:1.1fr 1fr;align-items:center;gap:var(--s5)}
+  .feats{grid-template-columns:1fr 1fr}
+  .steps{grid-template-columns:repeat(3,1fr)}
+  .step{grid-template-columns:1fr;gap:14px}
+  .facts{grid-template-columns:1fr 1fr;gap:0 var(--s4)}
+  .prod-cta{grid-template-columns:1fr auto;align-items:center}
+  .prod-rel{grid-template-columns:1fr 1fr}
+  .svc-detail .num{grid-row:1/6}
+  .proj-list{grid-template-columns:1fr 1fr}
+  .form-2{grid-template-columns:1fr 1fr}
+  .form-2 .full{grid-column:1/-1}
+  .sheet{align-items:center;justify-items:center;padding:var(--s3)}
+  .sheet-card{width:min(560px,100%);border-radius:var(--r-l);max-height:min(90dvh,860px);padding:var(--s3)}
+  .sheet-grip{display:none}
+}
+/* ─────────────────────────── ≥1200: three columns ───────── */
+@media (min-width:1200px){
+  :root{--gutter:48px;--container:1440px;--sec:144px;--fs-h1:64px;--fs-h2:40px}
+  .stage-grid{grid-template-columns:1fr 1fr;gap:var(--s6)}
+  .chapters{min-height:440px}
+  .cards{grid-template-columns:repeat(3,1fr)}
+  .cats{grid-template-columns:repeat(4,1fr)}
+  .pgrid{grid-template-columns:repeat(3,1fr)}
+  .values{grid-template-columns:repeat(4,1fr)}
+  ol.timeline{gap:var(--s5)}
+  .pvis,.pcta-vis{height:190px}
+  .team{grid-template-columns:repeat(5,1fr)}
+  .proj-list{grid-template-columns:repeat(3,1fr)}
+  .svc-detail{grid-template-columns:170px 1fr 280px}
+  .feats{grid-template-columns:repeat(4,1fr)}
+  .facts{grid-template-columns:repeat(4,1fr)}
+  .prod-rel{grid-template-columns:repeat(3,1fr)}
+  .svc-detail .related{grid-column:3;grid-row:1/6;align-self:start}
+  .section-head{grid-template-columns:1.2fr 1fr}
+}
+
+
+
+/* ============================================================================
+   MOD:field — two sources, one pattern.
+
+   The animated two-source interference field lifted out of study 04 and
+   re-scoped from "backdrop the whole document scrolls through" to
+   "background of ONE ordinary section on a home page".
+
+   The field is a real computation, not a texture: two point sources with
+   1/sqrt(r) falloff, summed as
+       a1*sin(k*r1 - wt) + a2*sin(k*r2 - wt + phi2)
+   evaluated per pixel into an offscreen canvas at 1/3 resolution and scaled
+   up. It is the same physics that draws the W Labs mark, which is why the
+   section it sits behind is worth the cost.
+
+   Structure — three layers inside one root:
+     .sp-field            the section box; owns the fallback ground colour
+       .sp-field-canvas   absolutely positioned, aria-hidden, pointer-events:none
+       .sp-field-inner    the CONTENT SLOT the host fills, above the canvas
+
+   Legibility is the hard requirement, and it is bought in the field itself,
+   not with a scrim: the per-pixel value is multiplied by a gain envelope that
+   never exceeds 0.44, so the palette only ever travels 44% of the way from its
+   ground colour to either fringe extreme. Measured floors are in the JS block.
+   ========================================================================== */
+
+/* The root is an ordinary section box. `isolation:isolate` keeps the canvas's
+   stacking to this module so it can never slide under a host sibling.
+   The background is the fallback ground: with JS off, or if 2D canvas is
+   unavailable, the section still has its proper cream (or navy) ground and
+   the host's content is still legible on it. */
+.sp-field{position:relative;isolation:isolate;display:block;overflow:hidden;
+  padding-block:var(--sec);background:var(--cream);color:var(--ink)}
+
+/* dark ground variant — host adds .sp-field--dark to the root and the JS
+   picks the navy palette instead of the cream one */
+.sp-field--dark{color:var(--on-navy);
+  background:linear-gradient(168deg,var(--navy) 0%,var(--navy-2) 58%,var(--navy-3) 100%)}
+
+/* The field itself. Never interactive, never announced. */
+.sp-field .sp-field-canvas{position:absolute;inset:0;z-index:0;display:block;
+  width:100%;height:100%;pointer-events:none}
+
+/* The content slot. Everything the host drops in rides above the field. */
+.sp-field .sp-field-inner{position:relative;z-index:1;
+  width:100%;max-width:var(--container);margin-inline:auto;padding-inline:var(--gutter)}
+
+/* Optional caption — the one line of copy the module keeps, because it is the
+   line that explains what the reader is looking at. Delete the element and the
+   module still works. */
+.sp-field .sp-field-cap{margin:var(--s5) 0 0;font-family:var(--display);font-weight:600;
+  font-size:var(--fs-cap);letter-spacing:.14em;text-transform:uppercase;color:var(--teal)}
+.sp-field--dark .sp-field-cap{color:var(--cyan-2)}
+html:lang(ko) .sp-field .sp-field-cap{letter-spacing:.06em;text-transform:none}
+
+
+
+
+/* ── band stack ─────────────────────────────────────────────────
+   Concept 06 Spectrogram, as a reusable section treatment: each band's
+   HEIGHT is how much content it holds and its TEXTURE is computed from
+   its own words. Opening one expands it in place while the others
+   compress to rails, so the stack never changes its total shape — you
+   always see the whole set. Any number of stacks can live on a page;
+   every .sp-bands root is wired independently.                     */
+/* Ground is set in neutral values rather than a brand token on purpose: the
+   texture is drawn as light cells over it, so the ground is a contrast
+   decision, not a colour one. Even bands drop to pure black, which reads
+   as banding in the negative space between cells. */
+.sp-bands{position:relative;background:#080808;color:var(--on-navy);
+  border-radius:var(--r-l);overflow:hidden;isolation:isolate}
+.sp-bands-top{display:flex;align-items:baseline;justify-content:space-between;gap:var(--s2);
+  padding:var(--s3) var(--s3) var(--s2)}
+.sp-bands-eyebrow{font:700 var(--fs-eyebrow)/1 var(--display);letter-spacing:.14em;
+  text-transform:uppercase;color:var(--cyan-2)}
+.sp-bands-all{font:600 var(--fs-small)/1 var(--body);color:var(--on-navy);opacity:.75;
+  text-decoration:none;transition:opacity .18s var(--ease)}
+.sp-bands-all:hover,.sp-bands-all:focus-visible{opacity:1}
+
+.sp-bands-stack{list-style:none;margin:0;padding:0}
+.sp-band{position:relative;border-top:1px solid var(--line-navy)}
+.sp-bands-stack>.sp-band:nth-child(even){background:#000;--sp-band-ground:0,0,0}
+.sp-band.is-anim{overflow:hidden}
+
+/* the head: number · question · teaser, over the band's own texture */
+/* Heads keep their resting height whatever is open: the stack reads as a
+   fixed set of rows and only the expanded answer adds height, so nothing
+   the reader was looking at moves or shrinks under them. */
+.sp-band-head{position:relative;min-height:var(--sp-band-h,112px)}
+.sp-band-canvas{position:absolute;inset:0;width:100%;height:100%;display:block;
+  pointer-events:none;opacity:.85;transition:opacity .3s}
+.sp-band:hover .sp-band-canvas,.sp-band:focus-within .sp-band-canvas{opacity:1}
+/* the Spectrogram's scrim: the ground is solid under the label and thins to
+   nothing at the right edge, so the text stays legible while the texture
+   still reads across the band. Built from --sp-band-ground so the darker
+   even rows carry their own. */
+.sp-band-btn{position:relative;z-index:1;width:100%;min-height:inherit;
+  display:grid;grid-template-columns:auto minmax(0,1fr);gap:var(--s2);align-items:center;
+  padding:var(--s3);border:0;text-align:left;cursor:pointer;
+  color:inherit;font:inherit;
+  background:linear-gradient(90deg,
+    rgba(var(--sp-band-ground,8,8,8),1) 0%,
+    rgba(var(--sp-band-ground,8,8,8),.92) 34%,
+    rgba(var(--sp-band-ground,8,8,8),.35) 70%,
+    rgba(var(--sp-band-ground,8,8,8),0) 100%)}
+.sp-band-btn:focus-visible{outline:2px solid var(--cyan);outline-offset:-3px}
+.sp-band-n{font:700 var(--fs-cap)/1 var(--display);letter-spacing:.1em;
+  color:var(--cyan-2);font-variant-numeric:tabular-nums}
+.sp-band-q{display:grid;gap:4px;min-width:0}
+.sp-band-q b{font:700 var(--fs-h3)/1.3 var(--display);color:var(--on-navy)}
+html:lang(ko) .sp-band-q b{font-family:var(--body);word-break:keep-all}
+.sp-band-teaser{font:500 var(--fs-small)/1.5 var(--body);color:var(--on-navy-muted);
+  display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
+.sp-band.is-open .sp-band-teaser{display:none}
+
+/* the answer.
+   It opens by animating its own row track from 0fr to 1fr rather than
+   switching display, so the band's height eases open over 300ms instead
+   of the panel appearing at full size. The host wraps the panel's
+   children in .sp-collapse-in, which is the box that does the clipping. */
+.sp-band-panel{position:relative;z-index:1;display:grid;grid-template-rows:0fr;
+  padding:0 var(--s3) 0 calc(var(--s3) + 34px);max-width:64ch;
+  opacity:0;visibility:hidden;
+  transition:grid-template-rows 300ms ease-out,padding-bottom 300ms ease-out,
+             opacity 300ms ease-out,visibility 0s linear 300ms}
+.sp-band.is-open .sp-band-panel{grid-template-rows:1fr;padding-bottom:var(--s3);
+  opacity:1;visibility:visible;
+  transition:grid-template-rows 300ms ease-out,padding-bottom 300ms ease-out,
+             opacity 300ms ease-out,visibility 0s}
+.sp-band-panel>.sp-collapse-in{overflow:hidden;min-height:0;display:grid;gap:var(--s2)}
+.sp-band-panel p{margin:0;font:400 var(--fs-body)/1.65 var(--body);color:var(--on-navy)}
+html:lang(ko) .sp-band-panel p{word-break:keep-all}
+.sp-band-note{font-size:var(--fs-cap);color:var(--on-navy-muted)}
+.sp-band-cta{display:inline-flex;align-items:center;gap:8px;min-height:44px;
+  padding:0 var(--s2);border-radius:var(--r-pill);justify-self:start;
+  background:var(--cyan);color:var(--navy);border:0;cursor:pointer;
+  font:700 var(--fs-small)/1 var(--body);text-decoration:none;
+  transition:transform .18s var(--ease)}
+.sp-band-cta:hover{transform:translateY(-1px)}
+.sp-band-cta.is-ghost{background:none;color:var(--on-navy);
+  box-shadow:inset 0 0 0 1px var(--line-navy)}
+.sp-band-ctas{display:flex;flex-wrap:wrap;gap:var(--s1)}
+
+@media (min-width:744px){
+  .sp-bands-top{padding:var(--s3) var(--s4) var(--s2)}
+  .sp-band-btn{grid-template-columns:auto minmax(0,1fr);padding:28px var(--s4)}
+  .sp-band-panel{padding:0 var(--s4) 0 calc(var(--s4) + 34px)}
+  .sp-band.is-open .sp-band-panel{padding-bottom:var(--s4)}
+  .sp-band-teaser{-webkit-line-clamp:2}
+}
+@media (prefers-reduced-motion:reduce){
+  .sp-band-head,.sp-band-cta{transition:none}
+  .sp-band-panel,.sp-band.is-open .sp-band-panel{transition:none}
+}
+
+
+
+/* ============================================================================
+   MOD:rail — the company history as a time series.
+   A sticky READING scrubber (2022 → 2026) two-way synced with page scroll,
+   the filter pills demoted to a secondary row inside the same band, and the
+   dated reverse-chronological log it scrubs through: company milestones,
+   services, products, projects and proof, every one of them dated.
+
+   Everything is scoped to the single root .sp-rail. The module owns two
+   private custom properties, both written by JS at runtime:
+     --sp-rail-top  host sticky occlusion, measured (host header height)
+     --sp-rail-off  --sp-rail-top + the module's own band height
+   Nothing is hard-coded and nothing is read from the host.
+   ========================================================================== */
+
+.sp-rail{--sp-rail-h:84px;--sp-rail-top:0px;--sp-rail-off:0px;display:block;position:relative}
+
+/* ---- the navigation band: rail + secondary pills, one sticky unit --------
+   The band sticks under whatever the host has pinned at the top. Its own
+   height is what the scroll maths measures, so the band must stay one box. */
+.sp-rail .sp-rail-band{position:sticky;top:var(--sp-rail-top);z-index:20;
+  background:var(--navy);color:var(--on-navy);border-radius:var(--r-m);
+  border:1px solid var(--line-navy);box-shadow:var(--shadow-1);overflow:hidden}
+
+/* ---- rail: time axis + cumulative trace (JS-only enhancement) ---- */
+.sp-rail .sp-rail-rail{position:relative;height:var(--sp-rail-h);display:none}
+.sp-rail.is-live .sp-rail-rail{display:block}
+.sp-rail .sp-rail-head{position:absolute;left:var(--s2);top:6px;display:flex;gap:12px;align-items:baseline;
+  font-size:var(--fs-cap);color:var(--on-navy-muted);letter-spacing:.06em;text-transform:uppercase;pointer-events:none}
+.sp-rail .sp-rail-head b{color:var(--cyan-2);font-size:var(--fs-small);letter-spacing:.02em;text-transform:none}
+.sp-rail .sp-rail-head .sp-rail-read{color:var(--on-navy)}
+.sp-rail .sp-rail-note{display:none;position:absolute;right:var(--s2);top:6px;font-size:var(--fs-cap);
+  color:var(--on-navy-muted);max-width:52%;text-align:right;pointer-events:none;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* the invisible native range gives drag, touch and keyboard (arrows, Home/End) for free */
+.sp-rail .sp-rail-scrub{position:absolute;left:var(--s2);right:var(--s2);top:26px;bottom:6px}
+.sp-rail .sp-rail-scrub svg{position:absolute;inset:0;width:100%;height:100%;display:block;overflow:visible}
+.sp-rail .sp-rail-scrub input[type=range]{position:absolute;inset:0;width:100%;height:100%;margin:0;opacity:0;
+  cursor:ew-resize;-webkit-appearance:none;appearance:none;background:transparent;z-index:2;touch-action:pan-y}
+.sp-rail .sp-rail-scrub input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:100%}
+.sp-rail .sp-rail-scrub input[type=range]::-moz-range-thumb{width:16px;height:100%;border:0}
+.sp-rail .sp-rail-scrub input[type=range]:focus-visible ~ svg .sp-rail-ring{stroke:var(--cyan);stroke-width:3;opacity:1}
+.sp-rail .sp-rail-axis-line{stroke:var(--navy-3);stroke-width:2}
+.sp-rail .sp-rail-ytick{stroke:var(--on-navy-muted);stroke-width:1}
+.sp-rail .sp-rail-ylabel{fill:var(--on-navy-muted);font:500 11px var(--body);font-variant-numeric:tabular-nums}
+.sp-rail .sp-rail-tick{stroke:var(--cyan-2);stroke-width:2;opacity:.85;transition:opacity .25s}
+.sp-rail .sp-rail-tick.is-off{opacity:.18}
+.sp-rail .sp-rail-tick.is-passed{stroke:var(--cyan)}
+.sp-rail .sp-rail-ghost{fill:none;stroke:var(--cyan-2);stroke-opacity:.28;stroke-width:1.5}
+.sp-rail .sp-rail-trace{fill:none;stroke:var(--cyan);stroke-width:2;stroke-linejoin:round}
+.sp-rail .sp-rail-handle{fill:var(--navy);stroke:var(--cyan);stroke-width:2}
+.sp-rail .sp-rail-ring{fill:none;stroke:var(--cyan-2);stroke-width:1;opacity:.5}
+.sp-rail .sp-rail-today-line{stroke:var(--cyan-2);stroke-width:1;stroke-dasharray:2 3}
+.sp-rail .sp-rail-today-label{fill:var(--cyan-2);font:600 10px var(--body);letter-spacing:.06em;text-transform:uppercase}
+
+/* ---- secondary navigation: the filter pills.
+   A 200px sticky sidebar does not fit inside a page's content column, so the
+   pills stay a horizontal scrollable row at every width, inside the band. --- */
+.sp-rail .sp-rail-filters{display:flex;gap:var(--s1);overflow-x:auto;scrollbar-width:none;
+  padding:8px var(--s2);border-top:1px solid var(--line-navy)}
+.sp-rail .sp-rail-filters::-webkit-scrollbar{display:none}
+.sp-rail .sp-rail-pill{flex:0 0 auto;display:inline-flex;align-items:center;gap:8px;min-height:36px;padding:0 14px;
+  border-radius:var(--r-pill);border:1px solid var(--navy-3);background:transparent;color:var(--cyan-2);
+  font:600 var(--fs-small)/1 var(--body);cursor:pointer;white-space:nowrap;
+  transition:background .2s,color .2s,border-color .2s}
+.sp-rail .sp-rail-pill:hover{border-color:var(--cyan-2)}
+.sp-rail .sp-rail-pill[aria-pressed="true"]{background:var(--cyan);border-color:var(--cyan);color:var(--navy)}
+.sp-rail .sp-rail-pcount{font-variant-numeric:tabular-nums;font-size:var(--fs-cap);font-weight:600;color:var(--on-navy-muted)}
+.sp-rail .sp-rail-pill[aria-pressed="true"] .sp-rail-pcount{color:var(--navy)}
+
+/* ---- the honest counters: they belong to the log, not to the filters.
+   Both read off the rail position, so the total only appears once the reader
+   has scrubbed as far as the 2026 entry that confirms it. ------------------- */
+/* the tiles fill the column they sit in rather than stopping at a fixed
+   measure -- they are a readout of the rail above them, so they read as
+   one band with it */
+.sp-rail .sp-rail-counters{display:grid;grid-template-columns:1fr;gap:var(--s2);margin:var(--s2) 0 0}
+.sp-rail .sp-rail-tile{background:var(--cream-2);border:1px solid var(--line);border-radius:var(--r-m);padding:var(--s2) var(--s2) 14px}
+.sp-rail .sp-rail-eyebrow{display:block;font-size:var(--fs-eyebrow);letter-spacing:.1em;text-transform:uppercase;color:var(--teal);font-weight:600}
+.sp-rail .sp-rail-big{display:block;font:700 36px/1 var(--display);color:var(--teal);margin:6px 0 4px;font-variant-numeric:tabular-nums}
+.sp-rail .sp-rail-sub{display:block;font-size:var(--fs-small);color:var(--ink-2);line-height:1.45}
+.sp-rail .sp-rail-btn{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 18px;
+  border-radius:var(--r-pill);font:600 var(--fs-small)/1 var(--body);cursor:pointer;
+  background:transparent;color:var(--teal);border:1px solid var(--teal)}
+.sp-rail .sp-rail-btn:hover{background:var(--teal-soft)}
+
+/* ---- the dating rule. Not an instruction: it is the rule that makes the
+   "c." entries and the 24 total honest, so it stays with the log. ---------- */
+.sp-rail .sp-rail-rule{background:var(--teal-soft);border-radius:var(--r-m);padding:var(--s2);
+  margin:var(--s2) 0 var(--s3);color:var(--ink-2);max-width:820px}
+.sp-rail .sp-rail-rule h3{font:700 var(--fs-small)/1.3 var(--display);letter-spacing:.06em;text-transform:uppercase;
+  color:var(--teal);margin:0 0 8px}
+.sp-rail .sp-rail-rule ul{margin:0;padding-left:1.2em;font-size:var(--fs-small);list-style:disc}
+.sp-rail .sp-rail-rule li+li{margin-top:4px}
+.sp-rail .sp-rail-status{font-size:var(--fs-small);color:var(--muted);margin:0 0 var(--s2);
+  font-variant-numeric:tabular-nums lining-nums}
+
+/* ---- the log: every entry dated, newest first ---- */
+.sp-rail .sp-rail-log{list-style:none;margin:0;padding:0}
+.sp-rail .sp-rail-entry{border-top:1px solid var(--line);padding:var(--s3) 0;overflow:hidden;
+  scroll-margin-top:calc(var(--sp-rail-off) + 8px)}
+.sp-rail .sp-rail-entry.is-collapsing{padding-top:0;padding-bottom:0;border-top-width:0}
+.sp-rail .sp-rail-entry[hidden]{display:none}
+.sp-rail .sp-rail-date{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.sp-rail .sp-rail-date time{font-weight:600;color:var(--teal);font-size:var(--fs-small);
+  font-variant-numeric:tabular-nums lining-nums;letter-spacing:.02em}
+.sp-rail .sp-rail-date time.sp-rail-circa{color:var(--muted)}
+.sp-rail .sp-rail-chip{display:inline-flex;align-items:center;height:22px;padding:0 9px;border-radius:var(--r-pill);
+  font-size:var(--fs-cap);font-weight:600;letter-spacing:.06em;text-transform:uppercase;
+  background:var(--cream-3);color:var(--ink-2)}
+.sp-rail .sp-rail-chip.is-service{background:var(--teal-soft);color:var(--teal)}
+.sp-rail .sp-rail-chip.is-product{background:var(--teal);color:var(--cream)}
+.sp-rail .sp-rail-chip.is-project{background:var(--cream);border:1px solid var(--cream-3);color:var(--ink-2)}
+.sp-rail .sp-rail-chip.is-proof{background:var(--navy);color:var(--cyan-2)}
+.sp-rail .sp-rail-title{font:700 22px/1.2 var(--display);margin:8px 0 0;max-width:30ch;color:var(--ink)}
+.sp-rail .sp-rail-meta{font-size:var(--fs-small);color:var(--teal-2);font-weight:600;margin:6px 0 0}
+.sp-rail .sp-rail-para{margin:10px 0 0;color:var(--ink-2);max-width:64ch}
+.sp-rail .sp-rail-enote{display:block;margin-top:8px;font-size:var(--fs-small);color:var(--muted);max-width:64ch}
+.sp-rail .sp-rail-enote.is-ruo{border-left:3px solid var(--teal-soft);padding-left:10px}
+.sp-rail .sp-rail-break{margin:10px 0 0;font-size:var(--fs-body);color:var(--ink-2);
+  font-variant-numeric:tabular-nums lining-nums}
+.sp-rail .sp-rail-break b{color:var(--teal);font-size:18px}
+.sp-rail .sp-rail-link{color:var(--teal-2);font-size:var(--fs-small);text-underline-offset:3px;
+  display:inline-flex;align-items:center;min-height:40px}
+
+.sp-rail :focus-visible{outline:3px solid var(--teal-3);outline-offset:3px;border-radius:var(--r-xs)}
+
+@media (min-width:744px){
+  .sp-rail{--sp-rail-h:96px}
+  .sp-rail .sp-rail-note{display:block}
+  .sp-rail .sp-rail-counters{grid-template-columns:1fr 1fr}
+  .sp-rail .sp-rail-btn{min-height:40px;padding:0 14px}
+  .sp-rail .sp-rail-entry{display:grid;grid-template-columns:150px minmax(0,1fr);gap:var(--s3)}
+  .sp-rail .sp-rail-date{flex-direction:column;align-items:flex-start;gap:8px}
+  .sp-rail .sp-rail-title{margin-top:0}
+  .sp-rail .sp-rail-rule,.sp-rail .sp-rail-status{margin-left:calc(150px + var(--s3))}
+}
+@media (min-width:1200px){
+  .sp-rail{--sp-rail-h:104px}
+  .sp-rail .sp-rail-entry{grid-template-columns:168px minmax(0,820px)}
+  .sp-rail .sp-rail-rule,.sp-rail .sp-rail-status{margin-left:calc(168px + var(--s3))}
+}
+@media (prefers-reduced-motion:reduce){
+  .sp-rail .sp-rail-tick,.sp-rail .sp-rail-pill,.sp-rail .sp-rail-entry{transition:none!important}
+}
+
+
+
+/* ============================================================================
+   MOD:tuner — the resonance finder, as the front half of the inquiry page.
+
+   Three dials (what / how far / how fast) drive one code-drawn wave and, once
+   the "what" dial is set, FLIP-reorder the Services, Products and Projects
+   card grids around whatever the reader's answers resonate with. The reader
+   is being asked what they need BEFORE the host's contact form asks who they
+   are, so the module owns no form: it hands its conclusion to the host
+   through window.spTunerOnResult and marks its CTA with data-sp-tuner-cta.
+
+   Everything is scoped to the single root .sp-tuner. Colour is written in the
+   brand's terms (cream ground, teal primary, navy panel, cyan only ever on
+   navy) using host tokens; only #fff and the two teal/navy rgba() shadows are
+   literals, exactly as in the source study.
+   ========================================================================== */
+
+.sp-tuner{display:grid;gap:var(--s4)}
+.sp-tuner [hidden]{display:none!important}
+.sp-tuner .sp-tuner-strings{display:none}
+
+/* ---- panel lead: the finder's own hero copy, not an operating hint ------- */
+.sp-tuner .sp-tuner-lead{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:var(--s1) var(--s3)}
+.sp-tuner .sp-tuner-eyebrow{margin:0;font-family:var(--display);font-weight:700;font-size:var(--fs-eyebrow);
+  letter-spacing:.14em;text-transform:uppercase;color:var(--teal-2)}
+.sp-tuner:lang(ko) .sp-tuner-eyebrow{letter-spacing:.06em}
+.sp-tuner .sp-tuner-h{margin:6px 0 0;font-family:var(--display);font-weight:700;font-size:var(--fs-h2);
+  line-height:1.15;letter-spacing:-.01em;color:var(--ink);max-width:24ch}
+.sp-tuner .sp-tuner-hint{margin:0;color:var(--muted);font-size:var(--fs-body);max-width:52ch}
+
+/* ---- the tuner itself: navy scope beside the cream dial panel ------------ */
+.sp-tuner .sp-tuner-tuner{display:grid;gap:var(--s3);grid-template-columns:minmax(0,1fr)}
+@media (min-width:1200px){.sp-tuner .sp-tuner-tuner{grid-template-columns:minmax(0,7fr) minmax(0,5fr);align-items:stretch}}
+
+/* Navy scope panel: the wave lives here (cyan only on navy). */
+.sp-tuner .sp-tuner-scope{position:relative;background:var(--navy);color:var(--on-navy);
+  border-radius:var(--r-l);overflow:hidden;min-height:300px;display:flex;flex-direction:column}
+.sp-tuner .sp-tuner-scope::before{content:"";position:absolute;inset:0;background:
+  radial-gradient(120% 80% at 80% -10%,rgba(26,155,177,.35),transparent 60%),
+  radial-gradient(80% 60% at 10% 110%,rgba(0,212,255,.18),transparent 60%);pointer-events:none}
+.sp-tuner .sp-tuner-scope-grid{position:absolute;inset:0;
+  background-image:linear-gradient(rgba(127,225,245,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(127,225,245,.07) 1px,transparent 1px);
+  background-size:40px 40px;
+  mask-image:radial-gradient(ellipse at center,black 40%,transparent 95%);
+  -webkit-mask-image:radial-gradient(ellipse at center,black 40%,transparent 95%);pointer-events:none}
+.sp-tuner .sp-tuner-scope-head{position:relative;display:flex;justify-content:space-between;align-items:center;
+  padding:18px 20px 0;font-family:var(--display);font-size:var(--fs-cap);letter-spacing:.14em;
+  text-transform:uppercase;color:var(--cyan-2)}
+.sp-tuner:lang(ko) .sp-tuner-scope-head{letter-spacing:.06em}
+.sp-tuner .sp-tuner-lock{display:inline-flex;align-items:center;gap:6px;opacity:0;transition:opacity .3s}
+.sp-tuner .sp-tuner-lock::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--cyan);box-shadow:0 0 12px var(--cyan)}
+.sp-tuner .sp-tuner-scope.is-locked .sp-tuner-lock{opacity:1}
+
+/* the wave: one resolved stroke, one dashed ghost ahead of the completion edge */
+.sp-tuner .sp-tuner-wave-wrap{position:relative;flex:1;display:flex;align-items:center;padding:8px 12px;min-width:0}
+.sp-tuner .sp-tuner-wave{width:100%;height:auto;display:block;overflow:visible}
+.sp-tuner .sp-tuner-wave .sp-tuner-resolved{fill:none;stroke:var(--cyan);stroke-width:3;stroke-linecap:round;stroke-linejoin:round;transition:stroke-width .3s}
+.sp-tuner .sp-tuner-wave .sp-tuner-ghost{fill:none;stroke:var(--cyan-2);stroke-width:1.5;stroke-dasharray:4 8;opacity:.45;stroke-linecap:round}
+.sp-tuner .sp-tuner-wave .sp-tuner-axis{stroke:rgba(127,225,245,.25);stroke-width:1;stroke-dasharray:2 6}
+.sp-tuner .sp-tuner-wave .sp-tuner-node{fill:var(--navy);stroke:var(--cyan);stroke-width:2.5;opacity:0;transition:opacity .4s}
+.sp-tuner .sp-tuner-scope.is-locked .sp-tuner-wave .sp-tuner-node{opacity:1}
+.sp-tuner .sp-tuner-scope.is-locked .sp-tuner-wave .sp-tuner-resolved{filter:url(#sp-tuner-glow);stroke-width:3.5}
+.sp-tuner .sp-tuner-scope.is-neutral .sp-tuner-wave .sp-tuner-resolved{opacity:.7}
+@keyframes sp-tuner-snap{0%{transform:scale(1)}35%{transform:scale(1.035)}70%{transform:scale(.995)}100%{transform:scale(1)}}
+.sp-tuner .sp-tuner-scope.do-snap .sp-tuner-wave{animation:sp-tuner-snap .55s var(--ease) 1;transform-origin:50% 50%}
+@keyframes sp-tuner-ring{0%{opacity:.7;transform:scale(.6)}100%{opacity:0;transform:scale(1.6)}}
+.sp-tuner .sp-tuner-snap-ring{position:absolute;inset:0;border-radius:inherit;border:2px solid var(--cyan);opacity:0;pointer-events:none}
+.sp-tuner .sp-tuner-scope.do-snap .sp-tuner-snap-ring{animation:sp-tuner-ring .7s ease-out 1}
+
+/* Readout under the wave: the diagnosis in words. Its empty state is copy. */
+.sp-tuner .sp-tuner-readout{position:relative;padding:8px 20px 20px;display:grid;gap:6px;min-height:118px;align-content:end}
+.sp-tuner .sp-tuner-ro-wait{margin:0;color:var(--cyan-2);opacity:.85;font-size:var(--fs-body)}
+.sp-tuner .sp-tuner-ro-line{margin:0;display:flex;flex-wrap:wrap;gap:4px 10px;align-items:baseline;font-size:var(--fs-body);color:var(--on-navy)}
+.sp-tuner .sp-tuner-ro-k{font-family:var(--display);font-size:var(--fs-cap);letter-spacing:.14em;text-transform:uppercase;color:var(--cyan-2);flex:none}
+.sp-tuner:lang(ko) .sp-tuner-ro-k{letter-spacing:.04em}
+.sp-tuner .sp-tuner-ro-v{font-weight:600;min-width:0}
+.sp-tuner .sp-tuner-ro-v b{color:var(--cyan);font-family:var(--display);font-weight:700}
+.sp-tuner .sp-tuner-ro-sub{color:var(--cyan-2);font-size:var(--fs-small);font-weight:500}
+
+/* ---- phone: the scope becomes a readout strip --------------------------
+   On a phone the instrument was ~850px of waveform before the reader
+   reached a single dial, and once they scrolled into the results the
+   answer was off screen -- so they were scrolling blind through services,
+   products and projects with no reminder of what they had tuned. The
+   waveform is the part that does not survive the width, so it goes, and
+   what is left is the diagnosis in words: a slim navy strip that pins
+   under the masthead and follows the reader down the results. All three
+   lines stay -- the service, the product and the first step -- because
+   they are the finder's whole output. */
+@media (max-width:743.98px){
+  .sp-tuner .sp-tuner-scope{position:sticky;top:var(--sp-mhead-h,56px);z-index:18;
+    min-height:0;border-radius:var(--r-m);
+    box-shadow:0 10px 24px -14px rgba(4,14,22,.8)}
+  /* the wave stays, as the strip's ground rather than a block of its own:
+     stretched behind the words, dimmed, and with a scrim over the side the
+     text sits on. It still redraws as the dials move, so the strip keeps
+     the instrument's motion without spending any height on it. */
+  .sp-tuner .sp-tuner-snap-ring{display:none}
+  .sp-tuner .sp-tuner-wave-wrap{position:absolute;inset:0;padding:0;
+    opacity:.62;pointer-events:none;z-index:0}
+  .sp-tuner .sp-tuner-wave{height:100%!important}
+  .sp-tuner .sp-tuner-wave-wrap::after{content:"";position:absolute;inset:0;
+    background:linear-gradient(90deg,rgba(21,43,59,.90) 0%,rgba(21,43,59,.74) 48%,
+      rgba(21,43,59,.30) 80%,rgba(21,43,59,.08) 100%)}
+  .sp-tuner .sp-tuner-scope-head,
+  .sp-tuner .sp-tuner-readout{position:relative;z-index:1}
+  .sp-tuner .sp-tuner-scope-head{padding:9px 14px 0;font-size:10px}
+  .sp-tuner .sp-tuner-readout{padding:4px 14px 11px;min-height:0;gap:3px}
+  .sp-tuner .sp-tuner-ro-line{font-size:13px;gap:1px 8px;line-height:1.35}
+  .sp-tuner .sp-tuner-ro-k{font-size:9px;letter-spacing:.1em}
+  .sp-tuner .sp-tuner-ro-sub{font-size:11px}
+  .sp-tuner .sp-tuner-ro-wait{font-size:13px}
+}
+
+/* ---- dial panel -------------------------------------------------------- */
+.sp-tuner .sp-tuner-dials{background:#fff;border:1px solid var(--line);border-radius:var(--r-l);
+  padding:20px 16px;display:grid;gap:20px;align-content:start;margin:0}
+@media (min-width:744px){.sp-tuner .sp-tuner-dials{padding:24px}}
+.sp-tuner .sp-tuner-rail{display:grid;gap:8px}
+.sp-tuner .sp-tuner-rail-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+.sp-tuner .sp-tuner-q{font-family:var(--display);font-weight:700;font-size:var(--fs-body);color:var(--ink)}
+.sp-tuner .sp-tuner-val{font-size:var(--fs-small);font-weight:600;color:var(--teal);text-align:right;min-height:1.4em;transition:color .3s}
+.sp-tuner .sp-tuner-rail[data-touched="false"] .sp-tuner-val{color:var(--muted-2);font-weight:500}
+/* The range input is narrowed so its thumb centres land on the N label columns. */
+.sp-tuner .sp-tuner-track{--n:5;position:relative}
+/* The dial used to be inset by half a column at each end so that its stops
+   landed on the centres of n equal columns -- which is where the ticks and
+   labels sat. That left a visible margin at both ends of the track. The
+   dial now fills its container, and the ticks and labels follow the stops
+   instead: a range input centres its thumb at half a thumb-width from each
+   end, so stop i sits at 14px + (W - 28px) * i / (n - 1). Everything below
+   is that one expression. */
+.sp-tuner .sp-tuner-ticks{position:absolute;inset:0;pointer-events:none}
+.sp-tuner .sp-tuner-ticks i{position:absolute;top:50%;display:block;width:2px;height:12px;
+  background:var(--cream-3);border-radius:1px;
+  left:calc(14px + (100% - 28px) * var(--i,0) / (var(--n) - 1));
+  transform:translate(-50%,-50%)}
+.sp-tuner .sp-tuner-ticks i:nth-child(1){--i:0}
+.sp-tuner .sp-tuner-ticks i:nth-child(2){--i:1}
+.sp-tuner .sp-tuner-ticks i:nth-child(3){--i:2}
+.sp-tuner .sp-tuner-ticks i:nth-child(4){--i:3}
+.sp-tuner .sp-tuner-ticks i:nth-child(5){--i:4}
+.sp-tuner .sp-tuner-dial{-webkit-appearance:none;appearance:none;display:block;height:44px;
+  margin:0;width:100%;background:transparent;position:relative}
+.sp-tuner .sp-tuner-dial::-webkit-slider-runnable-track{height:4px;border-radius:var(--r-pill);background:linear-gradient(90deg,var(--teal-2),var(--teal-soft))}
+.sp-tuner .sp-tuner-dial::-moz-range-track{height:4px;border-radius:var(--r-pill);background:linear-gradient(90deg,var(--teal-2),var(--teal-soft))}
+.sp-tuner .sp-tuner-dial::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:28px;height:28px;margin-top:-12px;
+  border-radius:50%;background:var(--teal);border:3px solid #fff;box-shadow:0 0 0 2px var(--teal),0 4px 10px rgba(3,79,94,.25);transition:background .25s,box-shadow .25s}
+.sp-tuner .sp-tuner-dial::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:var(--teal);border:3px solid #fff;box-shadow:0 0 0 2px var(--teal),0 4px 10px rgba(3,79,94,.25)}
+.sp-tuner .sp-tuner-rail[data-touched="false"] .sp-tuner-dial::-webkit-slider-thumb{background:#fff;box-shadow:0 0 0 2px var(--muted-2)}
+.sp-tuner .sp-tuner-rail[data-touched="false"] .sp-tuner-dial::-moz-range-thumb{background:#fff;box-shadow:0 0 0 2px var(--muted-2)}
+.sp-tuner .sp-tuner-rail[data-touched="false"] .sp-tuner-dial::-webkit-slider-runnable-track{background:var(--cream-3)}
+.sp-tuner .sp-tuner-rail[data-touched="false"] .sp-tuner-dial::-moz-range-track{background:var(--cream-3)}
+.sp-tuner .sp-tuner-dial:focus-visible{outline:none}
+.sp-tuner .sp-tuner-dial:focus-visible::-webkit-slider-thumb{box-shadow:0 0 0 2px var(--teal),0 0 0 6px var(--teal-soft)}
+.sp-tuner .sp-tuner-dial:focus-visible::-moz-range-thumb{box-shadow:0 0 0 2px var(--teal),0 0 0 6px var(--teal-soft)}
+/* the labels hang off the same stops: each one's text begins at its own
+   stop, and the last is anchored to the right end so it cannot run past
+   the track */
+/* The labels are a legend under the track: n even columns, each reading
+   from its own left edge. They cannot all start exactly on their stop --
+   the last one would run off the end -- so the ticks carry the precise
+   positions and the labels stay an evenly spaced row. */
+.sp-tuner .sp-tuner-rail-labels{display:grid;
+  grid-template-columns:repeat(var(--n),minmax(0,1fr));gap:2px}
+/* A button centres its own content, so labels of one, two and three lines
+   each sat on a different baseline and the row read as ragged. They are
+   flex boxes instead: the text starts at the top-left of a cell that
+   stretches to the tallest label, so every label begins on the same line
+   and the whole row is one block. Long words wrap rather than run past the
+   last column's edge. */
+.sp-tuner .sp-tuner-rail-labels button{min-height:44px;padding:6px;border:0;background:transparent;border-radius:var(--r-xs);
+  font:inherit;font-size:var(--fs-cap);line-height:1.3;color:var(--muted);text-align:left;font-weight:500;cursor:pointer;min-width:0;
+  display:flex;align-items:flex-start;justify-content:flex-start;height:100%;
+  overflow-wrap:anywhere;hyphens:auto}
+.sp-tuner .sp-tuner-rail-labels button:hover{color:var(--teal);background:var(--cream-2)}
+.sp-tuner .sp-tuner-rail-labels button[aria-pressed="true"]{color:var(--teal);font-weight:700}
+.sp-tuner .sp-tuner-rail[data-touched="false"] .sp-tuner-rail-labels button[aria-pressed="true"]{color:var(--muted);font-weight:500}
+@media (min-width:744px){.sp-tuner .sp-tuner-rail-labels button{font-size:var(--fs-small)}}
+.sp-tuner .sp-tuner-dials-foot{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px;
+  border-top:1px solid var(--line);padding-top:16px}
+.sp-tuner .sp-tuner-cap{margin:0;font-size:var(--fs-small);color:var(--muted)}
+.sp-tuner .sp-tuner-reset{display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0 12px;border-radius:var(--r-pill);
+  border:1.5px solid var(--line);background:#fff;color:var(--muted);font:inherit;font-size:var(--fs-small);font-weight:600;cursor:pointer}
+.sp-tuner .sp-tuner-reset:hover{color:var(--teal);border-color:var(--teal-2)}
+.sp-tuner .sp-tuner-reset:disabled{opacity:.45;cursor:default}
+
+/* ---- the results: what the dials resolved to ---------------------------
+   The module's whole contract with the inquiry form below it is now the
+   payload it hands to the host, not a panel of its own. */
+.sp-tuner .sp-tuner-results{display:grid;gap:var(--s2)}
+.sp-tuner .sp-tuner-band{display:grid;gap:12px;margin-top:var(--s3)}
+.sp-tuner .sp-tuner-band:first-child{margin-top:0}
+.sp-tuner .sp-tuner-grid{display:grid;gap:16px}
+.sp-tuner .sp-tuner-card{position:relative;background:#fff;border:1.5px solid var(--line);border-radius:var(--r-m);
+  padding:20px;display:grid;gap:12px;align-content:start;min-width:0;will-change:transform;transition:border-color .35s,box-shadow .35s}
+.sp-tuner .sp-tuner-card.is-match{border-color:var(--teal-2);box-shadow:0 0 0 3px var(--teal-soft),0 12px 30px rgba(3,79,94,.10)}
+.sp-tuner .sp-tuner-card.is-also{border-color:var(--teal-3)}
+.sp-tuner .sp-tuner-card>*{min-width:0}
+.sp-tuner .sp-tuner-tag{position:absolute;top:-11px;left:16px;display:none;align-items:center;gap:6px;padding:2px 10px;
+  border-radius:var(--r-pill);background:var(--teal);color:#fff;font-family:var(--display);font-weight:700;
+  font-size:var(--fs-cap);letter-spacing:.08em;text-transform:uppercase}
+.sp-tuner:lang(ko) .sp-tuner-tag{letter-spacing:0}
+.sp-tuner .sp-tuner-tag::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--cyan)}
+.sp-tuner .sp-tuner-card.is-match .sp-tuner-tag,.sp-tuner .sp-tuner-card.is-also .sp-tuner-tag{display:inline-flex}
+.sp-tuner .sp-tuner-card.is-also .sp-tuner-tag{background:var(--teal-3)}
+.sp-tuner .sp-tuner-num{margin:0;font-family:var(--display);font-weight:700;font-size:var(--fs-small);letter-spacing:.12em;color:var(--teal-2)}
+.sp-tuner .sp-tuner-num b{font-size:22px;letter-spacing:0;color:var(--teal);margin-right:6px}
+.sp-tuner .sp-tuner-card h3{margin:0;font-family:var(--display);font-weight:700;font-size:var(--fs-h3);line-height:1.15;color:var(--ink)}
+.sp-tuner .sp-tuner-card p{margin:0;color:var(--muted);font-size:var(--fs-body)}
+/* align-items must be pinned: as a grid item the tag row is stretched to its
+   row's height, and its flex children were stretching with it — which is why
+   the chips grew to 46px whenever the name beside them ran to two lines. */
+.sp-tuner .sp-tuner-tags{display:flex;flex-wrap:wrap;gap:6px;
+  align-items:flex-start;align-content:flex-start;align-self:start}
+/* the tags are glossary chips: the shell wires .chip[data-tip] to its own
+   tooltip, so they carry the term as the key and inherit the bubble. The
+   hover skin has to be restated here, because this selector is more
+   specific than the shell's .chip[data-tip]:hover. */
+.sp-tuner .sp-tuner-tags span[data-tip]:hover,
+.sp-tuner .sp-tuner-tags span[data-tip]:focus-visible{
+  background:var(--teal);color:#fff;outline:none}
+.sp-tuner .sp-tuner-tags span{display:inline-flex;align-items:center;flex:none;
+  min-height:26px;padding:0 12px;font-size:var(--fs-cap);font-weight:600;line-height:1;
+  color:var(--teal);background:var(--teal-soft);border-radius:var(--r-pill);white-space:nowrap}
+
+/* Services: the first card spans the row; the matched one also expands. */
+.sp-tuner .sp-tuner-svc-grid{grid-template-columns:minmax(0,1fr)}
+/* Each service is a panel of its own, like the products and projects
+   below it, so all three result groups read as one family. The internal
+   split stays a row — code and name on the left, the sentence and its
+   tags on the right — which is what lets a panel hold a full sentence
+   without the set going ragged. */
+.sp-tuner .sp-tuner-svc-grid{gap:var(--s2)}
+.sp-tuner .sp-tuner-svc-grid .sp-tuner-card{padding:var(--s3);gap:10px}
+.sp-tuner .sp-tuner-svc-grid .sp-tuner-card.is-match{background:var(--cream-2)}
+/* The marker used to straddle the card's top edge. That worked while each
+   card was its own pane; now that the five rows share one clipped pane the
+   overhanging half is cut off. It moves into a reserved bottom strip, the
+   same place and the same rules as the product and project cards -- so all
+   three lists mark a match the same way. */
+.sp-tuner .sp-tuner-svc-grid .sp-tuner-card{padding-bottom:46px;position:relative}
+.sp-tuner .sp-tuner-svc-grid .sp-tuner-tag{
+  top:auto;bottom:12px;left:auto;right:16px}
+@media (min-width:900px){
+  .sp-tuner .sp-tuner-svc-grid .sp-tuner-card{
+    grid-template-columns:minmax(0,248px) minmax(0,1fr);
+    column-gap:var(--s3);align-content:start}
+  .sp-tuner .sp-tuner-svc-grid .sp-tuner-num{grid-column:1;grid-row:1;margin-top:3px}
+  .sp-tuner .sp-tuner-svc-grid .sp-tuner-card>h3{grid-column:1;grid-row:2}
+  /* the eyebrow is a <p> too, so the sentence rule has to exclude it —
+     otherwise it lands in the same cell and prints over the sentence */
+  .sp-tuner .sp-tuner-svc-grid .sp-tuner-card>p:not(.sp-tuner-num){grid-column:2;grid-row:1}
+  .sp-tuner .sp-tuner-svc-grid .sp-tuner-tags{grid-column:2;grid-row:2}
+  .sp-tuner .sp-tuner-svc-grid .sp-tuner-detail{grid-column:2;grid-row:3;
+    border-top:1px dashed var(--line);margin-top:6px}
+}
+/* most service names fit one line once the column is wide enough */
+@media (min-width:1200px){
+  .sp-tuner .sp-tuner-svc-grid .sp-tuner-card{grid-template-columns:minmax(0,320px) minmax(0,1fr)}
+}
+/* minmax(0,…) + min-width:0 on the children: the related-projects column is
+   wide and would otherwise starve the prose column it sits beside. */
+.sp-tuner .sp-tuner-detail{display:none;gap:16px;border-top:1px dashed var(--line);padding-top:16px}
+.sp-tuner .sp-tuner-card.is-match .sp-tuner-detail{display:grid}
+.sp-tuner .sp-tuner-detail>*{min-width:0}
+.sp-tuner .sp-tuner-related{display:grid;gap:8px;align-content:start;min-width:0}
+.sp-tuner .sp-tuner-rl{font-family:var(--display);font-weight:700;font-size:var(--fs-cap);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.sp-tuner:lang(ko) .sp-tuner-rl{letter-spacing:0}
+.sp-tuner .sp-tuner-related ul{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:8px;min-width:0}
+.sp-tuner .sp-tuner-related li{display:inline-flex;align-items:center;gap:8px;font-size:var(--fs-small);font-weight:600;
+  color:var(--ink-2);background:var(--cream);border:1px solid var(--line);border-radius:var(--r-pill);padding:6px 12px 6px 6px;max-width:100%}
+.sp-tuner .sp-tuner-related li i{display:inline-grid;place-items:center;width:26px;height:26px;border-radius:50%;
+  background:var(--teal);color:#fff;font-style:normal;font-family:var(--display);font-weight:700;font-size:11px;flex:none}
+.sp-tuner .sp-tuner-related .sp-tuner-note{font-size:var(--fs-cap);color:var(--muted-2)}
+@keyframes sp-tuner-fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.sp-tuner .sp-tuner-card.is-match .sp-tuner-detail{animation:sp-tuner-fade .5s var(--ease) both;animation-delay:.25s}
+
+/* Products */
+.sp-tuner .sp-tuner-prod-grid{grid-template-columns:minmax(0,1fr)}
+@media (min-width:744px){.sp-tuner .sp-tuner-prod-grid,
+  .sp-tuner .sp-tuner-prod-grid.has-custom{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (min-width:1000px){.sp-tuner .sp-tuner-prod-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (min-width:1400px){.sp-tuner .sp-tuner-prod-grid.has-custom{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.sp-tuner .sp-tuner-price{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;
+  margin-top:auto;font-size:var(--fs-small);font-weight:600;color:var(--ink-2)}
+/* The scoped-engagement card only exists when a custom build is the match. */
+.sp-tuner .sp-tuner-card.sp-tuner-custom{display:none;border-style:dashed;background:var(--cream)}
+.sp-tuner .sp-tuner-prod-grid.has-custom .sp-tuner-card.sp-tuner-custom{display:grid}
+.sp-tuner .sp-tuner-ruo-note{margin:var(--s2) 0 0;font-size:var(--fs-small);color:var(--muted);border-left:3px solid var(--teal-soft);padding-left:12px}
+
+/* ── category as a corner tag ─────────────────────────────────────
+   The category used to be the card's first row, which cost a line of
+   height on every product and project card. It is now a tag pinned to
+   the card's top-left corner. Its only radius is the bottom-right one —
+   the other three are square, and the card clips its own rounded corner
+   over the tag, which is what turns the top-left back into the panel's
+   curve. That clip is why the card sets overflow:hidden here, and why
+   the RESONATES marker moves inside the card rather than overhanging
+   its top edge as it does on the service rows.
+
+   The card reserves the tag's height as top padding, which also sets
+   the gap between the tag and the card's title. */
+.sp-tuner .sp-tuner-prod,.sp-tuner .sp-tuner-proj{overflow:hidden;padding-top:44px}
+.sp-tuner .sp-tuner-kind,.sp-tuner .sp-tuner-cat{
+  position:absolute;top:0;left:0;margin:0;
+  display:inline-flex;align-items:center;gap:6px;
+  min-height:24px;padding:0 10px;max-width:calc(100% - 8px);
+  background:var(--cream-3);border-radius:0 0 var(--r-m) 0;
+  font:700 10px/1 var(--display);letter-spacing:.04em;text-transform:uppercase;
+  color:var(--ink);white-space:nowrap}
+.sp-tuner:lang(ko) .sp-tuner-kind,.sp-tuner:lang(ko) .sp-tuner-cat{letter-spacing:0}
+.sp-tuner .sp-tuner-price .sp-tuner-ruo{color:#fff;background:var(--ink-2);
+  border-radius:var(--r-pill);padding:2px 9px;font-size:10px;font-weight:700;
+  letter-spacing:.04em;text-transform:uppercase;white-space:nowrap}
+/* The top strip belongs to the category, which runs to 278px on the widest
+   name while the cards are 284-411px wide -- there is no room beside it for
+   a 120px marker, so the match marker takes the bottom-right instead. The
+   strip it sits in is reserved on every card, matched or not, so nothing
+   moves when the dials change. */
+.sp-tuner .sp-tuner-prod,.sp-tuner .sp-tuner-proj{padding-bottom:46px}
+.sp-tuner .sp-tuner-prod .sp-tuner-tag,.sp-tuner .sp-tuner-proj .sp-tuner-tag{
+  top:auto;bottom:12px;left:auto;right:12px}
+/* on a product card the right edge of that strip is already under the
+   Research Use Only badge, so the marker takes the left instead */
+.sp-tuner .sp-tuner-prod .sp-tuner-tag{left:16px;right:auto}
+
+/* Projects */
+.sp-tuner .sp-tuner-proj-grid{grid-template-columns:minmax(0,1fr)}
+@media (min-width:760px){.sp-tuner .sp-tuner-proj-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+/* four across needs real width: at 744 it left 134px cards, narrower than a
+   single word of some category names */
+@media (min-width:744px){.sp-tuner .sp-tuner-proj-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (min-width:1400px){.sp-tuner .sp-tuner-proj-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+/* the shorthand would otherwise drop the headroom the pinned tag needs,
+   since this rule comes after it */
+.sp-tuner .sp-tuner-proj-grid .sp-tuner-card{padding:44px 16px 46px;gap:8px}
+.sp-tuner .sp-tuner-proj-grid .sp-tuner-card h3{font-size:var(--fs-body)}
+.sp-tuner .sp-tuner-proj-grid .sp-tuner-card p{font-size:var(--fs-small)}
+.sp-tuner .sp-tuner-proj-note{margin:var(--s2) 0 0;font-size:var(--fs-small);color:var(--muted)}
+
+.sp-tuner .sp-tuner-sr{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* ---- static fallback: no animation, no FLIP travel, nothing hidden ------ */
+@media (prefers-reduced-motion:reduce){
+  .sp-tuner *,.sp-tuner *::before,.sp-tuner *::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}
+  .sp-tuner .sp-tuner-scope.do-snap .sp-tuner-wave,.sp-tuner .sp-tuner-scope.do-snap .sp-tuner-snap-ring{animation:none}
+}
+
+
+
+/* ── 07 Superposition: host-side glue ────────────────────────────
+   Four concepts are grafted into this shell. Everything below is the
+   seam between them and the Waves and Nodes host — the modules
+   themselves are untouched, so each can be re-extracted or swapped. */
+
+/* Single product / project pages: section heads read as one column —
+   eyebrow above the heading, both flush left, at every width. */
+.prod-sec .section-head{grid-template-columns:minmax(0,1fr);align-items:start;justify-items:start;text-align:left}
+.prod-sec .section-head>*{grid-column:1}
+
+/* The proof band sits INSIDE the interference field, so it must not
+   paint its own ground over the canvas. */
+.sp-field .proof{background:none}
+.sp-field .sp-field-inner{padding-block:0}
+/* The module's content slot already carries the page gutter, and the host's
+   own .wrap carries it again -- so the proof band sat two gutters in from
+   the edge (32px of a 394px phone, 96px on desktop) while every other
+   section sat one. The inner one goes; .wrap keeps its max-width, which is
+   what it is really there for. */
+.sp-field .sp-field-inner .wrap{padding-inline:0}
+/* on a phone the tiles can give a little back too */
+@media (max-width:743.98px){.sp-field .proof-item{padding-inline:14px}}
+.sp-field-cap{display:none}            /* the proof band carries its own copy */
+
+/* Home FAQ: the shell's own search-results idiom, so it reads as a list you
+   scan rather than a thing you operate. */
+.sp-home-faq{padding-bottom:var(--sec)}
+.sp-faq2-top{display:flex;align-items:baseline;justify-content:space-between;
+  gap:var(--s2);margin-bottom:var(--s2)}
+.sp-faq2-list{display:grid}
+/* the row is padded on all four sides and pulled back out by the same
+   amount, so the text still lines up with the column while the row itself
+   -- hover tint, open answer and divider alike -- is a wider band */
+.sp-faq2-item{display:grid;gap:8px;padding:22px 12px;margin-inline:-12px;
+  border-bottom:1px solid var(--line);position:relative}
+@media (min-width:900px){
+  .sp-faq2-item{padding:26px 22px;margin-inline:-22px}
+}
+/* the whole row is the target, so the whole row lights: a tint that bleeds
+   past the content column, drawn behind the text and never over the
+   dividers, which keep the list's rhythm. */
+.sp-faq2-item::before{content:"";position:absolute;inset:0;z-index:0;
+  border-radius:var(--r-s);background:transparent;pointer-events:none;
+  transition:background .2s var(--ease)}
+.sp-faq2-item:not(.is-open):hover::before,
+.sp-faq2-item:focus-within::before{
+  background:color-mix(in srgb,var(--teal) 7%,transparent)}
+.sp-faq2-item>*{position:relative;z-index:1}
+.sp-faq2-item:first-child{border-top:1px solid var(--line)}
+.sp-faq2-item b{font:700 18px/1.35 var(--display)}
+html:lang(ko) .sp-faq2-item b{font-family:var(--body);word-break:keep-all}
+.sp-faq2-item p{margin:0;font-size:15px;line-height:1.6;color:var(--ink-2);max-width:72ch}
+.sp-faq2-item p.cap{font-size:13px;color:var(--muted)}
+.sp-faq2-ctas{display:flex;flex-wrap:wrap;gap:var(--s2);margin-top:4px}
+/* scaffolding: the question is the control, one answer open at a time */
+.sp-faq2-q{display:flex;align-items:baseline;justify-content:space-between;gap:var(--s2);
+  width:100%;padding:0;border:0;background:none;text-align:left;cursor:pointer;color:inherit;
+  font:inherit;min-height:32px}
+.sp-faq2-q:focus-visible{outline:2px solid var(--teal);outline-offset:3px;border-radius:var(--r-xs)}
+.sp-faq2-q:hover .sp-faq2-mark,.sp-faq2-q:focus-visible .sp-faq2-mark{opacity:1}
+/* the row lights on hover, so the row has to be the target: the button
+   stretches its hit area out over the item's padding. It stops short of
+   the answer's own bottom so the links inside an open item stay clickable. */
+/* the extra 8px is the grid gap: the collapsed answer still holds a row,
+   so the row's bottom padding starts below it */
+.sp-faq2-q::after{content:"";position:absolute;inset:-22px -12px -30px -12px}
+.sp-faq2-item.is-open .sp-faq2-q::after{bottom:-8px}
+@media (min-width:900px){
+  .sp-faq2-q::after{inset:-26px -22px -34px -22px}
+  .sp-faq2-item.is-open .sp-faq2-q::after{bottom:-10px}
+}
+.sp-faq2-mark{flex:none;width:11px;height:11px;position:relative;opacity:.55}
+.sp-faq2-mark::before,.sp-faq2-mark::after{content:"";position:absolute;background:currentColor}
+.sp-faq2-mark::before{inset:5px 0 5px 0;height:1px}
+.sp-faq2-mark::after{inset:0 5px 0 5px;width:1px;transition:transform 300ms ease-out}
+.sp-faq2-item.is-open .sp-faq2-mark::after{transform:scaleY(0)}
+/* the answer eases open on its own row track -- 0fr to 1fr over 300ms --
+   rather than switching display, so the list reflows smoothly. The wiring
+   wraps the body's children in .sp-collapse-in, which does the clipping. */
+.sp-faq2-body{display:grid;grid-template-rows:0fr;padding-top:0;
+  opacity:0;visibility:hidden;
+  transition:grid-template-rows 300ms ease-out,padding-top 300ms ease-out,
+             opacity 300ms ease-out,visibility 0s linear 300ms}
+.sp-faq2-item.is-open .sp-faq2-body{grid-template-rows:1fr;padding-top:14px;
+  opacity:1;visibility:visible;
+  transition:grid-template-rows 300ms ease-out,padding-top 300ms ease-out,
+             opacity 300ms ease-out,visibility 0s}
+.sp-faq2-body>.sp-collapse-in{overflow:hidden;min-height:0;display:grid;gap:10px}
+@media (prefers-reduced-motion:reduce){
+  .sp-faq2-mark::after,.sp-faq2-item::before{transition:none}
+  .sp-faq2-body,.sp-faq2-item.is-open .sp-faq2-body{transition:none}
+}
+
+/* ── the finder and the form are one card ────────────────────────
+   The finder's result becomes the form's topic and message, so the two
+   are a single act: work out what you need, then say who you are. The
+   form is moved inside the finder's card at runtime (see the wiring)
+   and everything below undoes the shell's .on-navy form skin, because
+   the card is cream while the screen around it is navy. */
+/* the foot of the form reads as one centred column: the submit button and
+   the two notes under it */
+#contact-form>.full:has(>.btn[type="submit"]){display:grid;justify-items:center}
+/* the shell pins this button to the start of its row; the centred foot
+   needs it released */
+#contact-form>.full>.btn[type="submit"]{width:auto;min-width:min(100%,320px);
+  justify-self:center}
+#contact-form>.rc-note.full,#contact-form>.cap.full,
+#contact-form>.form-status.full{text-align:center}
+
+/* the form is the card's second step, so it gets a surface of its own
+   rather than a rule across the card: padded on all four sides, which is
+   also what keeps the fields off the card's edge. */
+#contact .sp-tuner .sp-tuner-form{margin-top:var(--s4);
+  padding:var(--s3);border-radius:var(--r-l);
+  background:rgba(255,255,255,.55);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.6)}
+@media (min-width:900px){
+  #contact .sp-tuner .sp-tuner-form{margin-top:var(--s5);padding:var(--s4)}
+}
+#contact .sp-tuner .sp-tuner-form-head{display:grid;gap:6px;margin-bottom:var(--s3)}
+#contact .sp-tuner .sp-tuner-form-head h3{font:700 var(--fs-h3)/1.3 var(--display);color:var(--ink)}
+#contact .sp-tuner .sp-tuner-form-head p{margin:0;font-size:var(--fs-small);color:var(--muted)}
+#contact .sp-tuner .field input,
+#contact .sp-tuner .field select,
+#contact .sp-tuner .field textarea{background-color:#fff;border-color:var(--line-strong);color:var(--ink)}
+#contact .sp-tuner .field label,#contact .sp-tuner .check{color:var(--ink-2)}
+#contact .sp-tuner .field.req label::after{color:var(--teal)}
+#contact .sp-tuner .req-note{color:var(--muted)}
+#contact .sp-tuner .req-note b{color:var(--teal)}
+#contact .sp-tuner .cap,#contact .sp-tuner .rc-note{color:var(--muted)}
+#contact .sp-tuner .rc-note a{color:var(--teal-2)}
+#contact .sp-tuner .btn-primary{background:var(--teal);color:#fff;border-color:var(--teal)}
+#contact .sp-tuner .btn-primary:hover{background:var(--teal-2);border-color:var(--teal-2)}
+#contact .sp-tuner .form-status{background:var(--teal-soft);color:var(--teal)}
+/* The two consent checkboxes are marked .full, so they span both form
+   columns and stack even on a wide screen. On desktop they sit side by side
+   — required on the left, optional on the right — and only fall back to a
+   column below 900, where the form itself is single-column anyway. */
+@media (min-width:900px){
+  #contact .sp-tuner .form-2 .check.full{grid-column:auto;align-items:start}
+  #contact .sp-tuner .form-2 .check.full span{line-height:1.5}
+}
+#contact .sp-tuner .field select{background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23333333' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='m6 9 6 6 6-6'/></svg>")}
+
+/* the inquiry page's full set, on the navy screen */
+#contact .sp-faq2-item{border-color:var(--line-navy)}
+#contact .sp-faq2-item p{color:var(--on-navy-muted)}
+#contact .sp-faq2-item p.cap{color:var(--on-navy-muted);opacity:.8}
+#contact .sp-faq2-q:focus-visible{outline-color:var(--cyan)}
+#sp-bands-faq .sp-band-panel{padding-top:0}
+/* the inquiry screen is already navy; the stack is darker than it, so the ring
+   is all that is needed to read it as an object */
+#sp-bands-faq{box-shadow:inset 0 0 0 1px var(--line-navy)}
+
+/* Services band stack sits full-width inside the home column. The section
+   already has its own SERVICES eyebrow, so the stack's is screen-reader only. */
+#sp-bands-services{margin-block:var(--s2) 0}
+.sp-bands-sr{position:absolute;width:1px;height:1px;margin:-1px;padding:0;
+  overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+
+/* ── Company: the timeline is part of the section's navigation ────
+   The rail moves out of the story panel to sit beside the Our story /
+   Team / Insights tabs, because that is what it is: the primary way
+   through 2022 -> 2026. The tab list is relocated INTO the rail band
+   (keeping its .seg wrapper, which the shell's tab router selects on),
+   so the two share one row. When another tab is active the band keeps
+   only the tabs and the timeline folds away. */
+#company .sp-rail{width:100%;max-width:var(--container);margin-inline:auto;
+  padding-inline:var(--gutter)}
+#company .sp-rail-band{display:grid;gap:0}
+/* the band is a box, so the row inside it is inset on all four sides --
+   without this the tabs touch the band's edge on Team and Insights,
+   where the timeline is folded away and the row is all there is. */
+/* The band reads top-down: the section tabs, then the filters they scope,
+   then the timeline the filters draw on. Tabs first because they are the
+   only control that is there on every Company tab -- sharing their line
+   with the timeline made the row's height, and the tabs' position, depend
+   on which tab was open. */
+.sp-rail-navrow{display:flex;align-items:center;gap:var(--s3);min-width:0;
+  padding:10px var(--s1)}
+.sp-rail-navrow .seg{position:static;padding-block:0;flex:none}
+.sp-rail-navrow .seg .wrap{max-width:none;padding-inline:0;margin-inline:0}
+#company .sp-rail .sp-rail-filters{padding-inline:var(--s1)}
+#company .sp-rail-band>.sp-rail-rail{padding:4px var(--s2) 12px;
+  border-top:1px solid var(--line-navy)}
+/* the axis is drawn into the element's own box, so the padding has to come
+   off the height the instrument was told to be */
+#company .sp-rail-band>.sp-rail-rail.sp-rail-rail{height:auto;
+  min-height:calc(var(--sp-rail-h) + 16px)}
+
+/* only Our story gets the instrument */
+#company:not(.is-story) .sp-rail-band>:not(.sp-rail-navrow),
+#company:not(.is-story) .sp-rail>:not(.sp-rail-band){display:none}
+/* With the timeline folded away the band holds nothing but the three tabs,
+   and a full-width bar around them read as an empty panel. It hugs them
+   instead -- a pill of tabs, flush left, the way the tab group looks
+   everywhere else. Our story keeps the full width: the instrument needs it. */
+#company:not(.is-story) .sp-rail-band{width:max-content;max-width:100%}
+
+/* tab contents keep the page's side gutters */
+#panel-story.is-rail-host{padding-inline:var(--gutter)}
+
+/* The rail and the panel under it are two separate readings of the company
+   -- the log, then the point of view -- and they ran straight into each
+   other, the panel's 24px top padding being the only thing between them.
+   They get a section's worth of air, the same interval the page uses
+   between its own sections. */
+#company .sp-rail{margin-bottom:var(--s5)}
+@media (min-width:900px){#company .sp-rail{margin-bottom:var(--sec)}}
+/* same interval between the values grid and the partnership panel that
+   closes the tab -- it carried an inline margin, hence the !important */
+#panel-story>.cta-panel{margin-top:var(--s5)!important}
+@media (min-width:900px){#panel-story>.cta-panel{margin-top:var(--sec)!important}}
+
+/* From 1200 up the log's own columns are fixed -- a 168px date rail and an
+   820px measure -- so the block stopped well short of the band above it and
+   read as pinned to the left edge. The whole group (counters, dating rule,
+   status line and the log itself) is centred under the band instead, and
+   the rule and status keep their indent onto the measure column by
+   inheriting the same offset, so nothing loses its alignment. */
+@media (min-width:1200px){
+  #company .sp-rail{--sp-log-col:calc(168px + var(--s3));
+    --sp-log-w:calc(var(--sp-log-col) + 820px);
+    --sp-log-off:calc((100% - var(--sp-log-w)) / 2)}
+  #company .sp-rail>.sp-rail-log{max-width:var(--sp-log-w);margin-inline:auto}
+  #company .sp-rail>.sp-rail-counters{max-width:var(--sp-log-w);margin-inline:auto}
+  #company .sp-rail>.sp-rail-rule,
+  #company .sp-rail>.sp-rail-status{max-width:820px;
+    margin-left:calc(var(--sp-log-off) + var(--sp-log-col))}
+}
+
+/* Search rows -- shortcuts and results alike -- get the same padded-row
+   treatment as the FAQ: real padding on all four sides, pulled back out
+   so the text still lines up with the column. The selected row's tint
+   then fills the row rather than a band inside it. */
+.results .hit{padding:20px 12px;margin-inline:-12px;border-radius:var(--r-s)}
+.results .hit.sel{margin-inline:-12px;padding-inline:12px}
+@media (min-width:900px){
+  .results .hit{padding:22px 20px;margin-inline:-20px}
+  .results .hit.sel{margin-inline:-20px;padding-inline:20px}
+}
+
+/* Inherited from the 01 shell: between 744 and 900 the desktop header is
+   wider than the viewport (logo 150 + nav 542 + gutters), so the page scrolls
+   sideways by 12px. The tablet band gets a tighter header. */
+/* Also inherited: the header dropdowns are left-anchored to their trigger and
+   260px wide, so in Korean the Company menu runs 3px past the viewport and the
+   page scrolls sideways even while the menu is shut (it is hidden, but still
+   laid out). Anchoring them to the trigger's right edge in this band keeps
+   them inside without touching the desktop placement. */
+@media (min-width:744px) and (max-width:899.98px){
+  .header nav .has-sub .sub{left:auto;right:0}
+}
+
+@media (min-width:744px) and (max-width:899.98px){
+  .header .wrap{gap:var(--s2)}
+  .logo-h{width:122px;height:31px}
+  .header nav>ul{gap:0;padding:4px 12px}
+  .header nav a{padding:0 9px;font-size:13px}
+}
+
+/* ── header nav: filled, not transparent ─────────────────────────
+   The pill was a hairline outline over whatever the page put behind it,
+   which cost legibility over the busier sections. It now carries the same
+   ground as the Company segmented tabs.
+
+   The fill goes on the ::before, not on the <ul>, because that pseudo-
+   element already carries the clip-path that cuts the notch out of the
+   bottom edge — so the fill is bitten by exactly the same shape and the
+   indent under the active item survives. Clipping the <ul> itself would
+   have worked too, but it would also clip the Work and Company dropdowns.
+   The ::before precedes the <li> items in tree order and both are
+   positioned with z-index auto, so the fill stays behind the links. */
+.header nav>ul::before{background:var(--cream-3);
+  /* The stroke's shoulders curve; the original clip was a square-cornered
+     rectangle, which left slivers of fill sitting above the curve. Chamfering
+     the two shoulders tracks the arc. The chamfer must sit INSIDE the arc, not
+     across it: a wider cut let the page's ground through on either side of the
+     notch, which on the navy screens read as a separate outline around the
+     active item rather than an indent in the bar. */
+  clip-path:polygon(0 0,100% 0,100% 100%,
+    calc(var(--x,0px) + var(--w,0px) + 10px) 100%,
+    calc(var(--x,0px) + var(--w,0px) + 4px) calc(100% - 7px),
+    calc(var(--x,0px) - 4px) calc(100% - 7px),
+    calc(var(--x,0px) - 10px) 100%, 0 100%)}
+.header nav>ul{background:none}
+/* The header inverts its whole wrap over dark sections, so the cream fill
+   would come back as #232323 — all but identical to the ground it sits on.
+   A slightly darker light value inverts to a lighter dark one, which keeps
+   the pill reading as an object on the navy screens too. */
+.header.is-dark nav>ul::before{background:#D2D2D2}
+
+/* Home teaser CTA rows: every module gets one or two ways in. */
+.sp-ctas{display:flex;flex-wrap:wrap;align-items:center;gap:var(--s2);margin-top:var(--s3)}
+
+/* a shortcut swapping itself: out downward, in from above, so the row
+   reads as turning over rather than blinking */
+/* The filter rail is a single pill-shaped track wider than a phone, sitting
+   inside a panel that has the page's side gutters. Those gutters cut it off
+   mid-track at both ends, which read as a clipping bug rather than as
+   something scrollable. On phones it breaks out of the gutters and runs the
+   full width of the screen, so the track's rounded ends meet the edges and
+   the overflow is legible as overflow. The track keeps its pill shape; it
+   just no longer sits inside the gutters. */
+@media (max-width:743.98px){
+  /* both filter rails: the one in the Work panels and the one in Home's
+     projects section, which sits in a .section.wrap rather than a panel */
+  .panel>.filters,.section>.filters{margin-inline:calc(var(--gutter) * -1);
+    width:calc(100% + var(--gutter) * 2)}
+  /* flush: the track's own rounded ends meet the screen edges, at rest and
+     at the end of the scroll */
+  .panel>.filters>.filters-track,.section>.filters>.filters-track{margin-inline:0}
+}
+
+/* the countdown: a hairline along the foot of each row, filling left to
+   right as that row approaches its turn and dropping back to nothing the
+   moment it changes. Deliberately quiet -- it should be readable when
+   looked at and invisible when not. */
+/* ── mobile masthead ─────────────────────────────────────────────────
+   Only below the tablet breakpoint, where the real header is hidden and
+   the tab bar carries navigation. No surface of its own -- the page runs
+   under it -- and it sticks to the top so the mark stays with the reader.
+   The lockup flips to its light version over dark sections; see the
+   sampler in mobileLogo(). */
+.sp-mhead{display:none}
+@media (max-width:743.98px){
+  /* It stays hit-testable on purpose: the timeline band measures what the
+     host has pinned above it by probing elementsFromPoint, and a
+     pointer-events:none bar is invisible to that probe -- the band would
+     then stick underneath the logo. */
+  .sp-mhead{display:flex;align-items:center;
+    position:sticky;top:0;z-index:49;background:none;
+    padding:calc(env(safe-area-inset-top,0px) + var(--s3)) var(--gutter) var(--s2)}
+  .sp-mhead .lockup{color:var(--ink);transition:color .25s var(--ease)}
+  .sp-mhead.on-dark .lockup{color:#fff}
+  /* It takes no height of its own: the strip it used to occupy showed the
+     page's ground above the first section, which on the navy screens read
+     as a white band under the logo. Pulling the following content up by
+     its own height lets the section run to the top of the screen and the
+     lockup float over it -- which is what the contrast sampler is for. */
+  .sp-mhead{padding:calc(env(safe-area-inset-top,0px) + 10px) var(--gutter) 8px;
+    margin-bottom:calc(var(--sp-mhead-h,52px) * -1)}
+  /* The mark opens at 64px and settles to 48px once the reader moves.
+     The slot itself stays at the settled size and the artwork is scaled
+     inside it, so the bar's measured height -- which the sticky bands and
+     the page heads offset against -- never changes and nothing reflows
+     while scrolling. 64/48 = 1.3333. */
+  .sp-mhead .logo-h{width:131px;height:48px;transform-origin:left center;
+    transform:scale(1.3333);transition:transform .32s var(--ease)}
+  .sp-mhead.is-tight .logo-h{transform:none}
+  @media (prefers-reduced-motion:reduce){
+    .sp-mhead .logo-h{transition:none}
+  }
+  /* the lockup floats over the page now, so the first block on every
+     screen starts below it rather than under it -- the hero is the one
+     exception, since its stage is meant to run full-bleed to the top */
+  [data-screen]:not(#home)>.page-head,
+  #product-root>.crumbs,#project-root>.crumbs{
+    padding-top:calc(var(--sp-mhead-h,52px) + var(--s2))}
+  /* the page's own sticky bands sit under it, not behind it */
+  .seg{top:var(--sp-mhead-h,56px)}
+}
+
+/* The related items in a Services band are a stacked list -- one 44px row
+   each, three rows of mostly empty line. On a phone they wrap as chips
+   instead, hugging their own labels, so three items take one or two lines
+   rather than a 140px column. The 44px touch target is kept by the pill's
+   own height, not by a full-width row. */
+@media (max-width:743.98px){
+  .rel-list{display:flex;flex-wrap:wrap;gap:6px;margin-inline:0}
+  .rel-item{margin:0;min-height:36px;padding:4px 12px 4px 4px;
+    background:var(--cream-2);flex:0 0 auto}
+  .rel-item .initial{width:26px;height:26px;font-size:10px}
+}
+
+/* ── phone: the pinned chrome on a diet ──────────────────────────────
+   Masthead, section tabs, filter pills and the timeline are all pinned at
+   once on Our Story, and together they were taking nearly half the screen
+   -- on a 760px phone, 368px of chrome. Every one of them shrinks: the
+   controls stay full-size targets by the 44px rule only where they have
+   to, and the rest gives its height back to the log. */
+@media (max-width:743.98px){
+  .seg{padding-block:6px}
+  .seg-track{padding:3px;gap:2px}
+  .seg button{min-height:34px;padding:0 12px;font-size:13px}
+
+  .sp-rail-navrow{padding:6px var(--s1)}
+  .sp-rail .sp-rail-filters{padding:6px var(--s1);gap:6px}
+  .sp-rail .sp-rail-pill{min-height:30px;padding:0 10px;gap:5px;font-size:12px}
+  /* the counts are a desktop nicety; on a phone they are the first thing
+     to go, and the pills read as plain filters */
+  .sp-rail .sp-rail-pcount{display:none}
+
+  #company .sp-rail{--sp-rail-h:76px}
+  #company .sp-rail-band>.sp-rail-rail{padding:2px var(--s2) 8px}
+  #company .sp-rail-band>.sp-rail-rail.sp-rail-rail{min-height:calc(var(--sp-rail-h) + 10px)}
+  .sp-rail .sp-rail-head{top:3px;gap:8px}
+}
+
+/* the slot keeps its line even when the name is not known yet, so the
+   cards in a row stay the same height */
+.member h3 small{min-height:1.4em}
+
+#search-shortcuts li{position:relative}
+#search-shortcuts li>.sp-sc-tick{position:absolute;left:0;right:0;bottom:-1px;
+  height:2px;border-radius:2px;background:var(--teal,#2E7E90);opacity:.34;
+  transform:scaleX(0);transform-origin:left center;pointer-events:none}
+@media (prefers-reduced-motion:reduce){#search-shortcuts li>.sp-sc-tick{display:none}}
+
+#search-shortcuts li{transition:opacity .22s var(--ease),transform .22s var(--ease)}
+#search-shortcuts li.sp-sc-out{opacity:0;transform:translateY(6px)}
+#search-shortcuts li.sp-sc-in{animation:sp-sc-in .26s var(--ease) both}
+@keyframes sp-sc-in{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){
+  #search-shortcuts li,#search-shortcuts li.sp-sc-in{transition:none;animation:none}}
+
+/* The fact columns are grid cells that stretch to the tallest one, and each
+   is itself a two-row grid -- so the spare height was being handed to both
+   rows, which floated a one-line value below its neighbours' two-line ones.
+   The rows pack to the top; the cell still stretches, so the rules under
+   them stay on one line. */
+.facts div{align-content:start}
+/* The company teaser's avatar row and its two links cannot share a line
+   until the column they sit in is genuinely wide. On a phone the links wrap
+   to two or three each; on a tablet it is worse, because from 744 the
+   teaser is itself one half of a two-column section, so the row has less
+   width than it had on the phone and the links land on top of the faces.
+   The row is a column everywhere below the desktop container: avatars,
+   then the links stacked under them at full width. */
+@media (max-width:1199.98px){
+  .company-teaser .row-between{flex-direction:column;align-items:flex-start;gap:var(--s3)}
+  .company-teaser .row-between>.sp-ctas{flex-direction:column;align-items:flex-start;
+    gap:12px;margin-top:0;width:100%}}
+
+/* The finder runs above the inquiry form. It was built for a light page and
+   the inquiry screen is navy, so it gets its own cream card: its type keeps
+   the contrast it was designed against, and "what do you need" reads as a
+   distinct step from "who are you". */
+.sp-tuner{margin-bottom:var(--sec)}
+#contact .sp-tuner{background:var(--cream);color:var(--ink);
+  border-radius:var(--r-l);padding:var(--s4) var(--s3);margin-top:var(--s2)}
+@media (min-width:744px){#contact .sp-tuner{padding:var(--s5) var(--s4)}}
+.sp-tuner-carried{scroll-margin-top:96px}
+
+
+
+/* ═══ 08 Depth ═══════════════════════════════════════════════════════
+   Steel and teal, over the structure 07 already settled. Only tokens are
+   re-pointed here — no module's layout is touched — plus the three places
+   a module paints a colour of its own rather than reading a token. */
+:root{
+  --cream:#F4F7F9; --cream-2:#E9F0F4; --cream-3:#DAE6ED;
+  --ink:#182731; --ink-2:#24404F; --wordmark:#182731;
+  --muted:#607583; --muted-2:#8AA1AF;
+  --teal:#146CA1; --teal-2:#1A87C4; --teal-3:#3AA7DA; --teal-soft:#DCEBF4;
+  --navy:#152B3B; --navy-2:#1D3B4E; --navy-3:#2A5068;
+  --cyan:#4FC3DE; --cyan-2:#A6E2F0; --cyan-soft:rgba(79,195,222,.18);
+  --on-navy:#E8F1F6; --on-navy-muted:#9DB6C6;
+  --line:rgba(24,39,49,.14); --line-strong:rgba(24,39,49,.30);
+  --line-navy:rgba(255,255,255,.16);
+  --shadow-1:0 1px 2px rgba(24,39,49,.06),0 8px 24px -12px rgba(24,39,49,.20);
+  --shadow-2:0 24px 60px -24px rgba(21,43,59,.45);
+}
+/* the paper picks up the demo's cool light: a wash from the upper right */
+body{background:
+  radial-gradient(ellipse at 76% 6%,#DCEAF3 0,transparent 52%),
+  linear-gradient(150deg,#FBFCFD,#EDF2F5) fixed;}
+.logo-h{width:120px;height:44px;color:var(--ink)}
+/* the bar inverts as a whole on dark sections; the lockup is artwork with
+   its own colour, so it inverts back and swaps symbol instead */
+.header.is-dark .lockup{filter:invert(1)}
+/* the header sits a little further in than the sections below it, so the
+   nav pane and the logo clear the content edge instead of touching it */
+.header>.wrap{padding-inline:calc(var(--gutter) + 12px)}
+@media (min-width:900px){
+  .header>.wrap{padding-inline:calc(var(--gutter) + 24px)}
+}
+/* That inset is paid for out of the shared container, so the header's own
+   band ends up ~1296px while the sections below it get the full 1440. On
+   desktop the header widens by exactly the padding it added, so logo and
+   nav sit at 1440 apart -- outside the content column, not inside it. */
+@media (min-width:1200px){
+  .header>.wrap{max-width:min(100%,calc(var(--container) + 2*(var(--gutter) + 24px)))}
+}
+@media (min-width:900px){.logo-h{width:145px;height:54px}}
+
+/* ── header nav: glass, no stroke ────────────────────────────────────
+   The pill's outline came from the wireframe, where a hairline was the
+   only way to describe a container. With a real palette the panel can
+   carry itself: a cool translucent pane that blurs what runs under it,
+   with the light caught on its top edge instead of a border. The notch
+   under the active module is untouched -- it is cut from this same pane,
+   so losing the stroke costs nothing there. */
+.header nav>ul{border-color:transparent}
+.header nav>ul::before{border:0;
+  background:linear-gradient(180deg,rgba(255,255,255,.66),rgba(223,236,245,.48));
+  -webkit-backdrop-filter:blur(16px) saturate(150%);
+  backdrop-filter:blur(16px) saturate(150%);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.95),
+             inset 0 0 0 1px rgba(24,39,49,.07)}
+/* The notch was a stroked path drawn under the pane. With no pill border
+   left for it to continue, the line had nothing to belong to -- so the
+   stroke goes entirely. The indent survives: it is cut out of the pane
+   itself by the clip-path, so the glass edge still steps down under the
+   active module, with nothing drawn across the section beneath it. */
+.nav-notch path{stroke:none}
+/* The pane is drawn on an element of its own, inserted by the wiring.
+   Order matters: CSS applies `filter` BEFORE `clip-path`, so a shadow on
+   the clipped element is generated from its unclipped rectangle and then
+   cut -- which is exactly the rectangular halo with a hard edge. Splitting
+   them fixes it: the child paints and clips the pane, the parent carries
+   the shadow, and a parent's filter sees the child's clipped result. */
+.header nav>ul::before{display:none}
+/* Liquid travel. The notch is cut from --x / --w, which the shell writes
+   on the <ul> as plain custom properties -- untyped, so they snap. Typing
+   them with @property makes them animatable, and giving the width a
+   longer curve than the position makes the cut stretch as it travels and
+   settle a beat later, rather than sliding as a rigid shape. Descendants
+   read the interpolated values, so the clip-path follows every frame. */
+@property --x{syntax:"<length>";inherits:true;initial-value:0px}
+@property --w{syntax:"<length>";inherits:true;initial-value:0px}
+.header nav>ul{transition:--x .42s cubic-bezier(.22,.9,.24,1),
+                          --w .60s cubic-bezier(.22,.9,.24,1)}
+@media (prefers-reduced-motion:reduce){
+  .header nav>ul{transition:none}
+}
+.sp-navpane{position:absolute;inset:-1.5px;z-index:0;pointer-events:none;
+  filter:drop-shadow(0 1px 0 rgba(24,39,49,.13))
+         drop-shadow(0 2px 3px rgba(21,43,59,.10))
+         drop-shadow(0 10px 20px rgba(21,43,59,.16))}
+.sp-navpane::before{content:"";position:absolute;inset:0;border-radius:999px;
+  background:linear-gradient(180deg,rgba(255,255,255,.66),rgba(223,236,245,.48));
+  -webkit-backdrop-filter:blur(16px) saturate(150%);
+  backdrop-filter:blur(16px) saturate(150%);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.95),
+             inset 0 0 0 1px rgba(24,39,49,.07);
+  /* the indent: a tab-shaped bite out of the pane's bottom edge under the
+     active module, riding --x / --w, which the shell publishes on the ul */
+  clip-path:polygon(0 0,100% 0,100% 100%,
+    calc(var(--x,0px) + var(--w,0px) + 12px) 100%,
+    calc(var(--x,0px) + var(--w,0px) + 5px) calc(100% - 6.5px),
+    calc(var(--x,0px) - 5px) calc(100% - 6.5px),
+    calc(var(--x,0px) - 12px) 100%,0 100%)}
+
+/* On dark sections the header is inverted wholesale. A backdrop filter
+   samples what is behind it and then gets inverted too, which turns the
+   teal band under it brown -- so over dark the pane stops sampling and
+   becomes an opaque one, specified as what it should look like BEFORE
+   the inversion. */
+.header.is-dark .sp-navpane::before{
+  -webkit-backdrop-filter:none;backdrop-filter:none;
+  /* these two look wrong on purpose: inversion is a per-channel flip, so
+     a cool grey would come out warm brown. #E3D0C3 / #D7BCAD are the
+     complements of the steel this is meant to read as (#1C2F3C/#284352). */
+  background:linear-gradient(180deg,#E3D0C3,#D7BCAD);
+  box-shadow:inset 0 0 0 1px rgba(24,39,49,.10)}
+.header nav>ul>li>a{position:relative;z-index:1}
+
+/* the band stack's ground is painted, not tokenised */
+.sp-bands{background:#16242E}
+.sp-bands-stack>.sp-band{--sp-band-ground:22,36,46}
+.sp-bands-stack>.sp-band:nth-child(even){background:#101C24;--sp-band-ground:16,28,36}
+
+/* ── buttons: chrome and glass ───────────────────────────────────────
+   Both buttons drop their border and become objects with a light source:
+   a bevel painted with two inset shadows (light along the top edge, shade
+   along the bottom), a body gradient, and a ground shadow that says how
+   far off the page it sits. Press moves the light to the other side --
+   the highlight goes, an inset shade comes in -- so the button reads as
+   depressed rather than just smaller. */
+.btn{transition:transform .18s var(--ease),box-shadow .18s var(--ease),
+     background .2s,color .2s}
+
+.btn-primary{border:0;color:#fff;text-shadow:0 1px 0 rgba(6,32,50,.35);
+  background:
+    linear-gradient(180deg,rgba(255,255,255,.26),rgba(255,255,255,0) 46%),
+    linear-gradient(180deg,#2E8AC0,#146CA1 54%,#0E527D);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.55),
+    inset 0 -1px 0 rgba(4,28,45,.5),
+    inset 0 0 0 1px rgba(9,60,92,.55),
+    0 1px 1px rgba(12,38,56,.16),
+    0 10px 20px -10px rgba(10,52,80,.6)}
+.btn-primary:hover{transform:translateY(-1px);
+  background:
+    linear-gradient(180deg,rgba(255,255,255,.34),rgba(255,255,255,0) 46%),
+    linear-gradient(180deg,#3C9AD0,#1A7DB6 54%,#125E8E);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.62),
+    inset 0 -1px 0 rgba(4,28,45,.5),
+    inset 0 0 0 1px rgba(9,60,92,.5),
+    0 2px 2px rgba(12,38,56,.14),
+    0 16px 26px -12px rgba(10,52,80,.6)}
+.btn-primary:active{transform:translateY(1px) scale(.995);
+  box-shadow:
+    inset 0 2px 5px rgba(4,28,45,.5),
+    inset 0 0 0 1px rgba(9,60,92,.6),
+    0 1px 1px rgba(12,38,56,.1)}
+
+.btn-ghost{border:0;color:var(--ink);
+  background:linear-gradient(180deg,rgba(255,255,255,.88),rgba(223,236,245,.62));
+  -webkit-backdrop-filter:blur(14px) saturate(150%);
+  backdrop-filter:blur(14px) saturate(150%);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.95),
+    inset 0 -1px 0 rgba(24,39,49,.12),
+    inset 0 0 0 1px rgba(24,39,49,.09),
+    0 8px 18px -12px rgba(21,43,59,.45)}
+.btn-ghost:hover{transform:translateY(-1px);
+  background:linear-gradient(180deg,rgba(255,255,255,.96),rgba(228,240,248,.7));
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,1),
+    inset 0 -1px 0 rgba(24,39,49,.12),
+    inset 0 0 0 1px rgba(20,108,161,.22),
+    0 14px 24px -14px rgba(21,43,59,.5)}
+.btn-ghost:active{transform:translateY(1px) scale(.995);
+  box-shadow:inset 0 2px 5px rgba(24,39,49,.16),inset 0 0 0 1px rgba(24,39,49,.1)}
+
+/* on the navy screens the same two objects, lit from the same direction */
+.on-navy .btn-primary{color:#06202F;text-shadow:0 1px 0 rgba(255,255,255,.35);
+  background:
+    linear-gradient(180deg,rgba(255,255,255,.5),rgba(255,255,255,0) 48%),
+    linear-gradient(180deg,#8FE4F4,#4FC3DE 54%,#2FA6C4);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.8),
+    inset 0 -1px 0 rgba(3,40,56,.4),
+    inset 0 0 0 1px rgba(20,120,146,.5),
+    0 10px 22px -10px rgba(0,0,0,.6)}
+.on-navy .btn-ghost{color:var(--on-navy);
+  background:linear-gradient(180deg,rgba(255,255,255,.14),rgba(255,255,255,.05));
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.22),
+    inset 0 0 0 1px rgba(255,255,255,.12),
+    0 10px 22px -14px rgba(0,0,0,.7)}
+.on-navy .btn-ghost:hover{
+  background:linear-gradient(180deg,rgba(255,255,255,.2),rgba(255,255,255,.08));
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.3),
+    inset 0 0 0 1px rgba(79,195,222,.4),
+    0 16px 28px -16px rgba(0,0,0,.7)}
+
+/* ── product shots ───────────────────────────────────────────────────
+   A filled slot stops being a placeholder: the wireframe's dashed box and
+   its "Illustration" label go, the fallback SVG under it goes, and the
+   capture crops to the slot. */
+/* the wireframe paints these slots with `background:#fff!important`, a
+   shorthand -- so an inline background-image is wiped every time. The
+   capture travels as a custom property and is applied by a rule that can
+   answer that !important in kind. */
+.sp-shot{background:var(--shot) center/cover no-repeat!important}
+.sp-shot>*{display:none}
+.card .art.sp-shot{width:100%;height:auto;aspect-ratio:16/10}
+/* a slot this script created has no wireframe styling of its own to
+   inherit, so it states the shape the shell's own slots get */
+.card .art.sp-shot-made{border-radius:var(--r-m);overflow:hidden;position:relative;
+  background:var(--cream-2)}
+#product-root .pvis.sp-shot{width:100%;min-height:300px;aspect-ratio:16/10;
+  border-radius:var(--r-l);overflow:hidden}
+
+/* The first section under the detail hero carried the same hairline that
+   separates the sections below it -- against a full-bleed hero it read as
+   a line drawn under the image rather than a divider between two
+   sections. Products and projects alike. */
+#product-root .prod-head + .prod-sec,
+#project-root .prod-head + .prod-sec{border-top:0}
+
+/* ── detail hero: the capture IS the head ────────────────────────────
+   Not a picture beside the copy -- the capture fills the whole head and the
+   tag, title, lead and buttons sit on it. `.has-shot` is added by the image
+   wiring, so a page whose visual is still a placeholder keeps the ordinary
+   two-column head rather than overlaying type on an empty box.
+   Three layers: the visual (absolute, filling), a scrim above it, the copy
+   above that. The scrim runs left-to-right on wide screens, where the copy
+   occupies the left half, and bottom-up on a phone, where it spans the
+   width -- in both cases it keeps body copy on a near-solid ground and lets
+   the far side of the photograph stay a photograph. */
+.prod-head.has-shot{position:relative;border-radius:var(--r-l);overflow:hidden;
+  grid-template-columns:minmax(0,1fr);align-items:end;gap:0;
+  padding:var(--s4) var(--s3);min-height:600px;
+  margin-top:var(--s2);padding-block-end:var(--s4)}
+.prod-head.has-shot>.prod-visual{position:absolute;inset:0;z-index:0;
+  width:100%;height:100%;min-height:0;aspect-ratio:auto;
+  border-radius:0;margin:0}
+.prod-head.has-shot::before{content:"";position:absolute;inset:0;z-index:1;
+  pointer-events:none;
+  background:linear-gradient(180deg,
+    rgba(247,250,252,0) 0%, rgba(247,250,252,.22) 22%,
+    rgba(247,250,252,.90) 38%, rgba(247,250,252,.98) 50%,
+    rgba(247,250,252,.99) 100%)}
+.prod-head.has-shot>div:first-of-type{position:relative;z-index:2;
+  align-self:end;max-width:640px}
+
+@media (min-width:900px){
+  .prod-head.has-shot{align-items:center;padding:var(--s5);min-height:500px}
+  .prod-head.has-shot::before{
+    background:linear-gradient(90deg,
+      rgba(247,250,252,.98) 0%, rgba(247,250,252,.95) 40%,
+      rgba(247,250,252,.62) 62%, rgba(247,250,252,.10) 88%,
+      rgba(247,250,252,0) 100%)}
+  .prod-head.has-shot>div:first-of-type{align-self:center;max-width:min(56%,620px)}
+}
+@media (min-width:1200px){
+  .prod-head.has-shot{padding:var(--s6) var(--s5);min-height:560px}
+  .prod-head.has-shot>div:first-of-type{max-width:min(52%,660px)}
+}
+
+/* the plain head -- no capture yet -- still reads better stretched than
+   with the placeholder floating mid-column */
+@media (min-width:900px){
+  .prod-head:not(.has-shot){align-items:stretch;gap:var(--s5)}
+  .prod-head:not(.has-shot)>div:first-of-type{align-self:center}
+  .prod-head:not(.has-shot)>.prod-visual{height:auto;min-height:340px;
+    aspect-ratio:auto;align-self:stretch}
+}
+
+/* ── full glass ──────────────────────────────────────────────────────
+   Panels lose their hairline and become panes: a translucent pane that
+   blurs the paper (and whatever wave or field is drawn on it) and is held
+   by light on its top edge plus a soft ground shadow, instead of by an
+   outline. Rules are grouped by what a thing IS -- surfaces, controls,
+   panes on dark -- so the look can be tuned in three places, not thirty. */
+
+/* surfaces: anything that was a bordered card on the light ground */
+.card,.cat,.feat,.member,.news-item,.pcard,.proj,.proj-nav button,
+.proof-grid,.svc-detail .related,
+.sp-tuner .sp-tuner-card,.sp-tuner .sp-tuner-form,
+.sp-faq2-panel,.sp-rail .sp-rail-tile{
+  border:0;
+  background:linear-gradient(180deg,rgba(255,255,255,.74),rgba(234,242,248,.52));
+  -webkit-backdrop-filter:blur(14px) saturate(140%);
+  backdrop-filter:blur(14px) saturate(140%);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.92),
+             inset 0 0 0 1px rgba(255,255,255,.28),
+             0 14px 34px -22px rgba(21,43,59,.30)}
+/* ── the phone's tab bar, as a floating pill ─────────────────────────
+   It was a full-width slab pinned to the bottom edge -- the one piece of
+   chrome still wearing the wireframe. It becomes the same object as the
+   desktop nav: a glass pill held by light on its top edge and a ground
+   shadow, floating clear of the side and bottom edges. The active tab's
+   marker moves to the underside, since the pill's top edge is now a
+   highlight rather than a rail to hang from. */
+@media (max-width:743.98px){
+  .tabbar{left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom,0px));
+    padding-bottom:0;border:0;background:none;
+    /* the shell blurs the backdrop on the bar itself. A backdrop-filter
+       paints over its own box, so even with no background it left a
+       rectangle of greyed, blurred page behind the pill -- the blur now
+       belongs to the pane, which is the thing with the pill's shape. */
+    -webkit-backdrop-filter:none;backdrop-filter:none;
+    transition:--x .42s cubic-bezier(.22,.9,.24,1),
+               --w .60s cubic-bezier(.22,.9,.24,1)}
+  .tabbar ul{height:58px;position:relative;z-index:1}
+  .tabbar>.sp-tabpane{position:absolute;inset:0;z-index:0;pointer-events:none;
+    filter:drop-shadow(0 1px 0 rgba(24,39,49,.11))
+           drop-shadow(0 2px 4px rgba(21,43,59,.10))
+           drop-shadow(0 12px 22px rgba(21,43,59,.18))}
+  .tabbar>.sp-tabpane::before{content:"";position:absolute;inset:0;border-radius:999px;
+    background:linear-gradient(180deg,rgba(255,255,255,.74),rgba(223,236,245,.58));
+    -webkit-backdrop-filter:blur(16px) saturate(150%);
+    backdrop-filter:blur(16px) saturate(150%);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.95),
+               inset 0 0 0 1px rgba(24,39,49,.07);
+    /* the indent, mirrored: the bite is taken out of the TOP edge, over
+       the tab the reader is on */
+    clip-path:polygon(0 0,
+      calc(var(--x,0px) - 12px) 0,
+      calc(var(--x,0px) - 5px) 6.5px,
+      calc(var(--x,0px) + var(--w,0px) + 5px) 6.5px,
+      calc(var(--x,0px) + var(--w,0px) + 12px) 0,
+      100% 0,100% 100%,0 100%)}
+  /* the rule under the label is what the notch replaces */
+  .tab[aria-current]::before{display:none}
+  /* the page reserved the bar's height at the foot of <main>, but the
+     footer sits outside it -- so the last lines ended up behind the
+     glass. The footer reserves the pill plus the gap it floats in. */
+  footer{padding-bottom:calc(58px + 28px + env(safe-area-inset-bottom,0px))}
+}
+
+/* ── the services list is one pane ───────────────────────────────────
+   Five service rows, each its own pane with a gap between, read as five
+   unrelated cards -- and stacked glass on glass made the gaps the loudest
+   thing in the block. The grid itself becomes the pane and the rows sit
+   inside it flush, divided by a hairline. The matched row keeps its tint,
+   which now reads as a highlighted row rather than a separate card. */
+.sp-tuner .sp-tuner-svc-grid{gap:0;border-radius:var(--r-l);overflow:hidden;
+  background:linear-gradient(180deg,rgba(255,255,255,.74),rgba(234,242,248,.52));
+  -webkit-backdrop-filter:blur(14px) saturate(140%);
+  backdrop-filter:blur(14px) saturate(140%);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.92),
+             inset 0 0 0 1px rgba(255,255,255,.28),
+             0 14px 34px -22px rgba(21,43,59,.30)}
+.sp-tuner .sp-tuner-svc-grid .sp-tuner-card{background:none;border-radius:0;
+  -webkit-backdrop-filter:none;backdrop-filter:none;box-shadow:none}
+.sp-tuner .sp-tuner-svc-grid .sp-tuner-card + .sp-tuner-card{
+  box-shadow:inset 0 1px 0 rgba(24,39,49,.10)}
+.sp-tuner .sp-tuner-svc-grid .sp-tuner-card.is-match{
+  background:color-mix(in srgb,var(--teal) 8%,transparent)}
+.sp-tuner .sp-tuner-svc-grid .sp-tuner-card.is-match + .sp-tuner-card,
+.sp-tuner .sp-tuner-svc-grid .sp-tuner-card.is-match{
+  box-shadow:inset 0 1px 0 rgba(24,39,49,.10)}
+
+/* a pane inside a pane would stack two blurs and read as fog */
+.card .card,.pcard .card,.cat .card{backdrop-filter:none;-webkit-backdrop-filter:none}
+
+/* controls: pills and segmented tracks, same material, less of it */
+.mode,.filters-track,.ntip-box,.sheet-close{
+  border:0;
+  background:rgba(255,255,255,.62);
+  -webkit-backdrop-filter:blur(12px) saturate(140%);
+  backdrop-filter:blur(12px) saturate(140%);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.9),
+             inset 0 0 0 1px rgba(24,39,49,.06)}
+/* the floating EN|KO is left alone: it was already built to read over
+   both grounds, and glass would cost it that */
+
+/* ── section tabs ────────────────────────────────────────────────────
+   One material for every primary tab group, light page or dark: a deep
+   steel track with the selected tab as a light pill. It started as the
+   fix for the company tabs, where the shell's --ink label had gone
+   invisible against the rail; it reads as a single object rather than a
+   row of words, so it carries to the Work tabs too.
+
+   Nested filter rows are deliberately NOT included -- a filter set inside
+   a tabbed group has to stay the quieter of the two. */
+.seg-track{border:0;
+  background:rgba(21,43,59,.9);
+  -webkit-backdrop-filter:blur(12px) saturate(140%);
+  backdrop-filter:blur(12px) saturate(140%);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.14),
+             inset 0 0 0 1px rgba(255,255,255,.08),
+             0 12px 26px -16px rgba(21,43,59,.55)}
+.seg button{color:var(--on-navy-muted)}
+.seg button:hover{background:rgba(255,255,255,.08);color:var(--on-navy)}
+.seg button[aria-selected="true"]{color:var(--navy)}
+.seg-track>.track-pill{background:var(--on-navy)}
+/* on the rail the track sits on navy already, so it lightens instead */
+.sp-rail-navrow .seg-track{background:rgba(255,255,255,.10);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.16)}
+
+/* the finder's card is the largest pane on the site, sitting on the navy
+   inquiry screen: it lets the ground through rather than covering it */
+#contact .sp-tuner{border:0;
+  background:linear-gradient(180deg,rgba(244,249,252,.93),rgba(226,238,246,.86));
+  -webkit-backdrop-filter:blur(18px) saturate(150%);
+  backdrop-filter:blur(18px) saturate(150%);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.9),
+             0 30px 70px -40px rgba(4,14,22,.75)}
+
+/* panes on the dark grounds: glass cut the other way.
+   The CTA panel is one of these -- it carries .on-navy and white text, so
+   the light material would have bleached it blank. */
+.cta-panel.on-navy{border:0;
+  background:linear-gradient(180deg,rgba(28,56,74,.94),rgba(17,37,50,.92));
+  -webkit-backdrop-filter:blur(16px) saturate(140%);
+  backdrop-filter:blur(16px) saturate(140%);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.14),
+             0 30px 70px -44px rgba(4,14,22,.8)}
+
+/* panes on the dark grounds: glass cut the other way */
+.on-navy .card,.on-navy .feat,.on-navy .proj,
+.sp-rail .sp-rail-tile.on-navy,.sp-band-panel .sp-band-cta.is-ghost{
+  border:0;background:rgba(255,255,255,.07);
+  -webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.14)}
+
+/* hairlines that divide rather than enclose stay, one notch quieter */
+:root{--line:rgba(24,39,49,.10)}
+/* the illustration slots are wireframe furniture, not panels -- keep them
+   legible as missing art but stop them competing with the panes */
+
+
+/* ── the deck ────────────────────────────────────────────────────────
+   Four layers on one perspective, tilted into an isometric stack: data at
+   the bottom, the platform on top. It shares the hero's three chapters —
+   whichever chapter is reading, its layer lifts out of the stack — so the
+   scroll drives one idea in two registers rather than two animations. */
+.dp-stack{position:absolute;left:0;right:0;bottom:7%;height:48%;
+  display:grid;place-items:center;perspective:1300px;pointer-events:none;z-index:2}
+/* The deck is centred on the bowl of the W's right side rather than on
+   the empty half of the stage: the box spans 9%->100% and 8%->100% of the
+   visual, so its centre lands at 54.5% / 54% -- where the trail's right
+   loop crosses itself. */
+@media (min-width:900px){
+  .dp-stack{left:9%;right:0;top:8%;bottom:0;height:auto}
+}
+/* between the two-column breakpoint and 1200 the copy column is still
+   wide, so the deck comes back down rather than running under the CTAs */
+@media (min-width:900px) and (max-width:1199.98px){
+  .dp-deck{width:min(66%,520px)}
+}
+.dp-deck{position:relative;width:min(78%,645px);aspect-ratio:1/.94;
+  transform-style:preserve-3d;isolation:isolate}
+.dp-aura{position:absolute;inset:26% 2% 12%;border-radius:50%;
+  background:radial-gradient(ellipse,rgba(122,166,192,.30),transparent 66%);
+  filter:blur(26px)}
+.dp-layer{position:absolute;left:11%;right:11%;top:26%;height:40%;
+  border-radius:24px;border:1px solid rgba(233,246,255,.9);
+  background:linear-gradient(125deg,rgba(250,254,255,.96),rgba(216,232,243,.93));
+  box-shadow:-2px 6px 0 #A6BECB,0 8px 0 #8EACBD,0 26px 44px rgba(37,87,121,.14);
+  transform:translateY(calc((1.5 - var(--i)) * 74px)) rotateX(58deg) rotateZ(-32deg)
+    translateZ(var(--lz,0px));
+  transform-style:preserve-3d;z-index:var(--z);overflow:hidden;
+  transition:transform .5s var(--ease),box-shadow .5s var(--ease),filter .5s var(--ease)}
+.dp-layer::after{content:"";position:absolute;inset:9px;border-radius:17px;
+  border:1px solid rgba(172,205,221,.38);pointer-events:none}
+/* the card above covers each card's top edge, so the label lives on the
+   bottom edge, which is the part of every layer that stays in view */
+.dp-label{position:absolute;left:24px;bottom:14px;z-index:1;
+  font:700 9px/1 var(--display);letter-spacing:.2em;text-transform:uppercase;
+  color:#3B6D88}
+html:lang(ko) .dp-label{letter-spacing:.08em;font-family:var(--body)}
+/* the deepest layer is the data floor: dark steel, with the field's own
+   ripple drawn straight into it */
+.dp-layer.is-data{background:linear-gradient(135deg,#25495F,#3F7391);
+  border-color:rgba(179,215,235,.7)}
+.dp-layer.is-data .dp-label{color:#D2EDFD}
+.dp-ripple{position:absolute;inset:0;opacity:.5;
+  background:repeating-linear-gradient(115deg,
+    rgba(255,255,255,.34) 0 1px,transparent 1px 9px)}
+/* the top layer carries the mark itself */
+.dp-layer.is-top{display:grid;place-items:center}
+.dp-layer.is-top .dp-mark{margin-bottom:6px}
+.dp-layer.is-top .dp-mark{width:46%;height:auto;color:#24506B;opacity:.92}
+.dp-wire{position:absolute;inset:14% 16%;opacity:.5}
+.dp-wire i{position:absolute;left:0;right:0;height:1px;background:#8FB3C8}
+.dp-wire i:nth-child(1){top:12%;right:38%}
+.dp-wire i:nth-child(2){top:44%;left:22%}
+.dp-wire i:nth-child(3){top:74%;right:16%}
+.dp-wire b{position:absolute;width:7px;height:7px;border-radius:50%;
+  background:#2F7EA6;box-shadow:0 0 0 3px rgba(47,126,166,.18)}
+.dp-wire b:nth-of-type(1){top:calc(12% - 3px);left:58%}
+.dp-wire b:nth-of-type(2){top:calc(44% - 3px);left:30%}
+.dp-wire b:nth-of-type(3){top:calc(74% - 3px);left:70%}
+/* the reading layer lifts clear of the stack */
+/* lifting means moving along the card's own normal, not up the screen --
+   translateY would push the lower layers back into the stack */
+.dp-layer.is-on{transform:translateY(calc((1.5 - var(--i)) * 74px))
+  rotateX(58deg) rotateZ(-32deg) translateZ(calc(var(--lz,0px) + 40px));
+  box-shadow:-2px 6px 0 #9BB6C6,0 10px 0 #7FA0B4,0 40px 60px rgba(37,87,121,.22)}
+/* ── the deck assembles on load ──────────────────────────────────────
+   Each layer flies in along its own normal, from below and behind, one
+   after another from the data floor up. Slow on purpose: the stack is the
+   idea of the page, so it is worth watching build. The entrance is a
+   keyframe animation, which outranks the transitions that drive the
+   chapter lift -- so the wiring takes the class off once the last layer
+   has landed, and only then hands over to the chapters. */
+@keyframes dp-in{
+  from{opacity:0;
+    transform:translateY(calc((1.5 - var(--i)) * 74px + 40px))
+      rotateX(58deg) rotateZ(-32deg) translateZ(-150px)}
+  60%{opacity:1}
+  to{opacity:1;
+    transform:translateY(calc((1.5 - var(--i)) * 74px))
+      rotateX(58deg) rotateZ(-32deg) translateZ(var(--lz,0px))}}
+.dp-deck.is-entering .dp-layer{
+  animation:dp-in 2.2s cubic-bezier(.16,.84,.26,1) both;
+  animation-delay:calc(var(--i) * .34s + .3s)}
+.dp-deck.is-entering .dp-aura{animation:dp-aura 2.6s ease-out both}
+@keyframes dp-aura{from{opacity:0;transform:scale(.7)}to{opacity:1;transform:none}}
+
+.dp-caption{position:absolute;left:0;right:0;bottom:-2%;text-align:center;margin:0;
+  font:600 10px/1.4 var(--body);letter-spacing:.14em;text-transform:uppercase;
+  color:#7B94A3}
+html:lang(ko) .dp-caption{letter-spacing:.04em;text-transform:none}
+/* the W keeps running behind the deck rather than competing with it */
+.stage-visual .hero-mono{opacity:.3}
+@media (max-width:899.98px){
+  .dp-deck{width:min(92%,430px)}
+  .dp-label{left:16px;bottom:10px}
+}
+/* On a phone the deck is behind the hero copy rather than beside it, and at
+   full size its corners ran under the buttons and the chapter rail. Scaling
+   the whole deck keeps the layer separation and the 3D angles intact --
+   shrinking the width alone would have flattened the stack. */
+@media (max-width:743.98px){
+  .dp-deck{transform:scale(.8);transform-origin:center}
+  /* Phone hero reads top-down: the deck is the opening image, the stage copy
+     closes the section. The deck keeps its own band at the top of the grid and
+     the copy is pushed to the bottom edge, above the tab pill's clearance. */
+  /* The copy starts below the floating masthead rather than under it --
+     the stage is the one screen that runs full-bleed to the top, so it has
+     to make the room itself. The chapter well is trimmed to just over the
+     tallest chapter, which buys the deck its band back. */
+  .stage-grid{align-content:start;
+    padding-block:calc(var(--sp-mhead-h,52px) + var(--s3)) 76px}
+  .stage-copy{align-content:start}
+  .chapters{min-height:180px}
+  .dp-stack{top:auto;bottom:5%;height:46%}
+}
+@media (prefers-reduced-motion:reduce){
+  .dp-layer{transition:none}
+  .dp-deck.is-entering .dp-layer,.dp-deck.is-entering .dp-aura{animation:none}
+}
+
+
+
+/* ── the team's faces ───────────────────────────────────────────────
+   The shell hides every member <img> and shows the monogram, because no
+   row had a photograph. Where one does now, the photograph wins and the
+   monogram steps aside -- and a member still without one keeps the
+   monogram, so the grid never shows a hole or a broken image.
+   !important because the rule being overridden is itself unconditional
+   and sits later in the cascade. */
+.member.has-av img{display:block!important}
+.member.has-av .initial{display:none!important}
+.avatars img.has-av{display:block!important}
+.avatars img.has-av + .initial{display:none}
+/* Drawn at 2x and set on the page's own ground, so a photograph shot on
+   white does not cut a hard white disc out of a cream card. */
+.member img,.avatars img{background:var(--cream-2)}

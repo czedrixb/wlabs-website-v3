@@ -5,9 +5,9 @@ import { t } from "@/lib/strings";
 
 type Props = {
   locale: Locale;
-  // Current route plus any non-locale query (e.g. "/", "/?page=2",
-  // "/posts/my-slug") — used to build the "switch language" links so they
-  // land on the same page the reader is already on.
+  // Current route below the locale segment, plus any query (e.g. "/blog",
+  // "/blog?page=2", "/blog/my-slug") — used to build the "switch language"
+  // links so they land on the same page the reader is already on.
   path: string;
 };
 
@@ -20,7 +20,9 @@ export function SiteHeader({ locale, path }: Props) {
   return (
     <header className="mx-auto mb-10 flex max-w-3xl items-center justify-between px-6 pt-16">
       <h1 className="text-3xl font-bold">
-        <Link href={withLocale("/", locale)}>W Labs Blog</Link>
+        {/* "/" is the future v3 site home (WOS-314); the blog's own root is
+            "/blog" now that both live under the same locale-prefixed app. */}
+        <Link href={withLocale("/blog", locale)}>W Labs Blog</Link>
       </h1>
       <nav aria-label={t(locale).languageNav} className="flex items-center gap-2 text-sm">
         {OPTIONS.map((option, index) => {

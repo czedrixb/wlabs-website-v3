@@ -55,6 +55,18 @@ test.describe("wire-compat API (/api/getPosts, /api/getPost/:id)", () => {
     expect(koTitles).toContain("편집자를 위한 발행 워크플로우");
   });
 
+  // "kr" is a wire-compat alias for "ko" (resolveLocale's ALIASES map,
+  // matching the old Laravel SetLocale middleware) — the reader-facing site
+  // dropped its own ?locale= param for path segments (WOS-314), so this is
+  // now the only place the alias mapping is exercised.
+  test("?locale=kr is an alias for ko", async ({ request }) => {
+    const list = await (
+      await request.get("/api/getPosts?locale=kr")
+    ).json();
+    const titles = list.map((p: { title: string }) => p.title);
+    expect(titles).toContain("편집자를 위한 발행 워크플로우");
+  });
+
   test("a post with no English translation still returns its Korean title under ?locale=en", async ({
     request,
     baseURL,

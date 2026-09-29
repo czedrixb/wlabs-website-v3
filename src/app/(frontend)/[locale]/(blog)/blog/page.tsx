@@ -13,13 +13,15 @@ import { t } from "@/lib/strings";
 export const dynamic = "force-dynamic";
 
 type Props = {
-  searchParams: Promise<{ page?: string; locale?: string }>;
+  params: Promise<{ locale: string }>;
+  searchParams: Promise<{ page?: string }>;
 };
 
-export default async function BlogListPage({ searchParams }: Props) {
-  const params = await searchParams;
-  const locale = resolveLocale(params.locale);
-  const page = Math.max(1, Number(params.page) || 1);
+export default async function BlogListPage({ params, searchParams }: Props) {
+  const { locale: localeParam } = await params;
+  const locale = resolveLocale(localeParam);
+  const { page: pageParam } = await searchParams;
+  const page = Math.max(1, Number(pageParam) || 1);
 
   const { docs, totalPages, hasNextPage, hasPrevPage } = await getPostsPage(page);
 
@@ -27,7 +29,7 @@ export default async function BlogListPage({ searchParams }: Props) {
 
   return (
     <>
-      <SiteHeader locale={locale} path={page > 1 ? `/?page=${page}` : "/"} />
+      <SiteHeader locale={locale} path={page > 1 ? `/blog?page=${page}` : "/blog"} />
       <main className="mx-auto max-w-3xl px-6 pb-16">
         {docs.length === 0 && <p className="text-gray-500">{strings.noPosts}</p>}
 
@@ -40,7 +42,7 @@ export default async function BlogListPage({ searchParams }: Props) {
 
             return (
               <li key={post.id} className="border-b pb-8">
-                <Link href={withLocale(`/posts/${post.slug}`, locale)} className="group block">
+                <Link href={withLocale(`/blog/${post.slug}`, locale)} className="group block">
                   {banner?.url && (
                     <Image
                       src={mediaPath(banner.url)}
@@ -67,7 +69,7 @@ export default async function BlogListPage({ searchParams }: Props) {
 
         <nav className="mt-10 flex justify-between text-sm">
           {hasPrevPage ? (
-            <Link href={withLocale(`/?page=${page - 1}`, locale)} className="underline">
+            <Link href={withLocale(`/blog?page=${page - 1}`, locale)} className="underline">
               &larr; {strings.previous}
             </Link>
           ) : (
@@ -75,7 +77,7 @@ export default async function BlogListPage({ searchParams }: Props) {
           )}
           <span className="text-gray-400">{strings.pageIndicator(page, totalPages || 1)}</span>
           {hasNextPage ? (
-            <Link href={withLocale(`/?page=${page + 1}`, locale)} className="underline">
+            <Link href={withLocale(`/blog?page=${page + 1}`, locale)} className="underline">
               {strings.next} &rarr;
             </Link>
           ) : (

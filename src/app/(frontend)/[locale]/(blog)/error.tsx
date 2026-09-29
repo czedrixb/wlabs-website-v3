@@ -2,11 +2,17 @@
 
 import { useEffect } from "react";
 
-// Catches server-render failures for the public pages (e.g. Postgres
+// Catches server-render failures for the public blog pages (e.g. Postgres
 // unreachable, WOS-329) so visitors get a retry page instead of Next's raw
 // production 500. Rendered client-side without a locale, so the copy is
 // bilingual ko-first like the rest of the site chrome.
-export default function FrontendError({
+//
+// Lives beside (blog)'s own layout.tsx (which imports globals.css) rather
+// than up at [locale] — an error boundary swaps out its layout's subtree,
+// so if it sat above (blog)/layout.tsx it would render without Tailwind's
+// generated CSS ever having loaded. Once WOS-314's v3 port adds a (site)
+// group, it gets its own error.tsx styled with the site's own tokens.
+export default function BlogError({
   error,
   retry,
 }: {
