@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import Link from "next/link";
 import type { Locale } from "@/lib/locale";
 import { resolveLocale, withLocale } from "@/lib/locale";
 import { siteT } from "@/lib/site/dictionary";
@@ -10,6 +9,7 @@ import { SegNav } from "@/components/site/work/SegNav";
 import { TeamGrid } from "@/components/site/company/TeamGrid";
 import { NewsList } from "@/components/site/company/NewsList";
 import { StoryTimeline } from "@/components/site/company/StoryTimeline";
+import { CtaPanel } from "@/components/site/modules/CtaPanel";
 
 type Props = { params: Promise<{ locale: string; panel: string }> };
 
@@ -121,20 +121,14 @@ export default async function CompanyPanelPage({ params }: Props) {
               </article>
             ))}
           </div>
-          <div className="cta-panel on-navy" style={{ marginTop: "var(--s4)" }}>
-            <div className="row-between" style={{ position: "relative" }}>
-              <span className="eyebrow">{chrome.partner}</span>
-            </div>
-            <h2 style={{ fontSize: 24 }}>{company.partnerH2}</h2>
-            <div className="btns">
-              <Link className="btn btn-primary" href={withLocale("/contact", locale)}>
-                <span>{company.partnerCta}</span>
-                <span className="arr" aria-hidden="true">
-                  ↗
-                </span>
-              </Link>
-            </div>
-          </div>
+          <CtaPanel
+            locale={locale}
+            eyebrow={chrome.partner}
+            h2={company.partnerH2}
+            h2FontSize={24}
+            primary={{ label: company.partnerCta, topic: "partnership" }}
+            style={{ marginTop: "var(--s4)" }}
+          />
         </div>
       )}
     </>
