@@ -1,5 +1,6 @@
 import type { Locale } from "@/lib/locale";
 import { V3_STRINGS } from "./dictionary.generated";
+import { V3_CONTENT } from "./content.generated";
 
 // The site chrome + Home dictionary — extends the STRINGS/t(locale) pattern
 // already used for the blog (src/lib/strings.ts) with namespaces matching
@@ -97,6 +98,13 @@ function build(locale: Locale) {
       // Faq's ctaHistory CTA — reused rather than harvested twice, same
       // convention as band.eyebrow above.
       ctaHistory: v3.faq.ctaHistory,
+      // WOS-336: Home's products preview reuses the Work products panel's
+      // price/footer strings (v3 points both surfaces at the same
+      // priceAsk/monthly/productPage keys) — cross-referenced, not
+      // harvested twice.
+      priceAsk: v3.work.priceAsk,
+      monthly: v3.work.monthly,
+      productPage: v3.work.productPage,
     },
     proof: {
       ...v3.proof,
@@ -134,6 +142,84 @@ function build(locale: Locale) {
     contact: {
       ...v3.contact,
       rcNote: parseRcNote(v3.contact.rcNote),
+    },
+    // WOS-336: the sp-tuner resonance finder. Besides the flat per-card
+    // copy, the dial options / short forms / first steps are exposed as
+    // id-keyed records so SpTuner can look them up by the option ids its
+    // data tables use (tunerData.ts) instead of string-assembling key names.
+    tuner: {
+      ...v3.tuner,
+      optionLabels: {
+        ai: v3.tuner.o_ai,
+        software: v3.tuner.o_software,
+        imaging: v3.tuner.o_imaging,
+        interface: v3.tuner.o_interface,
+        modernise: v3.tuner.o_modernise,
+        idea: v3.tuner.o_idea,
+        spec: v3.tuner.o_spec,
+        prototype: v3.tuner.o_prototype,
+        production: v3.tuner.o_production,
+        exploring: v3.tuner.o_exploring,
+        quarter: v3.tuner.o_quarter,
+        urgent: v3.tuner.o_urgent,
+      },
+      optionShorts: {
+        ai: v3.tuner.s_ai,
+        software: v3.tuner.s_software,
+        imaging: v3.tuner.s_imaging,
+        interface: v3.tuner.s_interface,
+        modernise: v3.tuner.s_modernise,
+        idea: v3.tuner.s_idea,
+        spec: v3.tuner.s_spec,
+        prototype: v3.tuner.s_prototype,
+        production: v3.tuner.s_production,
+        exploring: v3.tuner.s_exploring,
+        quarter: v3.tuner.s_quarter,
+        urgent: v3.tuner.s_urgent,
+      },
+      steps: {
+        define: v3.tuner.step_define,
+        workshop: v3.tuner.step_workshop,
+        prototype: v3.tuner.step_prototype,
+        build: v3.tuner.step_build,
+        review: v3.tuner.step_review,
+        migration: v3.tuner.step_migration,
+      },
+    },
+    // WOS-336: the company reading-log rail. Entry text is joined onto the
+    // structural rows in content.ts (RAIL_ENTRIES); this slice carries the
+    // rail's own chrome (scrubber, pills, counters, rule aside, chips).
+    rail: v3.rail,
+    // WOS-336: /search. The result-group labels come from v3's `KIND`
+    // table (content.generated.ts), resolved per locale here so
+    // SearchClient gets one flat strings slice.
+    search: {
+      ...v3.search,
+      kinds: Object.fromEntries(
+        Object.entries(V3_CONTENT.searchKinds).map(([kind, [en, ko]]) => [
+          kind,
+          locale === "en" ? en : ko,
+        ]),
+      ) as Record<keyof typeof V3_CONTENT.searchKinds, string>,
+    },
+    // WOS-336: the #sheet contact slide-over. Its form reuses the /contact
+    // form's field labels, validation and status strings verbatim (v3's own
+    // sheet markup points at the same fTopic/fEmail/errEmail/consent2/send
+    // keys) — cross-referenced rather than harvested twice, same convention
+    // as band.eyebrow above.
+    sheet: {
+      ...v3.sheet,
+      fTopic: v3.contact.fTopic,
+      fEmail: v3.contact.fEmail,
+      errEmail: v3.contact.errEmail,
+      errTopic: v3.contact.errTopic,
+      consent2: v3.contact.consent2,
+      send: v3.contact.send,
+      sending: v3.contact.sending,
+      sent: v3.contact.sent,
+      failed: v3.contact.failed,
+      invalid: v3.contact.invalid,
+      needConsent: v3.contact.needConsent,
     },
   };
 }

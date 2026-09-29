@@ -426,3 +426,96 @@ export const TOPICS: Topic[] = V3_CONTENT.topics.map(([id, ko, en]) => ({
   id,
   label: bi(en, ko),
 }));
+
+// ── Chip glossary (WOS-336) ─────────────────────────────────────────────
+//
+// v3's `CHIP_TIPS` (site/index.html:3688) — the 23 technical-term
+// definitions behind every `.chip[data-tip]` tooltip, and the search
+// index's `kind: "term"` glossary entries. The term itself is the chip's
+// visible English text (v3 never translates the terms, only the
+// definitions), so it doubles as the lookup key.
+
+export type ChipTip = { term: string; tip: Bilingual };
+
+export const CHIP_TIPS: ChipTip[] = Object.entries(V3_CONTENT.chipTips).map(([term, [en, ko]]) => ({
+  term,
+  tip: bi(en, ko),
+}));
+
+// ── Company reading log (WOS-336) ───────────────────────────────────────
+//
+// The sp-rail's 27 entries. Structure (ids, types, fractional-year rail
+// positions, dates, the p24 break-line figures) comes from the generated
+// V3_CONTENT.rail rows; each row's text arrives as v3 `data-i` key names
+// ("spRailTeamH") that join onto the `rail` dictionary namespace
+// (scripts/v3-rail-manifest.mjs keeps the same suffixes) — resolved here
+// into the Bilingual shape everything else in this file uses.
+
+export type RailEntryType = "milestone" | "service" | "product" | "project" | "proof";
+
+export type RailEntry = {
+  id: string;
+  type: RailEntryType;
+  t: number; // fractional year, the entry's position on the rail axis
+  total?: number; // the confirmed client-project total the p24 proof entry carries
+  datetime: string; // <time datetime> value ("2026-09", "2026")
+  dateLabel: string; // the displayed date ("2026-09", "c. 2026")
+  circa: boolean;
+  title: Bilingual;
+  meta?: Bilingual;
+  para: Bilingual;
+  enote?: Bilingual;
+  enoteRuo?: boolean;
+  breakLine?: { named: number; undisclosed: number };
+  link?: { href: string; label: string };
+};
+
+type RawRailEntry = {
+  id: string;
+  type: string;
+  t: number;
+  total?: number;
+  datetime: string;
+  dateLabel: string;
+  circa: boolean;
+  titleKey: string;
+  metaKey?: string;
+  paraKey: string;
+  enoteKey?: string;
+  enoteRuo?: boolean;
+  breakLine?: { named: number; undisclosed: number };
+  link?: { href: string; label: string };
+};
+
+const railKo = V3_STRINGS.ko.rail as Record<string, string>;
+const railEn = V3_STRINGS.en.rail as Record<string, string>;
+
+function railStr(v3Key: string): Bilingual {
+  const suffix = v3Key.replace(/^spRail/, "");
+  const field = suffix[0].toLowerCase() + suffix.slice(1);
+  const ko = railKo[field];
+  const en = railEn[field];
+  if (ko === undefined || en === undefined) {
+    throw new Error(
+      `Rail entry references "${v3Key}" but rail.${field} isn't in the generated dictionary — ` +
+        `add it to scripts/v3-rail-manifest.mjs and regenerate.`,
+    );
+  }
+  return { ko, en };
+}
+
+export const RAIL_ENTRIES: RailEntry[] = (V3_CONTENT.rail as readonly RawRailEntry[]).map((r) => ({
+  id: r.id,
+  type: r.type as RailEntryType,
+  t: r.t,
+  ...(r.total !== undefined ? { total: r.total } : {}),
+  datetime: r.datetime,
+  dateLabel: r.dateLabel,
+  circa: r.circa,
+  title: railStr(r.titleKey),
+  ...(r.metaKey ? { meta: railStr(r.metaKey) } : {}),
+  para: railStr(r.paraKey),
+  ...(r.enoteKey ? { enote: railStr(r.enoteKey), enoteRuo: Boolean(r.enoteRuo) } : {}),
+  ...(r.breakLine ? { breakLine: r.breakLine } : {}),
+  ...(r.link ? { link: r.link } : {}),
+}));
