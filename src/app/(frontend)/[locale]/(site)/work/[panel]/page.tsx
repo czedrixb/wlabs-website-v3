@@ -1,7 +1,9 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import type { Locale } from "@/lib/locale";
 import { resolveLocale, withLocale } from "@/lib/locale";
 import { siteT } from "@/lib/site/dictionary";
+import { siteMetadata } from "@/lib/site/metadata";
 import { PROJECT_CATS, PROJECTS, PRODUCT_ORDER, PRODUCTS } from "@/lib/site/content";
 import { SegNav } from "@/components/site/work/SegNav";
 import { ServiceDetail } from "@/components/site/work/ServiceDetail";
@@ -26,6 +28,14 @@ export function generateStaticParams() {
     { locale: "ko", panel },
     { locale: "en", panel },
   ]);
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale: localeParam, panel } = await params;
+  const locale = resolveLocale(localeParam);
+  if (!PANEL_KEYS.includes(panel as PanelKey)) return {};
+  const { work } = siteT(locale);
+  return siteMetadata({ locale, path: `/work/${panel}`, title: work.workH1, description: work.workLead });
 }
 
 // Work's three segmented panels — services (ServiceDetail), products

@@ -1,8 +1,10 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import { getPostsPage } from "@/lib/cachedPosts";
 import { resolveLocale, withLocale } from "@/lib/locale";
 import { mediaPath } from "@/lib/mediaPath";
+import { siteMetadata } from "@/lib/site/metadata";
 import { SiteHeader } from "@/components/frontend/SiteHeader";
 import { t } from "@/lib/strings";
 
@@ -16,6 +18,13 @@ type Props = {
   params: Promise<{ locale: string }>;
   searchParams: Promise<{ page?: string }>;
 };
+
+// Canonical always points at the unpaginated /blog — no title/description
+// override, so [locale]/layout.tsx's own BLOG_METADATA still applies.
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale: localeParam } = await params;
+  return siteMetadata({ locale: resolveLocale(localeParam), path: "/blog" });
+}
 
 export default async function BlogListPage({ params, searchParams }: Props) {
   const { locale: localeParam } = await params;

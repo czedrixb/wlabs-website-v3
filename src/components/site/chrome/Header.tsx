@@ -106,6 +106,8 @@ export function Header({ locale, s }: Props) {
     <header ref={headerRef} className={isDark ? "header is-dark" : "header"}>
       <div className="wrap">
         <Link className="lockup" href={withLocale("/", locale)} aria-label="W Labs">
+          {/* Plain <img>, deliberately — SVG logo, out of scope for
+              WOS-334's next/image switch (see Footer.tsx's own note). */}
           <img
             className="logo-h"
             src={isDark ? "/site/logo/secondary-land.svg" : "/site/logo/primary-land.svg"}

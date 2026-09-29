@@ -81,6 +81,8 @@ export function Masthead({ locale }: Props) {
   return (
     <div ref={barRef} className={classes}>
       <Link className="lockup" href={withLocale("/", locale)} aria-label="W Labs">
+        {/* Plain <img>, deliberately — SVG logo, out of scope for
+            WOS-334's next/image switch (see Footer.tsx's own note). */}
         <img
           className="logo-h"
           src={isDark ? "/site/logo/secondary-land.svg" : "/site/logo/primary-land.svg"}

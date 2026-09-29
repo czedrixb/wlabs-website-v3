@@ -1,9 +1,11 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import type { Locale } from "@/lib/locale";
 import { resolveLocale, withLocale } from "@/lib/locale";
 import { PROJECTS, PROJECT_CATS, CATEGORY_SERVICE, SERVICES } from "@/lib/site/content";
 import { ProjectArt } from "@/components/site/work/ProjectArt";
+import { siteMetadata } from "@/lib/site/metadata";
 
 type Props = { params: Promise<{ locale: string; slug: string }> };
 
@@ -12,6 +14,19 @@ export function generateStaticParams() {
     { locale: "ko", slug: p.id },
     { locale: "en", slug: p.id },
   ]);
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale: localeParam, slug } = await params;
+  const locale = resolveLocale(localeParam);
+  const project = PROJECTS.find((p) => p.id === slug);
+  if (!project) return {};
+  return siteMetadata({
+    locale,
+    path: `/projects/${slug}`,
+    title: locale === "en" ? project.title.en : project.title.ko,
+    description: locale === "en" ? project.desc.en : project.desc.ko,
+  });
 }
 
 // Every string below is a literal bilingual pair, not a dictionary key —

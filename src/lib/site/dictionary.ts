@@ -43,6 +43,26 @@ function parseHeading(html: string): Heading {
   return { lead: lead.trim(), accent: accent.trim(), tail };
 }
 
+type RcNote = { lead: string; privacy: string; mid: string; terms: string; tail: string };
+
+// contact.rcNote (WOS-334) is the fourth markup-bearing v3 string — two
+// <a href="https://policies.google.com/..."> links sitting mid-sentence in
+// both languages. Same reasoning as parseHeading above: split into a
+// 5-slot shape so ContactForm.tsx renders real <a> elements instead of
+// reaching for dangerouslySetInnerHTML. The two hrefs are fixed in the v3
+// source, so they aren't part of the parsed shape.
+const RC_NOTE_RE =
+  /^(.*?)<a href="https:\/\/policies\.google\.com\/privacy"[^>]*>(.*?)<\/a>(.*?)<a href="https:\/\/policies\.google\.com\/terms"[^>]*>(.*?)<\/a>(.*)$/;
+
+function parseRcNote(html: string): RcNote {
+  const m = RC_NOTE_RE.exec(html);
+  if (!m) {
+    throw new Error(`Dictionary rcNote isn't in the expected lead/privacy-link/mid/terms-link/tail shape: "${html}"`);
+  }
+  const [, lead, privacy, mid, terms, tail] = m;
+  return { lead, privacy, mid, terms, tail };
+}
+
 // v3 leaves a few strings untranslated by design (proof3b/proof4b's
 // "Verified"/"Approved" render in English in the Korean page too — see
 // dictionary.generated.ts — and ProofBand's animateRoll only scrambles
@@ -101,6 +121,12 @@ function build(locale: Locale) {
     work: v3.work,
     company: v3.company,
     insights: v3.insights,
+    // WOS-334: the /contact form. rcNote is the one markup-bearing string
+    // in this slice — see parseRcNote above.
+    contact: {
+      ...v3.contact,
+      rcNote: parseRcNote(v3.contact.rcNote),
+    },
   };
 }
 

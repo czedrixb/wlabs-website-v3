@@ -17,6 +17,7 @@ import { Products } from "./collections/Products";
 import { Services } from "./collections/Services";
 import { Faq } from "./collections/Faq";
 import { Insights } from "./collections/Insights";
+import { Inquiries } from "./collections/Inquiries";
 import { csrfOrigins, serverURL } from "./lib/deployOrigins";
 
 const filename = fileURLToPath(import.meta.url);
@@ -70,7 +71,7 @@ export default buildConfig({
       actions: ["/components/admin/LanguageToggle#LanguageToggle"],
     },
   },
-  collections: [Posts, Media, Users, Team, Projects, Products, Services, Faq, Insights],
+  collections: [Posts, Media, Users, Team, Projects, Products, Services, Faq, Insights, Inquiries],
   // Non-developer authors expect a persistent toolbar at the top of the
   // editor (like Word/Notion); the default Lexical toolbar only appears on
   // text selection, which reads as "there is no toolbar" (WOS-320).

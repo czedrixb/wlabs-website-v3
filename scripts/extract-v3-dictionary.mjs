@@ -23,13 +23,14 @@
 //      (`spRailUndisclosed` has no EN) is exactly the bug class this
 //      guards against for every future manifest addition.
 //
-// Two manifests feed this script: v3-dictionary-manifest.mjs (WOS-331 —
-// chrome + Home's hero/proof/band/faq) and v3-content-manifest.mjs
-// (WOS-332 — Work/Company panels, product/project detail pages, Home's
-// project-strip/company-teaser, and the rest of the FAQ). They're merged
-// namespace-by-namespace before extraction — `home` and `faq` are extended
-// by both rather than each owning a disjoint set of namespaces, since both
-// tickets add fields to Home and to the FAQ.
+// Three manifests feed this script: v3-dictionary-manifest.mjs (WOS-331 —
+// chrome + Home's hero/proof/band/faq), v3-content-manifest.mjs (WOS-332 —
+// Work/Company panels, product/project detail pages, Home's project-strip/
+// company-teaser, and the rest of the FAQ), and v3-contact-manifest.mjs
+// (WOS-334 — the /contact form). They're merged namespace-by-namespace
+// before extraction — `home` and `faq` are extended by more than one
+// manifest rather than each owning a disjoint set of namespaces, since
+// more than one ticket adds fields to Home and to the FAQ.
 //
 // Usage: node scripts/extract-v3-dictionary.mjs
 // Override the v3 repo location with V3_SITE_INDEX if it isn't the default
@@ -39,6 +40,7 @@ import { fileURLToPath } from "node:url";
 import path from "node:path";
 import { MANIFEST as DICTIONARY_MANIFEST } from "./v3-dictionary-manifest.mjs";
 import { CONTENT_MANIFEST } from "./v3-content-manifest.mjs";
+import { CONTACT_MANIFEST } from "./v3-contact-manifest.mjs";
 
 function mergeManifests(...manifests) {
   const merged = {};
@@ -50,7 +52,7 @@ function mergeManifests(...manifests) {
   return merged;
 }
 
-const MANIFEST = mergeManifests(DICTIONARY_MANIFEST, CONTENT_MANIFEST);
+const MANIFEST = mergeManifests(DICTIONARY_MANIFEST, CONTENT_MANIFEST, CONTACT_MANIFEST);
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(__dirname, "..");
@@ -176,10 +178,32 @@ function stripTags(html) {
   return html.replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
 }
 
+// A handful of runtime status strings (contact.sent/sending/failed/invalid/
+// needConsent, and the toast widget's — unused here) aren't carried by any
+// data-i element at all: the source assigns their Korean directly as
+// `KO.key='...';` literals (site/index.html:3217), after the [data-i]/
+// [data-i-attr] sweeps parseKorean() replays above. Same `??` precedence:
+// first occurrence wins, and this only fills in keys parseKorean() didn't
+// already find.
+function parseKoreanLiterals(source) {
+  const KO = {};
+  const re = /KO\.([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(["'])((?:\\.|(?!\2)[\s\S])*)\2\s*;/g;
+  let m;
+  while ((m = re.exec(source))) {
+    const [, key, , value] = m;
+    if (KO[key] === undefined) KO[key] = decodeEntities(unescapeJsString(value));
+  }
+  return KO;
+}
+
 function main() {
   const source = readV3Source();
   const EN = parseEnglish(source);
   const KO = parseKorean(source);
+  const KO_LITERALS = parseKoreanLiterals(source);
+  for (const [key, value] of Object.entries(KO_LITERALS)) {
+    if (KO[key] === undefined) KO[key] = value;
+  }
 
   const missing = [];
   const ko = {};

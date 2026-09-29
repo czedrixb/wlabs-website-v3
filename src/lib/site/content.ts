@@ -411,3 +411,18 @@ export const INSIGHTS: InsightItem[] = [
     body: bi(insEn.n5p, insKo.n5p),
   },
 ];
+
+// ── Contact topics ──────────────────────────────────────────────────────
+//
+// v3's `TOPICS` (site/index.html:3218) — the /contact form's topic
+// <select> options (WOS-334). Single source of truth for the form's
+// options, the Inquiries collection's `topic` select field options, and
+// the contact route handler's server-side topic validation — none of
+// those should retype this list.
+
+export type Topic = { id: string; label: Bilingual };
+
+export const TOPICS: Topic[] = V3_CONTENT.topics.map(([id, ko, en]) => ({
+  id,
+  label: bi(en, ko),
+}));

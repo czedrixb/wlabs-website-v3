@@ -1,3 +1,4 @@
+import Image from "next/image";
 import type { Locale } from "@/lib/locale";
 import type { SiteStrings } from "@/lib/site/dictionary";
 import { TEAM, TEAM_GROUPS } from "@/lib/site/content";
@@ -5,9 +6,6 @@ import { TEAM, TEAM_GROUPS } from "@/lib/site/content";
 type Props = { locale: Locale; s: SiteStrings["company"] };
 
 // Company → Team panel — ported from site/index.html's `renderTeam()`.
-// Photos are plain <img> here on purpose: WOS-334 owns the next/image
-// switch for product/team photography, and doing it piecemeal here would
-// collide with that ticket.
 export function TeamGrid({ locale, s }: Props) {
   const en = locale === "en";
   // v3's own "23명"/"23 people" is a literal count baked into the
@@ -35,7 +33,9 @@ export function TeamGrid({ locale, s }: Props) {
             <div className="team">
               {group.members.map((m) => (
                 <article className={m.photo ? "member has-av" : "member"} key={m.name}>
-                  {m.photo && <img src={m.photo} alt={m.nameKo ? `${m.name} ${m.nameKo}` : m.name} width={64} height={64} />}
+                  {m.photo && (
+                    <Image src={m.photo} alt={m.nameKo ? `${m.name} ${m.nameKo}` : m.name} width={64} height={64} />
+                  )}
                   <span className="initial" aria-hidden="true">
                     {m.name[0]}
                   </span>
