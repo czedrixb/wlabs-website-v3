@@ -1,26 +1,24 @@
 import type { Locale } from "@/lib/locale";
 import { withLocale } from "@/lib/locale";
 import type { SiteStrings } from "@/lib/site/dictionary";
+import { SERVICES } from "@/lib/site/content";
 import { SpectrogramStack, type StackItem } from "./SpectrogramStack";
 
-// Structural metadata only (numbers/weights) — copy comes from the
-// dictionary. v3's own SVC1-5/spTunerSvcNm1-5 keys are used for both the
-// accordion teaser and the expanded answer (see dictionary.generated.ts),
-// matching this component's original (duplicated) SERVICE_COPY rather than
-// harvesting two separate strings for the same sentence.
-const SERVICE_META: { key: string; number: string; weight?: number }[] = [
-  { key: "intelligence", number: "01" },
-  { key: "creation", number: "02" },
-  { key: "insight", number: "03", weight: 1.1 },
-  { key: "experience", number: "04" },
-  { key: "evolution", number: "05" },
-];
-
+// Structural metadata (number/weight/anchor) now lives in content.ts's
+// SERVICES (WOS-332), shared with the Work services panel and the
+// product/project "Related" rails instead of living here alone. Copy still
+// comes from the dictionary — v3's own SVC1-5/spTunerSvcNm1-5 keys are used
+// for both the accordion teaser and the expanded answer (see
+// dictionary.generated.ts), matching this component's original (duplicated)
+// SERVICE_COPY rather than harvesting two separate strings for the same
+// sentence.
 function buildServiceCopy(s: SiteStrings["band"]) {
   const questions = [s.svcName1, s.svcName2, s.svcName3, s.svcName4, s.svcName5];
   const bodies = [s.svc1, s.svc2, s.svc3, s.svc4, s.svc5];
-  return SERVICE_META.map((meta, i) => ({
-    ...meta,
+  return SERVICES.map((svc, i) => ({
+    key: svc.id,
+    number: svc.number,
+    weight: svc.weight,
     question: questions[i],
     body: bodies[i],
   }));

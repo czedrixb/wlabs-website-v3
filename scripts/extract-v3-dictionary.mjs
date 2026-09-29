@@ -17,11 +17,19 @@
 //   3. Decode the HTML entities the source pre-escapes for its own
 //      `innerHTML` injection (`&amp;` etc.) — React renders text nodes, so
 //      those must not survive into the dictionary.
-//   4. For every key scripts/v3-dictionary-manifest.mjs lists, require BOTH
-//      a Korean and an English value to exist. Fail loudly (not a silent
-//      Korean fallback) if either side is missing — the one gap in the v3
-//      source itself (`spRailUndisclosed` has no EN) is exactly the bug
-//      class this guards against for every future manifest addition.
+//   4. For every key a manifest lists, require BOTH a Korean and an
+//      English value to exist. Fail loudly (not a silent Korean fallback)
+//      if either side is missing — the one gap in the v3 source itself
+//      (`spRailUndisclosed` has no EN) is exactly the bug class this
+//      guards against for every future manifest addition.
+//
+// Two manifests feed this script: v3-dictionary-manifest.mjs (WOS-331 —
+// chrome + Home's hero/proof/band/faq) and v3-content-manifest.mjs
+// (WOS-332 — Work/Company panels, product/project detail pages, Home's
+// project-strip/company-teaser, and the rest of the FAQ). They're merged
+// namespace-by-namespace before extraction — `home` and `faq` are extended
+// by both rather than each owning a disjoint set of namespaces, since both
+// tickets add fields to Home and to the FAQ.
 //
 // Usage: node scripts/extract-v3-dictionary.mjs
 // Override the v3 repo location with V3_SITE_INDEX if it isn't the default
@@ -29,7 +37,20 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
-import { MANIFEST } from "./v3-dictionary-manifest.mjs";
+import { MANIFEST as DICTIONARY_MANIFEST } from "./v3-dictionary-manifest.mjs";
+import { CONTENT_MANIFEST } from "./v3-content-manifest.mjs";
+
+function mergeManifests(...manifests) {
+  const merged = {};
+  for (const manifest of manifests) {
+    for (const [namespace, fields] of Object.entries(manifest)) {
+      merged[namespace] = { ...merged[namespace], ...fields };
+    }
+  }
+  return merged;
+}
+
+const MANIFEST = mergeManifests(DICTIONARY_MANIFEST, CONTENT_MANIFEST);
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(__dirname, "..");

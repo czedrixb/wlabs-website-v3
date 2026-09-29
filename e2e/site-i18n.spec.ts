@@ -90,10 +90,14 @@ test.describe("site i18n: English Home", () => {
     await page.goto("/en");
     const bodyText = await page.locator("body").innerText();
     // legal1 keeps "더블유랩스" as v3's own English-form parenthetical
-    // ("W Labs (더블유랩스) · CEO Matt Jung") — everything else must be
-    // Hangul-free.
-    const withoutLegalAside = bodyText.replace("더블유랩스", "");
-    expect(withoutLegalAside).not.toMatch(/[가-힣]/);
+    // ("W Labs (더블유랩스) · CEO Matt Jung"). WOS-332's project strip
+    // renders Pagoda's "bubbles" ProjectArt illustration, whose SVG bakes
+    // in a literal "안녕하세요!" opposite "Hello!" — it's depicting a
+    // bilingual chat product, not translatable UI copy, and v3's own ART
+    // table carries the same hardcoded Korean regardless of page language.
+    // Everything else must be Hangul-free.
+    const withoutKnownArt = bodyText.replace("더블유랩스", "").replace("안녕하세요!", "");
+    expect(withoutKnownArt).not.toMatch(/[가-힣]/);
   });
 
   test("<html lang> and <title> are locale-correct and no longer say 'blog' on a site page", async ({
@@ -111,6 +115,11 @@ test.describe("site i18n: English Home", () => {
 });
 
 test.describe("site i18n: toggle round-trip", () => {
+  // WOS-332 replaced /work/services' stub (an <h1> that just echoed the
+  // segment label "Services"/"서비스") with the real ServiceDetail panel —
+  // its own <h1> is now workH1 ("Services, products and what we've built."
+  // / "서비스, 제품, 그리고 만들어 온 것들."). The active SegNav link is the
+  // stable "says Services/서비스" signal now.
   test("/ko -> EN -> KO keeps the same deep path and flips aria-pressed both ways", async ({ page }) => {
     await page.goto("/ko/work/services");
 
@@ -118,12 +127,12 @@ test.describe("site i18n: toggle round-trip", () => {
     await expect(page).toHaveURL(/\/en\/work\/services$/);
     await expect(page.locator(".lang-float a[lang='en']")).toHaveAttribute("aria-pressed", "true");
     await expect(page.locator(".lang-float a[lang='ko']")).toHaveAttribute("aria-pressed", "false");
-    await expect(page.getByRole("heading", { name: "Services" })).toBeVisible();
+    await expect(page.locator('.seg a[aria-current="page"]')).toHaveText("Services");
 
     await page.locator(".lang-float a[lang='ko']").click();
     await expect(page).toHaveURL(/\/ko\/work\/services$/);
     await expect(page.locator(".lang-float a[lang='ko']")).toHaveAttribute("aria-pressed", "true");
     await expect(page.locator(".lang-float a[lang='en']")).toHaveAttribute("aria-pressed", "false");
-    await expect(page.getByRole("heading", { name: "서비스" })).toBeVisible();
+    await expect(page.locator('.seg a[aria-current="page"]')).toHaveText("서비스");
   });
 });

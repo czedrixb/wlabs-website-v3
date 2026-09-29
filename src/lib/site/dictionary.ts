@@ -10,13 +10,16 @@ import { V3_STRINGS } from "./dictionary.generated";
 // cross the server/client boundary as a prop.
 //
 // Source strings live in dictionary.generated.ts, harvested from the v3
-// design repo by scripts/extract-v3-dictionary.mjs against
-// scripts/v3-dictionary-manifest.mjs. This file composes those raw pairs
-// into the shapes components actually use — parsing the two markup-bearing
-// headings, building the proof-band counter template, and cross-referencing
-// a couple of strings that repeat verbatim elsewhere in v3 (Band's "서비스"
-// eyebrow is the same string as the nav's segServices; Faq's two CTAs reuse
-// Band's) rather than harvesting duplicate keys for them.
+// design repo by scripts/extract-v3-dictionary.mjs against two manifests —
+// scripts/v3-dictionary-manifest.mjs (WOS-331: chrome + Home's hero/proof/
+// band/faq) and scripts/v3-content-manifest.mjs (WOS-332: Work/Company
+// panels, product/project detail pages, Home's project-strip/company-
+// teaser). This file composes those raw pairs into the shapes components
+// actually use — parsing the two markup-bearing headings, building the
+// proof-band counter template, and cross-referencing a couple of strings
+// that repeat verbatim elsewhere in v3 (Band's "서비스" eyebrow is the same
+// string as the nav's segServices; Faq's two CTAs reuse Band's) rather than
+// harvesting duplicate keys for them.
 
 type Heading = { lead: string; accent: string; tail: string };
 
@@ -62,6 +65,10 @@ function build(locale: Locale) {
       heading3: parseHeading(v3.home.ch3h),
       ctaDiscuss: v3.chrome.ctaDiscuss,
       storyAriaLabel: STORY_ARIA_LABEL,
+      // Company teaser's second link ("회사 연혁 보기") is the same string as
+      // Faq's ctaHistory CTA — reused rather than harvested twice, same
+      // convention as band.eyebrow above.
+      ctaHistory: v3.faq.ctaHistory,
     },
     proof: {
       ...v3.proof,
@@ -88,6 +95,12 @@ function build(locale: Locale) {
       ctaSeeAll: v3.band.ctaSeeAll,
       ctaFind: v3.band.ctaFind,
     },
+    // WOS-332: Work/Company panels + product/project detail pages. Plain
+    // passthroughs — no markup-bearing strings or cross-references in this
+    // slice the way home/proof/band/faq have above.
+    work: v3.work,
+    company: v3.company,
+    insights: v3.insights,
   };
 }
 
