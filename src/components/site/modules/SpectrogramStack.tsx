@@ -340,8 +340,20 @@ export function SpectrogramStack({ items }: Props) {
     setOpenKey((cur) => (cur === key ? null : key));
   }
 
+  // Escape closes the open band and returns focus to its trigger button —
+  // v3's stack-root keydown (WOS-336, index.html:4468-4472). On the ROOT,
+  // not the document, so it only fires while focus is inside this stack
+  // and two stacks on one page never fight; no preventDefault, matching
+  // the source (the sheet's own Escape handler is hidden-guarded anyway).
+  function onKeyDown(e: React.KeyboardEvent) {
+    if (e.key !== "Escape" || openKey === null) return;
+    const btn = rootRef.current?.querySelector<HTMLButtonElement>(".sp-band.is-open .sp-band-btn");
+    setOpenKey(null);
+    btn?.focus();
+  }
+
   return (
-    <ol ref={rootRef} className="sp-bands-stack">
+    <ol ref={rootRef} className="sp-bands-stack" onKeyDown={onKeyDown}>
       {items.map((item) => {
         const isOpen = openKey === item.key;
         const height = Math.round(BASE_HEIGHT * (item.weight ?? 1));
