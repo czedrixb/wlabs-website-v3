@@ -37,8 +37,11 @@ export function ServiceDetail({ locale, d, ctaDiscuss }: Props) {
           <h2>{locale === "en" ? svc.name.en : svc.name.ko}</h2>
           <p>{bodies[i]}</p>
           <div className="chips">
+            {/* data-tip + tabIndex opt each chip into the shared glossary
+                tooltip (TipboxHost) — chip text IS the CHIP_TIPS term here,
+                same as v3's runtime text-matching (WOS-336). */}
             {svc.chips.map((chip) => (
-              <span className="chip" key={chip}>
+              <span className="chip" data-tip={chip} tabIndex={0} key={chip}>
                 {chip}
               </span>
             ))}
@@ -70,7 +73,7 @@ export function ServiceDetail({ locale, d, ctaDiscuss }: Props) {
             </div>
             {svc.id === "evolution" && <span className="small">{d.relatedOpsNote}</span>}
           </div>
-          <Link className="btn btn-primary" href={withLocale("/contact", locale)}>
+          <Link className="btn btn-primary" href={withLocale("/contact", locale)} data-contact={svc.topic}>
             <span>{ctaDiscuss}</span>
             <span className="arr" aria-hidden="true">
               ↗

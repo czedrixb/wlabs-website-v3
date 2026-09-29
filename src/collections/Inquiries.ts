@@ -64,7 +64,10 @@ export const Inquiries: CollectionConfig = {
       options: TOPICS.map((t) => ({ label: { en: t.label.en, ko: t.label.ko }, value: t.id })),
       admin: { readOnly: true },
     },
-    { name: "name", type: "text", required: true, label: { en: "Name", ko: "이름" }, admin: { readOnly: true } },
+    // Optional since WOS-336: the #sheet slide-over is v3's slim inquiry
+    // form and deliberately has no name field — only the full contact-form
+    // requires one (enforced per-source by the route handler).
+    { name: "name", type: "text", label: { en: "Name", ko: "이름" }, admin: { readOnly: true } },
     { name: "org", type: "text", label: { en: "Company / organisation", ko: "회사 / 기관" }, admin: { readOnly: true } },
     { name: "email", type: "email", required: true, label: { en: "Email", ko: "이메일" }, admin: { readOnly: true } },
     { name: "phone", type: "text", label: { en: "Phone", ko: "연락처" }, admin: { readOnly: true } },
@@ -102,8 +105,8 @@ export const Inquiries: CollectionConfig = {
         readOnly: true,
         position: "sidebar",
         description: {
-          ko: "제출된 폼의 종류입니다 (현재는 contact-form 뿐).",
-          en: "Which form this came from (only contact-form exists today).",
+          ko: "제출된 폼의 종류입니다 (contact-form: /contact 전체 폼, sheet-form: 사이트 공통 문의 시트).",
+          en: "Which form this came from (contact-form: the full /contact form; sheet-form: the site-wide inquiry sheet).",
         },
       },
     },

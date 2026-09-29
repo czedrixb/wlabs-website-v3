@@ -24,8 +24,10 @@ export function ProductCard({ locale, product, s }: Props) {
       </h3>
       <p>{blurb}</p>
       <div className="chips">
+        {/* data-tip + tabIndex opt each chip into the shared glossary
+            tooltip (TipboxHost, WOS-336) — chip text IS the CHIP_TIPS term. */}
         {product.teaserChips.map((chip) => (
-          <span className="chip" key={chip}>
+          <span className="chip" data-tip={chip} tabIndex={0} key={chip}>
             {chip}
           </span>
         ))}

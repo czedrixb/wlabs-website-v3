@@ -549,7 +549,10 @@ export function Hero({ locale, s, pool }: Props) {
               ))}
             </div>
             <div className="hero-cta">
-              <Link className="btn btn-primary" href={withLocale("/contact", locale)}>
+              {/* data-contact: opens the contact sheet (general topic) via
+                  the SiteChrome-level delegated listener; the href is the
+                  no-JS fallback (WOS-336). */}
+              <Link className="btn btn-primary" href={withLocale("/contact", locale)} data-contact="general">
                 <span>{s.ctaDiscuss}</span>
                 <span className="arr" aria-hidden="true">
                   ↗

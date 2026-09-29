@@ -592,7 +592,7 @@ export interface Inquiry {
     | 'partnership'
     | 'newsletter'
     | 'other';
-  name: string;
+  name?: string | null;
   org?: string | null;
   email: string;
   phone?: string | null;
@@ -601,7 +601,7 @@ export interface Inquiry {
   consentMarketing?: boolean | null;
   locale: 'ko' | 'en';
   /**
-   * Which form this came from (only contact-form exists today).
+   * Which form this came from (contact-form: the full /contact form; sheet-form: the site-wide inquiry sheet).
    */
   source: string;
   captchaStatus: 'ok' | 'skipped' | 'unavailable' | 'error' | 'low-score';

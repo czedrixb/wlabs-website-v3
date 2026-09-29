@@ -114,6 +114,15 @@ export const CATEGORY_SERVICE: Record<ProjectCatId, ServiceId> = {
   prod: "intelligence",
 };
 
+// Which contact TOPICS id a project page's inquiry CTA preselects — v3's
+// `CAT_TOPIC` (site/index.html:3597), verbatim (WOS-336).
+export const CATEGORY_TOPIC: Record<ProjectCatId, string> = {
+  health: "data",
+  edu: "custom",
+  lang: "ai",
+  prod: "ai",
+};
+
 // ── Services ────────────────────────────────────────────────────────────
 //
 // SVC_ROWS (src/splice.py:651) authors these five rows in Python, not in
@@ -152,6 +161,10 @@ export type Service = {
   // reference.
   abbr: string;
   anchor: string; // the #svc-* id the Work services panel anchors to
+  // Which contact TOPICS id this service's inquiry CTA preselects — v3's
+  // own data-contact values on the five svc-detail cards (index.html:
+  // 2455-2459), also the tuner's service→topic hand-off map (WOS-336).
+  topic: string;
   weight?: number; // SpectrogramStack band weight; only `insight` deviates from 1
   // English-only technical-term chips shown under each svc-detail's body —
   // v3 never translates these (no bilingual span in the source markup).
@@ -171,6 +184,7 @@ export const SERVICES: Service[] = [
     name: bi("AI & Intelligent Automation", "AI·지능형 자동화"),
     abbr: "AI",
     anchor: "svc-ai",
+    topic: "ai",
     chips: ["Computer vision", "NLP / LLM", "Workflow AI"],
     related: [
       { kind: "project", id: "yumtrack", abbr: "YT" },
@@ -186,6 +200,7 @@ export const SERVICES: Service[] = [
     name: bi("Custom Software Development", "맞춤 소프트웨어 개발"),
     abbr: "CS",
     anchor: "svc-custom",
+    topic: "custom",
     chips: ["Web platforms", "SaaS", "Full-stack"],
     related: [
       { kind: "project", id: "ulms", abbr: "UE" },
@@ -201,6 +216,7 @@ export const SERVICES: Service[] = [
     name: bi("Data & Imaging Intelligence", "데이터·이미징 인텔리전스"),
     abbr: "DI",
     anchor: "svc-data",
+    topic: "data",
     weight: 1.1,
     chips: ["LC-OCT", "Segmentation", "3D reconstruction"],
     related: [
@@ -217,6 +233,7 @@ export const SERVICES: Service[] = [
     name: bi("UI/UX & Product Design", "UI/UX·제품 디자인"),
     abbr: "UX",
     anchor: "svc-design",
+    topic: "design",
     chips: ["Interface design", "Prototyping", "Design systems"],
     related: [
       { kind: "project", id: "pagoda", abbr: "PT" },
@@ -231,6 +248,7 @@ export const SERVICES: Service[] = [
     name: bi("Modernization & Support", "현대화·운영 지원"),
     abbr: "MS",
     anchor: "svc-ops",
+    topic: "support",
     chips: ["Legacy migration", "Integration", "Maintenance"],
     related: [
       { kind: "static", abbr: "LD", label: bi("Logistics dispatch", "물류 배차") },

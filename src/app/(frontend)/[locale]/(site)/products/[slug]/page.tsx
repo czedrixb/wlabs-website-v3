@@ -84,7 +84,10 @@ export default async function ProductPage({ params }: Props) {
           <h1>{product.name}</h1>
           <p className="lead">{en ? product.lead.en : product.lead.ko}</p>
           <div className="cta">
-            <Link className="btn btn-primary" href={withLocale("/contact", locale)}>
+            {/* data-contact preselects the sheet's topic — v3's product
+                pages use the product's own topic id (index.html:3578);
+                href is the no-JS fallback (WOS-336). */}
+            <Link className="btn btn-primary" href={withLocale("/contact", locale)} data-contact={product.topic}>
               <span>{en ? T.askAbout(product.name).en : T.askAbout(product.name).ko}</span>
               <span className="arr" aria-hidden="true">
                 ↗
@@ -202,7 +205,7 @@ export default async function ProductPage({ params }: Props) {
           </p>
         </div>
         <div className="cta">
-          <Link className="btn btn-primary" href={withLocale("/contact", locale)}>
+          <Link className="btn btn-primary" href={withLocale("/contact", locale)} data-contact={product.topic}>
             <span>{en ? T.askAbout(product.name).en : T.askAbout(product.name).ko}</span>
             <span className="arr" aria-hidden="true">
               ↗

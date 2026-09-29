@@ -100,7 +100,7 @@ export function ProjectGrid({ locale, cats, projects, filterLabel, limit, showSt
             <span className="pcat">{locale === "en" ? CTA_CARD.eyebrow.en : CTA_CARD.eyebrow.ko}</span>
             <h3>{locale === "en" ? CTA_CARD.title.en : CTA_CARD.title.ko}</h3>
             <p>{locale === "en" ? CTA_CARD.body.en : CTA_CARD.body.ko}</p>
-            <Link className="btn btn-primary" href={withLocale("/contact", locale)}>
+            <Link className="btn btn-primary" href={withLocale("/contact", locale)} data-contact="general">
               <span>{locale === "en" ? CTA_CARD.cta.en : CTA_CARD.cta.ko}</span>
               <span className="arr" aria-hidden="true">
                 ↗

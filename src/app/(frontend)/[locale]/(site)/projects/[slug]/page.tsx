@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import type { Locale } from "@/lib/locale";
 import { resolveLocale, withLocale } from "@/lib/locale";
-import { PROJECTS, PROJECT_CATS, CATEGORY_SERVICE, SERVICES } from "@/lib/site/content";
+import { PROJECTS, PROJECT_CATS, CATEGORY_SERVICE, CATEGORY_TOPIC, SERVICES } from "@/lib/site/content";
 import { ProjectArt } from "@/components/site/work/ProjectArt";
 import { siteMetadata } from "@/lib/site/metadata";
 
@@ -133,7 +133,9 @@ export default async function ProjectPage({ params }: Props) {
           <h1>{en ? project.title.en : project.title.ko}</h1>
           <p className="lead">{en ? project.desc.en : project.desc.ko}</p>
           <div className="cta">
-            <Link className="btn btn-primary" href={withLocale("/contact", locale)}>
+            {/* data-contact preselects the sheet's topic per v3's CAT_TOPIC
+                (index.html:3597); href is the no-JS fallback (WOS-336). */}
+            <Link className="btn btn-primary" href={withLocale("/contact", locale)} data-contact={CATEGORY_TOPIC[project.cat]}>
               <span>{t("discuss")}</span>
               <span className="arr" aria-hidden="true">
                 ↗
@@ -213,7 +215,7 @@ export default async function ProjectPage({ params }: Props) {
           </p>
         </div>
         <div className="cta">
-          <Link className="btn btn-primary" href={withLocale("/contact", locale)}>
+          <Link className="btn btn-primary" href={withLocale("/contact", locale)} data-contact={CATEGORY_TOPIC[project.cat]}>
             <span>{t("discussProject")}</span>
             <span className="arr" aria-hidden="true">
               ↗

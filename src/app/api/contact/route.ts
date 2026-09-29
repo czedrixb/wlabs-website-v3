@@ -102,7 +102,19 @@ export async function POST(request: NextRequest) {
 
   const { name, org, email, phone, message, topic, locale, consentPrivacy, consentMarketing, captchaToken } = body;
 
-  if (!isNonEmptyString(name, MAX_LEN.name)) {
+  // WOS-336: two forms share this endpoint — the full /contact form and the
+  // site-wide #sheet slide-over (v3's slim variant, which has no name field
+  // by design). `source` is the submitting form's id, v3's own convention;
+  // absent means the pre-sheet contact form for backward compatibility.
+  const source = body.source === undefined ? "contact-form" : body.source;
+  if (source !== "contact-form" && source !== "sheet-form") {
+    return NextResponse.json({ ok: false, error: "invalid-source" }, { status: 400 });
+  }
+
+  if (source === "contact-form" && !isNonEmptyString(name, MAX_LEN.name)) {
+    return NextResponse.json({ ok: false, error: "invalid-name" }, { status: 400 });
+  }
+  if (name !== undefined && typeof name === "string" && name.length > MAX_LEN.name) {
     return NextResponse.json({ ok: false, error: "invalid-name" }, { status: 400 });
   }
   if (!isNonEmptyString(email, MAX_LEN.email) || !EMAIL_RE.test(email)) {
@@ -141,7 +153,7 @@ export async function POST(request: NextRequest) {
       data: {
         ref,
         topic: topic as Inquiry["topic"],
-        name: name.trim(),
+        name: typeof name === "string" && name.trim() !== "" ? name.trim() : undefined,
         org: typeof org === "string" ? org.trim() : undefined,
         email: email.trim(),
         phone: typeof phone === "string" ? phone.trim() : undefined,
@@ -149,7 +161,7 @@ export async function POST(request: NextRequest) {
         consentPrivacy: true,
         consentMarketing: consentMarketing === true,
         locale: locale as Inquiry["locale"],
-        source: "contact-form",
+        source,
         captchaStatus: captcha.status,
         captchaScore: captcha.score,
         userAgent: request.headers.get("user-agent") ?? undefined,

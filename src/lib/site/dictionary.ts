@@ -220,6 +220,10 @@ function build(locale: Locale) {
       failed: v3.contact.failed,
       invalid: v3.contact.invalid,
       needConsent: v3.contact.needConsent,
+      toastOkT: v3.contact.toastOkT,
+      toastOk: v3.contact.toastOk,
+      toastInvalidT: v3.contact.toastInvalidT,
+      toastFailT: v3.contact.toastFailT,
     },
   };
 }
