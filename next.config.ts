@@ -29,6 +29,16 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: path.resolve(dirname),
   },
+  // Every reader-facing page now lives under /ko or /en (WOS-314) — old
+  // unprefixed links redirect instead of 404ing. "/" becomes the v3 site
+  // home once that lands (Step 2+); until then it 404s under /ko, same as
+  // hitting /ko directly, which is expected mid-migration on this branch.
+  async redirects() {
+    return [
+      { source: "/", destination: "/ko", permanent: false },
+      { source: "/posts/:slug", destination: "/ko/blog/:slug", permanent: true },
+    ];
+  },
 };
 
 export default withPayload(nextConfig, { devBundleServerPackages: false });

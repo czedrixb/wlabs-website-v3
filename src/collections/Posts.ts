@@ -1,5 +1,29 @@
+import { revalidateTag } from "next/cache";
 import type { CollectionConfig } from "payload";
 import { slugify } from "@/lib/slugify";
+
+// Every public read goes through src/lib/cachedPosts.ts, which tags its
+// unstable_cache entries "posts" and lets them serve up to 60s stale so a
+// Postgres outage degrades gracefully (WOS-329). That means every write path
+// has to invalidate the same tag, or a published/edited/deleted post can sit
+// invisible on the public site for up to a minute — this hook is that half
+// of the contract.
+const invalidatePostsCache = () => {
+  try {
+    // Next 16 requires a cache-life profile as the second argument (bare
+    // revalidateTag(tag) is deprecated); "max" means invalidate immediately,
+    // matching the writer's intent — this is a hard write, not a soft nudge.
+    revalidateTag("posts", "max");
+  } catch {
+    // Payload's admin /create view auto-creates a blank draft server-side,
+    // during the admin page's own React render — Next forbids calling
+    // revalidateTag mid-render ("used during render which is unsupported")
+    // and throws. That auto-created draft was never public, so there is
+    // nothing to invalidate for it; swallow it rather than break the admin
+    // page. A real publish/update always runs from a route handler or
+    // server action, outside render, where this succeeds normally.
+  }
+};
 
 export const Posts: CollectionConfig = {
   slug: "posts",
@@ -28,6 +52,10 @@ export const Posts: CollectionConfig = {
     create: ({ req }) => Boolean(req.user),
     update: ({ req }) => Boolean(req.user),
     delete: ({ req }) => Boolean(req.user),
+  },
+  hooks: {
+    afterChange: [invalidatePostsCache],
+    afterDelete: [invalidatePostsCache],
   },
   versions: {
     drafts: {

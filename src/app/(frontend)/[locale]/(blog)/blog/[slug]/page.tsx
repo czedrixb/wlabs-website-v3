@@ -10,13 +10,11 @@ import { t } from "@/lib/strings";
 export const dynamic = "force-dynamic";
 
 type Props = {
-  params: Promise<{ slug: string }>;
-  searchParams: Promise<{ locale?: string }>;
+  params: Promise<{ locale: string; slug: string }>;
 };
 
-export default async function PostDetailPage({ params, searchParams }: Props) {
-  const { slug } = await params;
-  const { locale: localeParam } = await searchParams;
+export default async function PostDetailPage({ params }: Props) {
+  const { locale: localeParam, slug } = await params;
   const locale = resolveLocale(localeParam);
 
   const post = await getPostBySlug(slug);
@@ -28,7 +26,7 @@ export default async function PostDetailPage({ params, searchParams }: Props) {
 
   return (
     <>
-      <SiteHeader locale={locale} path={`/posts/${slug}`} />
+      <SiteHeader locale={locale} path={`/blog/${slug}`} />
       <main className="mx-auto max-w-3xl px-6 pb-16">
         {banner?.url && (
           <Image
