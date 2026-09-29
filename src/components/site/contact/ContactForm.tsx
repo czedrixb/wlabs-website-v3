@@ -6,7 +6,19 @@ import type { SiteStrings } from "@/lib/site/dictionary";
 import type { Topic } from "@/lib/site/content";
 import { loadRecaptcha, useInquirySubmit } from "./useInquirySubmit";
 
-type Props = { locale: Locale; s: SiteStrings["contact"]; topics: Topic[] };
+type Props = {
+  locale: Locale;
+  s: SiteStrings["contact"];
+  topics: Topic[];
+  /** "contact-form" on the contact page — the #contact .sp-tuner host skin (site.css:1437-1500) keys off it. */
+  id?: string;
+  /** The tuner's topic hand-off — follows every tuning change, exactly v3's #c-topic write (unknown values keep the current selection). */
+  prefillTopic?: string | null;
+  /** The tuner's summary — owns the message box only until the visitor types their own text (v3's data-spTouched guard). */
+  prefillMessage?: string;
+  /** v3's messageHint(): the locked summary, or the "move the dials" invite. */
+  messagePlaceholder?: string;
+};
 
 // Ports v3's #contact-form (site/index.html:2995-3009) class-for-class
 // (form form-2 / field req / ferr / check full / req-note full /
@@ -15,10 +27,28 @@ type Props = { locale: Locale; s: SiteStrings["contact"]; topics: Topic[] };
 // (that line *was* the localStorage disclaimer WOS-334 removed). The
 // validate/POST/status/toast machinery lives in useInquirySubmit (WOS-336),
 // shared with the #sheet slide-over.
-export function ContactForm({ locale, s, topics }: Props) {
+export function ContactForm({ locale, s, topics, id, prefillTopic = null, prefillMessage = "", messagePlaceholder }: Props) {
   const formRef = useRef<HTMLFormElement>(null);
   const [consented, setConsented] = useState(false);
   const { sending, status, errors, setErrors, submit } = useInquirySubmit({ locale, s, source: "contact-form" });
+
+  // The two tuner-driven fields are controlled, with v3's exact ownership
+  // rules, applied with the adjust-state-during-render pattern (a new
+  // prefill value lands on the very render that carries it, no effect
+  // round-trip).
+  const [topic, setTopic] = useState("");
+  const [message, setMessage] = useState("");
+  const [messageTouched, setMessageTouched] = useState(false);
+  const [prevPrefillTopic, setPrevPrefillTopic] = useState(prefillTopic);
+  const [prevPrefillMessage, setPrevPrefillMessage] = useState(prefillMessage);
+  if (prefillTopic !== prevPrefillTopic) {
+    setPrevPrefillTopic(prefillTopic);
+    if (prefillTopic && topics.some((t) => t.id === prefillTopic)) setTopic(prefillTopic);
+  }
+  if (prefillMessage !== prevPrefillMessage) {
+    setPrevPrefillMessage(prefillMessage);
+    if (!messageTouched) setMessage(prefillMessage);
+  }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -30,9 +60,17 @@ export function ContactForm({ locale, s, topics }: Props) {
   return (
     <form
       ref={formRef}
+      id={id}
       className={`form form-2${sending ? " sending" : ""}`}
       onFocus={() => void loadRecaptcha()}
       onSubmit={(e) => void handleSubmit(e)}
+      onReset={() => {
+        // useInquirySubmit calls form.reset() on success — clear the
+        // controlled fields along with the native ones.
+        setTopic("");
+        setMessage("");
+        setMessageTouched(false);
+      }}
       noValidate
     >
       <p className="req-note full">
@@ -73,7 +111,16 @@ export function ContactForm({ locale, s, topics }: Props) {
       </div>
       <div className={`field full req${errors.topic ? " err" : ""}`}>
         <label htmlFor="c-topic">{s.fTopic}</label>
-        <select id="c-topic" name="topic" required defaultValue="" onChange={() => setErrors((e) => ({ ...e, topic: false }))}>
+        <select
+          id="c-topic"
+          name="topic"
+          required
+          value={topic}
+          onChange={(e) => {
+            setTopic(e.target.value);
+            setErrors((prev) => ({ ...prev, topic: false }));
+          }}
+        >
           <option value="" disabled>
             {" "}
           </option>
@@ -87,7 +134,19 @@ export function ContactForm({ locale, s, topics }: Props) {
       </div>
       <div className="field full">
         <label htmlFor="c-msg">{s.fMsg}</label>
-        <textarea id="c-msg" name="message" rows={5} />
+        <textarea
+          id="c-msg"
+          name="message"
+          rows={5}
+          value={message}
+          placeholder={messagePlaceholder}
+          onChange={(e) => {
+            setMessage(e.target.value);
+            // v3's data-spTouched: owned by the visitor while non-empty,
+            // handed back to the tuner when they empty it (index.html:5363-5366).
+            setMessageTouched(e.target.value.trim() !== "");
+          }}
+        />
       </div>
       <label className="check full">
         <input

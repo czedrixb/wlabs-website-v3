@@ -5,17 +5,19 @@ import type { Locale } from "@/lib/locale";
 import { withLocale } from "@/lib/locale";
 import type { SiteStrings } from "@/lib/site/dictionary";
 
-// Real content + markup shape from site/index.html's #home's sp-faq2
-// instance (a plain accordion — "in the shell's plain list idiom, no
-// canvas, nothing to learn", per the source's own comment). This
-// supersedes an earlier pass at this component built against
-// src/mods/mod-faq.html's canvas-textured design, which turns out to be
-// stale: the design repo moved Home's FAQ to this simpler accordion and
-// kept the canvas version (SpectrogramStack.tsx) only for the Contact
-// page's larger 8-question set (#sp-bands-faq, not yet ported). Caught by
-// visually checking the rendered page rather than by reading source alone
-// — worth remembering for the rest of this port.
-function buildFaqItems(s: SiteStrings["faq"]) {
+// Real content + markup shape from site/index.html's sp-faq2 instances (a
+// plain accordion — "in the shell's plain list idiom, no canvas, nothing
+// to learn", per the source's own comment). This supersedes an earlier
+// pass at this component built against src/mods/mod-faq.html's
+// canvas-textured design, which the design repo has since dropped:
+// today's built reference uses this accordion for BOTH FAQ surfaces —
+// Home's 4-question set (#sp-faq2-t-home) and Contact's 8-question
+// inquiry set (#sp-faq2-t-inq, index.html:3012-3095; no CTAs, no "ask"
+// link, only Q3 keeps its regulatory cap note) — and #sp-bands-faq no
+// longer exists there. The `variant` prop selects which instance this is.
+type FaqItem = { id: string; question: string; answer: string; note?: string; ctas?: { href: string; label: string }[] };
+
+function buildHomeItems(s: SiteStrings["faq"]): FaqItem[] {
   return [
     {
       id: "what",
@@ -48,22 +50,41 @@ function buildFaqItems(s: SiteStrings["faq"]) {
   ];
 }
 
-type Props = { locale: Locale; s: SiteStrings["faq"] };
+function buildInquiryItems(s: SiteStrings["faq"]): FaqItem[] {
+  return [
+    { id: "what", question: s.q1, answer: s.a1 },
+    { id: "start", question: s.q2, answer: s.a2 },
+    { id: "medical", question: s.q3, answer: s.a3, note: s.note3 },
+    { id: "vetted", question: s.q4, answer: s.a4 },
+    { id: "bilingual", question: s.q5, answer: s.a5 },
+    { id: "after", question: s.q6, answer: s.a6 },
+    { id: "existing", question: s.q7, answer: s.a7 },
+    { id: "size", question: s.q8, answer: s.a8 },
+  ];
+}
 
-export function Faq({ locale, s }: Props) {
+type Props = { locale: Locale; s: SiteStrings["faq"]; variant?: "home" | "inquiry" };
+
+export function Faq({ locale, s, variant = "home" }: Props) {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
-  const faqItems = buildFaqItems(s);
+  const inquiry = variant === "inquiry";
+  const faqItems = inquiry ? buildInquiryItems(s) : buildHomeItems(s);
+  const idBase = inquiry ? "sp-faq2-inq" : "sp-faq2-home";
 
   return (
     <div className="wrap sp-home-faq">
-      <section className="sp-faq2" aria-labelledby="sp-faq2-t-home">
+      <section className="sp-faq2" aria-labelledby={`sp-faq2-t-${inquiry ? "inq" : "home"}`}>
         <div className="sp-faq2-top">
-          <h2 className="eyebrow" id="sp-faq2-t-home">
+          <h2 className="eyebrow" id={`sp-faq2-t-${inquiry ? "inq" : "home"}`}>
             {s.title}
           </h2>
-          <a className="link" href={withLocale("/contact", locale)}>
-            {s.ask} →
-          </a>
+          {/* Only Home carries the "ask us directly" link — the inquiry
+              instance already sits on the contact page (v3 :3016-3018). */}
+          {!inquiry && (
+            <a className="link" href={withLocale("/contact", locale)}>
+              {s.ask} →
+            </a>
+          )}
         </div>
         <div className="sp-faq2-list">
           {faqItems.map((item, i) => {
@@ -74,23 +95,25 @@ export function Faq({ locale, s }: Props) {
                   className="sp-faq2-q"
                   type="button"
                   aria-expanded={isOpen}
-                  aria-controls={`sp-faq2-home-${i}`}
+                  aria-controls={`${idBase}-${i}`}
                   onClick={() => setOpenIndex(isOpen ? null : i)}
                 >
                   <b>{item.question}</b>
                   <span className="sp-faq2-mark" aria-hidden="true" />
                 </button>
-                <div className="sp-faq2-body" id={`sp-faq2-home-${i}`}>
+                <div className="sp-faq2-body" id={`${idBase}-${i}`}>
                   <div className="sp-collapse-in">
                     <p>{item.answer}</p>
                     {item.note && <p className="cap">{item.note}</p>}
-                    <div className="sp-faq2-ctas">
-                      {item.ctas.map((cta) => (
-                        <a key={cta.href} className="link" href={withLocale(cta.href, locale)}>
-                          {cta.label} →
-                        </a>
-                      ))}
-                    </div>
+                    {item.ctas && (
+                      <div className="sp-faq2-ctas">
+                        {item.ctas.map((cta) => (
+                          <a key={cta.href} className="link" href={withLocale(cta.href, locale)}>
+                            {cta.label} →
+                          </a>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>

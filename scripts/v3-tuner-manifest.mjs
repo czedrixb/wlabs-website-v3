@@ -146,5 +146,15 @@ export const TUNER_MANIFEST = {
     pr7: { v3Key: "spTunerPr7" },
     pr8: { v3Key: "spTunerPr8" },
     projNote: { v3Key: "spTunerProjNote" },
+    // The host-wiring strings v3 keeps outside its dictionary entirely
+    // (formHead() at index.html:5482-5487, messageHint() at :5491-5499 —
+    // "owned by this wiring", never data-i harvested) — inline literals,
+    // transcribed verbatim.
+    formHeadH: { ko: "이제 연락처를 알려주세요", en: "Now tell us who you are" },
+    formHeadP: { ko: "하루 안에 답변드립니다.", en: "We reply within one business day." },
+    msgHint: {
+      ko: "무엇이 필요한지 아직 정리되지 않았다면, 위의 다이얼 세 개를 움직여 보세요. 공명하는 항목이 여기에 요약됩니다. 자유롭게 적어 주셔도 됩니다.",
+      en: "Not sure how to describe it? Move the three dials above and what resonates will be summarised here. Or just write it in your own words.",
+    },
   },
 };

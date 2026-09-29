@@ -1,6 +1,6 @@
 // GENERATED FILE — do not hand-edit.
 // Regenerate with: node scripts/extract-v3-dictionary.mjs
-// Source: D:/Submit/wlabs-website-v3/site/index.html
+// Source: D:\Submit\wlabs-website-v3\site\index.html
 //
 // Raw Korean/English pairs harvested from the v3 design repo, scoped to
 // scripts/v3-dictionary-manifest.mjs. src/lib/site/dictionary.ts composes
@@ -356,7 +356,10 @@ export const V3_STRINGS = {
       "pr6": "생성형 AI로 감사와 응원의 메시지를 만들어 주는 플랫폼.",
       "pr7": "하지 않을 일을 먼저 정하는 것으로 시작하는 할 일 앱.",
       "pr8": "뉴럴 TTS로 텍스트에서 음성 파일을 일괄 생성합니다.",
-      "projNote": "고객사 이름은 서면 동의를 받은 경우에만 표기합니다. 성과 수치는 실제 프로젝트 데이터로 확인된 경우에만 게재합니다."
+      "projNote": "고객사 이름은 서면 동의를 받은 경우에만 표기합니다. 성과 수치는 실제 프로젝트 데이터로 확인된 경우에만 게재합니다.",
+      "formHeadH": "이제 연락처를 알려주세요",
+      "formHeadP": "하루 안에 답변드립니다.",
+      "msgHint": "무엇이 필요한지 아직 정리되지 않았다면, 위의 다이얼 세 개를 움직여 보세요. 공명하는 항목이 여기에 요약됩니다. 자유롭게 적어 주셔도 됩니다."
     },
     "rail": {
       "reading": "읽는 위치",
@@ -823,7 +826,10 @@ export const V3_STRINGS = {
       "pr6": "A platform that generates messages of thanks and encouragement with generative AI.",
       "pr7": "A to-do app that starts by deciding what you won't do.",
       "pr8": "Batch-generates audio files from text with neural TTS.",
-      "projNote": "Client names appear only with written permission. Figures are published only when confirmed by actual project data."
+      "projNote": "Client names appear only with written permission. Figures are published only when confirmed by actual project data.",
+      "formHeadH": "Now tell us who you are",
+      "formHeadP": "We reply within one business day.",
+      "msgHint": "Not sure how to describe it? Move the three dials above and what resonates will be summarised here. Or just write it in your own words."
     },
     "rail": {
       "reading": "Reading",
