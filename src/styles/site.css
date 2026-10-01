@@ -172,14 +172,6 @@ main{padding-bottom:calc(var(--tabbar) + env(safe-area-inset-bottom,0px))}
 .proof-item{background:var(--navy);padding:20px 18px;display:grid;gap:6px;align-content:start;min-height:128px}
 .proof-item b{font:700 clamp(30px,8vw,40px)/1 var(--display);letter-spacing:-.03em;color:var(--cyan)}
 .proof-item span{font-size:13px;line-height:1.5;color:var(--on-navy-muted)}
-/* WOS-331: the "since {year}" stat reads as one sentence with the animated
-   counter inline (English needs the year AFTER "since", Korean needs it
-   BEFORE — see src/lib/site/dictionary.ts's stat2 template and
-   ProofBand.tsx), not as its own big/small two-row stat like the other
-   three. Neutralize the oversized standalone-counter style from the rule
-   above for just this one composed sentence. */
-.proof-item .stat2{display:inline}
-.proof-item .stat2 b{font:inherit;letter-spacing:inherit;color:inherit}
 .proof-item .ok{display:inline-flex;align-items:center;gap:8px;font-size:clamp(20px,5.6vw,26px);min-height:40px}
 .proof-item .ok i{width:26px;height:26px;border-radius:50%;background:var(--cyan-soft);display:grid;place-items:center;font-style:normal;color:var(--cyan);font-size:14px}
 .proof .ok i{transform:scale(.2);opacity:0;transition:transform var(--micro) cubic-bezier(.34,1.56,.64,1),opacity calc(var(--micro)*.6) ease-out}
@@ -303,7 +295,7 @@ footer{border-top:1px solid var(--line);padding-block:var(--s5) var(--s4);backgr
 .seg button[aria-selected="true"]{background:transparent;color:#fff}
 /* sliding indicator shared by segmented tabs and filter bars */
 .seg-track,.filters-track{position:relative;isolation:isolate}
-.seg-track>button,.filters-track>button{position:relative;z-index:1}
+.seg-track>button,.filters-track>button,.seg-track>a{position:relative;z-index:1}
 /* liquid pill: both edges are animated separately — the edge facing the target moves first, the trailing edge follows, so the pill stretches then contracts */
 .track-pill{--lead:.34s;--lag:.14s;--ease:cubic-bezier(.2,.8,.2,1);position:absolute;top:var(--track-pad,4px);left:var(--l,0px);right:var(--r,0px);height:calc(100% - 2*var(--track-pad,4px));border-radius:var(--r-pill);background:var(--ink);z-index:0;pointer-events:none;opacity:var(--on,0);transition:left var(--lead) var(--ease),right var(--lead) var(--ease)}
 .track-pill.to-right{transition:right var(--lead) var(--ease),left var(--lead) var(--ease) var(--lag)}
@@ -542,6 +534,42 @@ ol.timeline p{font-size:15px;color:var(--ink-2);line-height:1.65}
 .check input{width:22px;height:22px;margin:0;accent-color:var(--teal)}
 .check{align-items:center}
 .check span{padding-top:1px;line-height:1.5}
+/* WOS-337: the consent boxes were the browser's own control tinted with
+   accent-color (above), which cannot be rounded -- a native checkbox takes
+   no border-radius, so the two square corners next to every other rounded
+   thing on the form were not a choice anyone made. This is the same
+   control drawn by hand: same 22px box, same teal when checked, same
+   white tick, 4px on the corners. The input keeps its own element, so the
+   label, the required gate and the reset all still work on it. */
+.check input[type=checkbox]{appearance:none;-webkit-appearance:none;
+  width:22px;height:22px;margin:0;flex:none;
+  border:1.5px solid var(--line-strong);border-radius:4px;
+  background:var(--cream);display:grid;place-content:center;cursor:pointer;
+  transition:background .15s var(--ease),border-color .15s var(--ease)}
+.check input[type=checkbox]::before{content:"";width:13px;height:13px;
+  background:#fff;transform:scale(0);
+  transition:transform .15s var(--ease);
+  /* a tick, cut out of a square rather than drawn as a stroke, so it
+     scales with the box and needs no second element */
+  clip-path:polygon(14% 45%,0 59%,38% 100%,100% 19%,86% 5%,38% 72%)}
+.check input[type=checkbox]:checked{background:var(--teal);border-color:var(--teal)}
+.check input[type=checkbox]:checked::before{transform:scale(1)}
+.check input[type=checkbox]:focus-visible{outline:2px solid var(--teal);
+  outline-offset:2px}
+@media (prefers-reduced-motion:reduce){
+  .check input[type=checkbox],
+  .check input[type=checkbox]::before{transition:none}
+}
+/* on the navy grounds the unchecked box has no cream to sit on, so it
+   takes the ground's own edge and a wash of light instead */
+.on-navy .check input[type=checkbox],
+.sheet .check input[type=checkbox]{
+  border-color:var(--line-navy);background:rgba(255,255,255,.08)}
+.on-navy .check input[type=checkbox]:checked,
+.sheet .check input[type=checkbox]:checked{
+  background:var(--teal-2);border-color:var(--teal-2)}
+.on-navy .check input[type=checkbox]:focus-visible,
+.sheet .check input[type=checkbox]:focus-visible{outline-color:var(--cyan)}
 .btn:disabled,.btn[aria-disabled="true"]{opacity:.45;cursor:not-allowed;transform:none!important;box-shadow:none}
 .on-navy .btn-primary:disabled{background:var(--cyan);color:var(--navy)}
 .form-status{border-radius:var(--r-s);padding:12px 14px;font-size:14px;background:var(--teal-soft);color:var(--teal)}
@@ -572,6 +600,48 @@ ol.timeline p{font-size:15px;color:var(--ink-2);line-height:1.65}
   .tabbar{display:none}
   .header{display:block;position:sticky;top:env(safe-area-inset-top,0px);z-index:50;background:none;border-bottom:0;margin-bottom:-72px}
   .screen{padding-top:72px}
+  /* WOS-338: v3 is one document with seven <section class="screen">
+     elements, so `.screen{padding-top:72px}` (above) is every screen's own
+     compensation for the header's negative margin. This app is a real
+     multi-page site instead — each route renders its own top-level
+     element rather than a `.screen` section — and only /contact happens to
+     carry that class itself. Every other page (work, company, search,
+     product/project detail, blog) rendered flush under the header with no
+     gap at all. #main is the one wrapper every route shares (SiteChrome),
+     so anchoring the same 72px there covers all of them; on /contact this
+     duplicates .screen's own 72px onto the same property with the same
+     value, which doesn't stack (a later padding-top simply wins), so nothing
+     there changes. .story (Hero's own wrapper) is excluded the same way the
+     mobile masthead's equivalent fix below excludes it: Home's sticky
+     `.stage{top:72px}` already pins the hero at this exact offset with
+     nothing above it, so it doesn't want this padding at all — the hero is
+     meant to run full-bleed under the transparent header. */
+  #main>:first-child:not(.story){padding-top:72px}
+  /* WOS-336: v3 puts the 72px compensation on the `.screen` wrapper, so
+     .page-head keeps its own --s4 above the eyebrow. Here the compensation
+     lands on the page-head itself (it IS #main's first child) and swallowed
+     that 40px — restate the reference rhythm: 72px header + 40px breathing
+     room. */
+  #main>.page-head:first-child{padding-top:calc(72px + var(--s4))}
+  /* WOS-336: on the tabbed screens (the only ones that render a .seg) the
+     header takes the same cream ground as the sticky tab row, so the two
+     sticky rows merge into a single surface with one edge underneath —
+     v3's body:has(#work)/body:has(#company) rule (index.html:6654). */
+  body:has(#main .seg) .header{background:var(--cream)}
+  /* ...and the contrast inversion is pinned off with it: the sampler reads
+     whatever paints behind the bar (e.g. the dark seg track pinned under
+     it), which is underneath an opaque cream ground the reader can no
+     longer see — so it would invert the bar over nothing (v3 :6656-6677). */
+  body:has(#main .seg) .header.is-dark .wrap,
+  body:has(#main .seg) .header.is-dark .sub,
+  body:has(#main .seg) .header.is-dark .lockup{filter:none}
+  body:has(#main .seg) .header.is-dark nav>ul::before{
+    -webkit-backdrop-filter:blur(16px) saturate(150%);
+    backdrop-filter:blur(16px) saturate(150%)}
+  body:has(#main .seg) .header.is-dark .sp-navpane::before{
+    background:linear-gradient(180deg,rgba(255,255,255,.66),rgba(223,236,245,.48));
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.95),
+               inset 0 0 0 1px rgba(24,39,49,.07)}
   .seg{top:calc(72px + env(safe-area-inset-top,0px))}
   /* header inverts while a dark (.on-navy) section sits behind it */
   .header .wrap{transition:filter .25s}
@@ -1490,10 +1560,9 @@ html:lang(ko) .sp-faq2-item b{font-family:var(--body);word-break:keep-all}
 #contact .sp-faq2-item p{color:var(--on-navy-muted)}
 #contact .sp-faq2-item p.cap{color:var(--on-navy-muted);opacity:.8}
 #contact .sp-faq2-q:focus-visible{outline-color:var(--cyan)}
-#sp-bands-faq .sp-band-panel{padding-top:0}
-/* the inquiry screen is already navy; the stack is darker than it, so the ring
-   is all that is needed to read it as an object */
-#sp-bands-faq{box-shadow:inset 0 0 0 1px var(--line-navy)}
+/* (WOS-336: the two #sp-bands-faq rules that sat here were dead in the v3
+   reference too — its contact FAQ is the sp-faq2 accordion, and no element
+   carries that id in the built page — so they're removed, not ported.) */
 
 /* Services band stack sits full-width inside the home column. The section
    already has its own SERVICES eyebrow, so the stack's is screen-reader only. */
@@ -1508,19 +1577,29 @@ html:lang(ko) .sp-faq2-item b{font-family:var(--body);word-break:keep-all}
    (keeping its .seg wrapper, which the shell's tab router selects on),
    so the two share one row. When another tab is active the band keeps
    only the tabs and the timeline folds away. */
-#company .sp-rail{width:100%;max-width:var(--container);margin-inline:auto;
-  padding-inline:var(--gutter)}
-#company .sp-rail-band{display:grid;gap:0}
-/* the band is a box, so the row inside it is inset on all four sides --
-   without this the tabs touch the band's edge on Team and Insights,
-   where the timeline is folded away and the row is all there is. */
-/* The band reads top-down: the section tabs, then the filters they scope,
-   then the timeline the filters draw on. Tabs first because they are the
-   only control that is there on every Company tab -- sharing their line
-   with the timeline made the row's height, and the tabs' position, depend
-   on which tab was open. */
-.sp-rail-navrow{display:flex;align-items:center;gap:var(--s3);min-width:0;
-  padding:10px var(--s1)}
+/* WOS-336: unlike v3 (which hoists the rail out of the story panel), this
+   port keeps the rail inside #panel-story's own .wrap — so the rail takes
+   no gutters of its own, the wrap already provides them. */
+#company .sp-rail{width:100%;padding-block:10px}
+#company.is-story .sp-rail{padding-top:0}
+#company .sp-rail-band{display:grid;gap:0;
+  /* the band's corners were 16px while the tab pill inside the tabs bar is
+     fully round; 24px+2 clearance closes the disagreement (v3 :1524) */
+  border-radius:26px}
+/* The pinned tab bar: the page's own column, the page's ground, and the
+   tab pill sitting on it (v3 :1545) — a bare wrapper; the track is the
+   object, exactly as on Work. The band then pins UNDER it. */
+/* top offsets live in the width media blocks (72px header / phone
+   masthead) — stated there AND here because this block sits later in the
+   file and a bare `top` here would win the cascade over them. */
+#company .sp-rail-tabs{position:sticky;z-index:21;
+  width:100%;max-width:var(--container);margin-inline:auto;
+  padding-inline:var(--gutter);padding-block:10px;background:var(--cream)}
+@media (min-width:744px){
+  #company .sp-rail-tabs{top:calc(72px + env(safe-area-inset-top,0px))}
+}
+#company .sp-rail-tabs .sp-rail-navrow{width:max-content;max-width:100%}
+.sp-rail-navrow{display:flex;align-items:center;gap:var(--s3);min-width:0}
 .sp-rail-navrow .seg{position:static;padding-block:0;flex:none}
 .sp-rail-navrow .seg .wrap{max-width:none;padding-inline:0;margin-inline:0}
 #company .sp-rail .sp-rail-filters{padding-inline:var(--s1)}
@@ -1530,15 +1609,64 @@ html:lang(ko) .sp-faq2-item b{font-family:var(--body);word-break:keep-all}
    off the height the instrument was told to be */
 #company .sp-rail-band>.sp-rail-rail.sp-rail-rail{height:auto;
   min-height:calc(var(--sp-rail-h) + 16px)}
+/* The band pins under the tab bar rather than under the header —
+   --sp-rail-top is the module's own measured host occlusion; --sp-tabs-h
+   is published by StoryRail's measureStack, because the module's probe
+   only counts what is pinned at the very top of the window and the tab
+   bar sits below the header (v3 :1575). */
+#company .sp-rail .sp-rail-band{
+  top:calc(var(--sp-rail-top,0px) + var(--sp-tabs-h,0px))}
+/* the log's own scroll targets clear both bars, not just the band */
+#company .sp-rail .sp-rail-log>*{
+  scroll-margin-top:calc(var(--sp-rail-off,0px) + var(--sp-tabs-h,0px) + 8px)}
 
-/* only Our story gets the instrument */
-#company:not(.is-story) .sp-rail-band>:not(.sp-rail-navrow),
-#company:not(.is-story) .sp-rail>:not(.sp-rail-band){display:none}
-/* With the timeline folded away the band holds nothing but the three tabs,
-   and a full-width bar around them read as an empty panel. It hugs them
-   instead -- a pill of tabs, flush left, the way the tab group looks
-   everywhere else. Our story keeps the full width: the instrument needs it. */
-#company:not(.is-story) .sp-rail-band{width:max-content;max-width:100%}
+/* Off Our story the bar is the only thing pinned and the panel follows it
+   directly, so the gap under the band comes off the bar (v3 :1593/1606). */
+#company:not(.is-story) .sp-rail-tabs{margin-bottom:calc(var(--s5) / 2)}
+/* the counter tiles take the same gap the other two tabs leave under the
+   band, so the band clears its content by the same amount on every tab */
+#company .sp-rail>.sp-rail-counters{margin-top:calc(var(--s5) / 2)}
+@media (min-width:900px){
+  #company:not(.is-story) .sp-rail-tabs{margin-bottom:calc(var(--sec) / 2)}
+  #company .sp-rail>.sp-rail-counters{margin-top:calc(var(--sec) / 2)}
+}
+
+/* The band's ground on Our story: the rail is the whole log and scrolls
+   away while the band stays pinned, so the cream ground rides with the
+   band — a sticky slab behind it, pinned 10px higher and 20px taller —
+   and the rounded page edge hangs off the slab's FOOT, below the band,
+   where the log actually passes (v3 theme8, index.html:6594-6635). */
+#company.is-story .sp-rail-ground{position:sticky;z-index:19;pointer-events:none;
+  top:calc(var(--sp-rail-top) + var(--sp-tabs-h,0px) - 10px);
+  /* a zero-height marker: slab and edge are both drawn out of flow */
+  height:0}
+#company.is-story .sp-rail-ground::before{content:"";position:absolute;
+  left:calc(var(--gutter) * -1);right:calc(var(--gutter) * -1);top:0;
+  /* --sp-rail-off is the host occlusion plus the band's measured height,
+     so this is the band plus the rail's 10px pad above and below */
+  height:calc(var(--sp-rail-off) - var(--sp-rail-top) + 20px);
+  background:var(--cream)}
+#company.is-story .sp-rail-ground::after{content:"";position:absolute;
+  top:calc(var(--sp-rail-off) - var(--sp-rail-top) + 20px);
+  left:50%;transform:translateX(-50%);
+  width:min(100vw - (var(--gutter) - 16px) * 2,
+            var(--container) - (var(--gutter) - 16px) * 2);
+  height:var(--edge-h);border-top:1.5px solid var(--edge-line);
+  border-radius:16px 16px 0 0;
+  background:var(--edge-fade);
+  pointer-events:none}
+/* without the rail's script the band has no measured height, so the ground
+   would draw at a guessed one */
+#company.is-story .sp-rail:not(.is-live) .sp-rail-ground,
+#company:not(.is-story) .sp-rail-ground{display:none}
+@media (max-width:743.98px){
+  #company.is-story .sp-rail-ground{
+    top:calc(var(--sp-rail-top) + var(--sp-tabs-h,0px) - 6px)}
+  #company.is-story .sp-rail-ground::before{
+    height:calc(var(--sp-rail-off) - var(--sp-rail-top) + 12px)}
+  #company.is-story .sp-rail-ground::after{
+    top:calc(var(--sp-rail-off) - var(--sp-rail-top) + 12px)}
+}
 
 /* tab contents keep the page's side gutters */
 #panel-story.is-rail-host{padding-inline:var(--gutter)}
@@ -1696,12 +1824,25 @@ html:lang(ko) .sp-faq2-item b{font-family:var(--body);word-break:keep-all}
   }
   /* the lockup floats over the page now, so the first block on every
      screen starts below it rather than under it -- the hero is the one
-     exception, since its stage is meant to run full-bleed to the top */
-  [data-screen]:not(#home)>.page-head,
-  #product-root>.crumbs,#project-root>.crumbs{
+     exception, since its stage is meant to run full-bleed to the top.
+     WOS-338: v3 scopes this to its own `[data-screen]`/#product-root/
+     #project-root markup, none of which this Next.js port ever renders
+     (each route is its own page, not a hidden/shown `[data-screen]`
+     section) -- so this compensation was dead code, and every non-home
+     mobile page ran the masthead's lockup straight over its own heading
+     with zero gap. #main is the wrapper every route shares (SiteChrome);
+     .story (Hero's own wrapper) is Home's unique first child, so
+     excluding it by class reproduces the same "hero only" exception
+     without needing v3's data-screen markup. */
+  #main>:first-child:not(.story){
     padding-top:calc(var(--sp-mhead-h,52px) + var(--s2))}
+  /* #company is the first child on /company — the masthead compensation
+     lands on the wrapper, so the page-head inside drops its own 40px to
+     keep v3's phone total (masthead + 16px). */
+  #company>.page-head{padding-top:0}
   /* the page's own sticky bands sit under it, not behind it */
   .seg{top:var(--sp-mhead-h,56px)}
+  #company .sp-rail-tabs{top:var(--sp-mhead-h,56px)}
 }
 
 /* The related items in a Services band are a stacked list -- one 44px row
@@ -1725,9 +1866,10 @@ html:lang(ko) .sp-faq2-item b{font-family:var(--body);word-break:keep-all}
 @media (max-width:743.98px){
   .seg{padding-block:6px}
   .seg-track{padding:3px;gap:2px}
-  .seg button{min-height:34px;padding:0 12px;font-size:13px}
+  .seg button,.seg a{min-height:34px;padding:0 12px;font-size:13px}
 
-  .sp-rail-navrow{padding:6px var(--s1)}
+  #company .sp-rail-tabs{padding-block:6px}
+  #company .sp-rail-band{border-radius:22px}
   .sp-rail .sp-rail-filters{padding:6px var(--s1);gap:6px}
   .sp-rail .sp-rail-pill{min-height:30px;padding:0 10px;gap:5px;font-size:12px}
   /* the counts are a desktop nicety; on a phone they are the first thing
@@ -1804,10 +1946,10 @@ html:lang(ko) .sp-faq2-item b{font-family:var(--body);word-break:keep-all}
   --shadow-1:0 1px 2px rgba(24,39,49,.06),0 8px 24px -12px rgba(24,39,49,.20);
   --shadow-2:0 24px 60px -24px rgba(21,43,59,.45);
 }
-/* the paper picks up the demo's cool light: a wash from the upper right */
-body{background:
-  radial-gradient(ellipse at 76% 6%,#DCEAF3 0,transparent 52%),
-  linear-gradient(150deg,#FBFCFD,#EDF2F5) fixed;}
+/* WOS-336: the paper is one flat, even ground — the reference's theme8
+   removed its earlier radial wash so every section sits on one surface
+   and no color band shows under the sticky header/tab rows. */
+body{background:var(--cream)}
 .logo-h{width:120px;height:44px;color:var(--ink)}
 /* the bar inverts as a whole on dark sections; the lockup is artwork with
    its own colour, so it inverts back and swaps symbol instead */
@@ -1835,12 +1977,6 @@ body{background:
    under the active module is untouched -- it is cut from this same pane,
    so losing the stroke costs nothing there. */
 .header nav>ul{border-color:transparent}
-.header nav>ul::before{border:0;
-  background:linear-gradient(180deg,rgba(255,255,255,.66),rgba(223,236,245,.48));
-  -webkit-backdrop-filter:blur(16px) saturate(150%);
-  backdrop-filter:blur(16px) saturate(150%);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.95),
-             inset 0 0 0 1px rgba(24,39,49,.07)}
 /* The notch was a stroked path drawn under the pane. With no pill border
    left for it to continue, the line had nothing to belong to -- so the
    stroke goes entirely. The indent survives: it is cut out of the pane
@@ -1867,120 +2003,99 @@ body{background:
 @media (prefers-reduced-motion:reduce){
   .header nav>ul{transition:none}
 }
-.sp-navpane{position:absolute;inset:-1.5px;z-index:0;pointer-events:none;
-  filter:drop-shadow(0 1px 0 rgba(24,39,49,.13))
-         drop-shadow(0 2px 3px rgba(21,43,59,.10))
-         drop-shadow(0 10px 20px rgba(21,43,59,.16))}
-.sp-navpane::before{content:"";position:absolute;inset:0;border-radius:999px;
-  background:linear-gradient(180deg,rgba(255,255,255,.66),rgba(223,236,245,.48));
-  -webkit-backdrop-filter:blur(16px) saturate(150%);
-  backdrop-filter:blur(16px) saturate(150%);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.95),
-             inset 0 0 0 1px rgba(24,39,49,.07);
-  /* the indent: a tab-shaped bite out of the pane's bottom edge under the
-     active module, riding --x / --w, which the shell publishes on the ul */
-  clip-path:polygon(0 0,100% 0,100% 100%,
-    calc(var(--x,0px) + var(--w,0px) + 12px) 100%,
-    calc(var(--x,0px) + var(--w,0px) + 5px) calc(100% - 6.5px),
-    calc(var(--x,0px) - 5px) calc(100% - 6.5px),
-    calc(var(--x,0px) - 12px) 100%,0 100%)}
-
-/* On dark sections the header is inverted wholesale. A backdrop filter
-   samples what is behind it and then gets inverted too, which turns the
-   teal band under it brown -- so over dark the pane stops sampling and
-   becomes an opaque one, specified as what it should look like BEFORE
-   the inversion. */
-.header.is-dark .sp-navpane::before{
-  -webkit-backdrop-filter:none;backdrop-filter:none;
-  /* these two look wrong on purpose: inversion is a per-channel flip, so
-     a cool grey would come out warm brown. #E3D0C3 / #D7BCAD are the
-     complements of the steel this is meant to read as (#1C2F3C/#284352). */
-  background:linear-gradient(180deg,#E3D0C3,#D7BCAD);
-  box-shadow:inset 0 0 0 1px rgba(24,39,49,.10)}
-.header nav>ul>li>a{position:relative;z-index:1}
+/* WOS-336: the pane itself (.sp-navpane and its ::before, the ul::before
+   blur layer, and the is-dark opaque variant) is defined ONCE in the
+   WOS-337 block near the end of this sheet. An earlier copy here also put
+   backdrop-filter on .sp-navpane::before, which the later copy did not
+   override -- two stacked blurs read as a solid white pill instead of
+   glass. */
 
 /* the band stack's ground is painted, not tokenised */
 .sp-bands{background:#16242E}
 .sp-bands-stack>.sp-band{--sp-band-ground:22,36,46}
 .sp-bands-stack>.sp-band:nth-child(even){background:#101C24;--sp-band-ground:16,28,36}
 
-/* ── buttons: chrome and glass ───────────────────────────────────────
-   Both buttons drop their border and become objects with a light source:
-   a bevel painted with two inset shadows (light along the top edge, shade
-   along the bottom), a body gradient, and a ground shadow that says how
-   far off the page it sits. Press moves the light to the other side --
-   the highlight goes, an inset shade comes in -- so the button reads as
-   depressed rather than just smaller. */
-.btn{transition:transform .18s var(--ease),box-shadow .18s var(--ease),
-     background .2s,color .2s}
+/* ── buttons: flat ──────────────────────────────────────────────────
+   WOS-337: v3 carried a "chrome and glass" pair here — a bevel painted
+   with two inset shadows, a sheen gradient, a ground shadow, and a press
+   that moved the light to the other side — until 29 Sep 2026, when the PM
+   asked for a flat version. This port had copied the chrome-and-glass
+   pair (this comment block used to say so); v3's own archive is
+   docs/BUTTONS-chrome-and-glass.md in the design repo if it ever needs to
+   come back.
 
-.btn-primary{border:0;color:#fff;text-shadow:0 1px 0 rgba(6,32,50,.35);
-  background:
-    linear-gradient(180deg,rgba(255,255,255,.26),rgba(255,255,255,0) 46%),
-    linear-gradient(180deg,#2E8AC0,#146CA1 54%,#0E527D);
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.55),
-    inset 0 -1px 0 rgba(4,28,45,.5),
-    inset 0 0 0 1px rgba(9,60,92,.55),
-    0 1px 1px rgba(12,38,56,.16),
-    0 10px 20px -10px rgba(10,52,80,.6)}
-.btn-primary:hover{transform:translateY(-1px);
-  background:
-    linear-gradient(180deg,rgba(255,255,255,.34),rgba(255,255,255,0) 46%),
-    linear-gradient(180deg,#3C9AD0,#1A7DB6 54%,#125E8E);
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.62),
-    inset 0 -1px 0 rgba(4,28,45,.5),
-    inset 0 0 0 1px rgba(9,60,92,.5),
-    0 2px 2px rgba(12,38,56,.14),
-    0 16px 26px -12px rgba(10,52,80,.6)}
-.btn-primary:active{transform:translateY(1px) scale(.995);
-  box-shadow:
-    inset 0 2px 5px rgba(4,28,45,.5),
-    inset 0 0 0 1px rgba(9,60,92,.6),
-    0 1px 1px rgba(12,38,56,.1)}
+   What went: every shadow, the sheen gradient, the text shadow, the
+   ghost's backdrop blur, and the press that moved the light to the other
+   side.
 
-.btn-ghost{border:0;color:var(--ink);
-  background:linear-gradient(180deg,rgba(255,255,255,.88),rgba(223,236,245,.62));
-  -webkit-backdrop-filter:blur(14px) saturate(150%);
-  backdrop-filter:blur(14px) saturate(150%);
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.95),
-    inset 0 -1px 0 rgba(24,39,49,.12),
-    inset 0 0 0 1px rgba(24,39,49,.09),
-    0 8px 18px -12px rgba(21,43,59,.45)}
-.btn-ghost:hover{transform:translateY(-1px);
-  background:linear-gradient(180deg,rgba(255,255,255,.96),rgba(228,240,248,.7));
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,1),
-    inset 0 -1px 0 rgba(24,39,49,.12),
-    inset 0 0 0 1px rgba(20,108,161,.22),
-    0 14px 24px -14px rgba(21,43,59,.5)}
-.btn-ghost:active{transform:translateY(1px) scale(.995);
-  box-shadow:inset 0 2px 5px rgba(24,39,49,.16),inset 0 0 0 1px rgba(24,39,49,.1)}
+   What stayed: the colours, exactly. The body gradient survives as the
+   two ends of the old one with nothing on top, so the button still has a
+   direction without reading as a lit object. States are colour now
+   rather than elevation: hover lightens a step, press darkens one, and
+   nothing moves — a flat button that lifts is not flat.
 
-/* on the navy screens the same two objects, lit from the same direction */
-.on-navy .btn-primary{color:#06202F;text-shadow:0 1px 0 rgba(255,255,255,.35);
-  background:
-    linear-gradient(180deg,rgba(255,255,255,.5),rgba(255,255,255,0) 48%),
-    linear-gradient(180deg,#8FE4F4,#4FC3DE 54%,#2FA6C4);
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.8),
-    inset 0 -1px 0 rgba(3,40,56,.4),
-    inset 0 0 0 1px rgba(20,120,146,.5),
-    0 10px 22px -10px rgba(0,0,0,.6)}
-.on-navy .btn-ghost{color:var(--on-navy);
-  background:linear-gradient(180deg,rgba(255,255,255,.14),rgba(255,255,255,.05));
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.22),
-    inset 0 0 0 1px rgba(255,255,255,.12),
-    0 10px 22px -14px rgba(0,0,0,.7)}
-.on-navy .btn-ghost:hover{
-  background:linear-gradient(180deg,rgba(255,255,255,.2),rgba(255,255,255,.08));
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.3),
-    inset 0 0 0 1px rgba(79,195,222,.4),
-    0 16px 28px -16px rgba(0,0,0,.7)}
+   The ghost keeps a hairline border instead of the inset ring it lost.
+   On cream it would otherwise be a white shape with no edge. */
+.btn{transition:background .18s var(--ease),border-color .18s var(--ease),
+     color .18s var(--ease)}
+
+/* The primary takes a stroke as well, so the two buttons are the same
+   object in two fills rather than one drawn shape and one filled one. Not
+   the ghost's own light line, though: on a blue fill that reads as a halo
+   around the button. A deeper step of the button's own blue reads as the
+   edge of it. */
+.btn-primary{border:1.5px solid #0C4C75;color:#fff;
+  background:linear-gradient(180deg,#2073AA,#146CA1)}
+.btn-primary:hover{border-color:#125E8E;
+  background:linear-gradient(180deg,#2A85C0,#1A7DB6)}
+.btn-primary:active{border-color:#0A4467;
+  background:linear-gradient(180deg,#125E8E,#0E527D)}
+
+/* The pair measure the same -- 44px both, 40 on a phone -- but they did
+   not read the same. The primary's stroke is a deep blue and the ghost's
+   was --line at ten per cent, so the primary's edge was part of its shape
+   while the ghost's visible pill started a pixel and a half inside its
+   own box. A shape with a faint edge reads smaller than the same shape
+   with a firm one. The ghost takes a stroke of the same weight and
+   presence as the primary's, in its own key, and the two now read the
+   size they actually are. */
+.btn-ghost{border:1.5px solid rgba(38,64,80,.22);color:var(--ink);
+  background:linear-gradient(180deg,#FFFFFF,#F1F6FA)}
+.btn-ghost:hover{border-color:rgba(20,108,161,.42);
+  background:linear-gradient(180deg,#FFFFFF,#E9F2F8)}
+.btn-ghost:active{background:linear-gradient(180deg,#E9F2F8,#DFECF5)}
+
+/* the navy screens, the same two objects with the same treatment */
+.on-navy .btn-primary{color:#06202F;border-color:#2FA6C4;
+  background:linear-gradient(180deg,#63D0E6,#4FC3DE)}
+.on-navy .btn-primary:hover{background:linear-gradient(180deg,#7ADBEF,#5CCCE6)}
+.on-navy .btn-primary:active{background:linear-gradient(180deg,#3FB2CE,#2FA6C4)}
+
+.on-navy .btn-ghost{color:var(--on-navy);border-color:rgba(255,255,255,.18);
+  background:linear-gradient(180deg,rgba(255,255,255,.10),rgba(255,255,255,.05))}
+.on-navy .btn-ghost:hover{border-color:rgba(79,195,222,.45);
+  background:linear-gradient(180deg,rgba(255,255,255,.16),rgba(255,255,255,.08))}
+.on-navy .btn-ghost:active{background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.03))}
+
+/* ── the arrow ───────────────────────────────────────────────────────
+   At rest it is a mark, not a second label: half-weight, the same colour
+   as the text it follows. On hover it takes its colour and brightens.
+   v3's current build also swaps travel direction per button (north-east
+   vs east) via a `data-arr` attribute the markup doesn't carry here, so
+   this keeps the one direction it already had — see WOS-337 notes for
+   the rest of that gap. */
+.btn .arr{display:inline-block;font-size:18px;line-height:1;opacity:.55;
+  transition:transform .2s var(--ease),opacity .2s var(--ease),
+             color .2s var(--ease)}
+.btn:hover .arr,.btn:focus-visible .arr{opacity:1;transform:translate(2px,-2px)}
+.btn-primary:hover .arr,.btn-primary:focus-visible .arr{color:var(--cyan-2)}
+.btn-ghost:hover .arr,.btn-ghost:focus-visible .arr{color:var(--teal)}
+.on-navy .btn-primary:hover .arr{color:var(--navy)}
+.on-navy .btn-ghost:hover .arr{color:var(--cyan)}
+@media (prefers-reduced-motion:reduce){
+  .btn .arr{transition:opacity .2s,color .2s}
+  .btn:hover .arr,.btn:focus-visible .arr{transform:none}
+}
 
 /* ── product shots ───────────────────────────────────────────────────
    A filled slot stops being a placeholder: the wireframe's dashed box and
@@ -2072,9 +2187,33 @@ body{background:
   background:linear-gradient(180deg,rgba(255,255,255,.74),rgba(234,242,248,.52));
   -webkit-backdrop-filter:blur(14px) saturate(140%);
   backdrop-filter:blur(14px) saturate(140%);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.92),
-             inset 0 0 0 1px rgba(255,255,255,.28),
-             0 14px 34px -22px rgba(21,43,59,.30)}
+  box-shadow:var(--pane-rest)}
+/* ── panels at rest ─────────────────────────────────────────────────
+   WOS-337: every panel keeps the light on its top edge and the hairline
+   ring -- what goes is the ground shadow that lifted it off the page. A
+   grid of a dozen of them, each with its own, read as a pile of paper
+   rather than a set of equals. This port had the --pane-lift shadow
+   (below) hardcoded onto the rest state above instead of the flatter
+   --pane-rest, so every one of these surfaces sat permanently "lifted".
+
+   It comes back where it means something: the panels a reader can pick
+   take it on hover and on focus-within, so a keyboard reader gets the
+   same answer as a pointer; the ones that are containers rather than
+   choices -- the proof grid, the finder's form, the FAQ panel, the rail
+   tile, the services grid -- stay flat in both states. */
+:root{
+  --pane-rest:inset 0 1px 0 rgba(255,255,255,.92),
+              inset 0 0 0 1px rgba(255,255,255,.28);
+  --pane-lift:inset 0 1px 0 rgba(255,255,255,.92),
+              inset 0 0 0 1px rgba(255,255,255,.28),
+              0 18px 40px -22px rgba(21,43,59,.38);
+}
+.card:hover,.cat:hover,.feat:hover,.member:hover,.news-item:hover,
+.pcard:hover,.proj:hover,.proj-nav button:hover,
+.sp-tuner .sp-tuner-card:hover,
+.card:focus-within,.cat:focus-within,.feat:focus-within,
+.news-item:focus-within,.pcard:focus-within,.proj:focus-within,
+.sp-tuner .sp-tuner-card:focus-within{box-shadow:var(--pane-lift)}
 /* ── the phone's tab bar, as a floating pill ─────────────────────────
    It was a full-width slab pinned to the bottom edge -- the one piece of
    chrome still wearing the wireframe. It becomes the same object as the
@@ -2085,11 +2224,17 @@ body{background:
 @media (max-width:743.98px){
   .tabbar{left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom,0px));
     padding-bottom:0;border:0;background:none;
-    /* the shell blurs the backdrop on the bar itself. A backdrop-filter
-       paints over its own box, so even with no background it left a
-       rectangle of greyed, blurred page behind the pill -- the blur now
-       belongs to the pane, which is the thing with the pill's shape. */
-    -webkit-backdrop-filter:none;backdrop-filter:none;
+    /* WOS-337: the blur belongs on the bar itself, NOT on the pane's
+       ::before below. `filter` on an element makes it a backdrop root --
+       a descendant's `backdrop-filter` then has nothing behind it to
+       sample and does nothing at all. .sp-tabpane carries the
+       drop-shadow, so a blur declared on its ::before (as this port
+       previously had it) was inert; the bar has no filter of its own, so
+       the blur is real here, clipped to the same 999px pill radius the
+       glass draws. */
+    -webkit-backdrop-filter:blur(16px) saturate(150%);
+    backdrop-filter:blur(16px) saturate(150%);
+    border-radius:999px;
     transition:--x .42s cubic-bezier(.22,.9,.24,1),
                --w .60s cubic-bezier(.22,.9,.24,1)}
   .tabbar ul{height:58px;position:relative;z-index:1}
@@ -2097,10 +2242,11 @@ body{background:
     filter:drop-shadow(0 1px 0 rgba(24,39,49,.11))
            drop-shadow(0 2px 4px rgba(21,43,59,.10))
            drop-shadow(0 12px 22px rgba(21,43,59,.18))}
+  /* no backdrop-filter here: the pane has a filter, so this would be
+     inert. The blur is on .tabbar above; this layer is the glass and the
+     notch. */
   .tabbar>.sp-tabpane::before{content:"";position:absolute;inset:0;border-radius:999px;
     background:linear-gradient(180deg,rgba(255,255,255,.74),rgba(223,236,245,.58));
-    -webkit-backdrop-filter:blur(16px) saturate(150%);
-    backdrop-filter:blur(16px) saturate(150%);
     box-shadow:inset 0 1px 0 rgba(255,255,255,.95),
                inset 0 0 0 1px rgba(24,39,49,.07);
     /* the indent, mirrored: the bite is taken out of the TOP edge, over
@@ -2129,9 +2275,7 @@ body{background:
   background:linear-gradient(180deg,rgba(255,255,255,.74),rgba(234,242,248,.52));
   -webkit-backdrop-filter:blur(14px) saturate(140%);
   backdrop-filter:blur(14px) saturate(140%);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.92),
-             inset 0 0 0 1px rgba(255,255,255,.28),
-             0 14px 34px -22px rgba(21,43,59,.30)}
+  box-shadow:var(--pane-rest)}
 .sp-tuner .sp-tuner-svc-grid .sp-tuner-card{background:none;border-radius:0;
   -webkit-backdrop-filter:none;backdrop-filter:none;box-shadow:none}
 .sp-tuner .sp-tuner-svc-grid .sp-tuner-card + .sp-tuner-card{
@@ -2141,6 +2285,26 @@ body{background:
 .sp-tuner .sp-tuner-svc-grid .sp-tuner-card.is-match + .sp-tuner-card,
 .sp-tuner .sp-tuner-svc-grid .sp-tuner-card.is-match{
   box-shadow:inset 0 1px 0 rgba(24,39,49,.10)}
+
+/* ── the projects grid tiles the same way, for the same reason ───────
+   WOS-337: eight separate cards, each with its own edge and its own gap,
+   made a page of boxes out of what is one list of eight things. It is 2
+   and 4 columns rather than one, so the divider cannot be an inset line
+   on the row above -- it is the grid's own 1px gap, with the container's
+   colour showing through it. The tiles are opaque for it: a translucent
+   tile would let the divider colour through and grey the whole grid. */
+.sp-tuner .sp-tuner-proj-grid{gap:1px;border-radius:var(--r-l);overflow:hidden;
+  background:rgba(24,39,49,.12);
+  box-shadow:var(--pane-rest)}
+.sp-tuner .sp-tuner-proj-grid .sp-tuner-card{border:0;border-radius:0;
+  background:linear-gradient(180deg,#FBFCFE,#EFF4F8);
+  -webkit-backdrop-filter:none;backdrop-filter:none;box-shadow:none}
+/* the match ring went with the borders; the row tints instead, the way
+   the services list already marks its match */
+.sp-tuner .sp-tuner-proj-grid .sp-tuner-card.is-match{box-shadow:none;
+  background:color-mix(in srgb,var(--teal) 8%,#FBFCFE)}
+.sp-tuner .sp-tuner-proj-grid .sp-tuner-card.is-also{box-shadow:none;
+  background:color-mix(in srgb,var(--teal) 4%,#FBFCFE)}
 
 /* a pane inside a pane would stack two blurs and read as fog */
 .card .card,.pcard .card,.cat .card{backdrop-filter:none;-webkit-backdrop-filter:none}
@@ -2153,8 +2317,150 @@ body{background:
   backdrop-filter:blur(12px) saturate(140%);
   box-shadow:inset 0 1px 0 rgba(255,255,255,.9),
              inset 0 0 0 1px rgba(24,39,49,.06)}
-/* the floating EN|KO is left alone: it was already built to read over
-   both grounds, and glass would cost it that */
+/* WOS-337: the EN|KO toggle takes the same edge as the tab bar it floats
+   beside -- no hard line, the light caught on the top edge and a
+   hairline ring inside it, over the same glass. This port had left it
+   plain (the comment here used to say "glass would cost it that"), but
+   v3's current build gives it the same material; the float adds the
+   bar's drop shadow on top of that edge. */
+.lang{border:0;
+  background:linear-gradient(180deg,rgba(255,255,255,.74),rgba(223,236,245,.58));
+  -webkit-backdrop-filter:blur(16px) saturate(150%);
+  backdrop-filter:blur(16px) saturate(150%);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.95),
+             inset 0 0 0 1px rgba(24,39,49,.07)}
+.lang-float{box-shadow:inset 0 1px 0 rgba(255,255,255,.95),
+            inset 0 0 0 1px rgba(24,39,49,.07),
+            0 1px 0 rgba(24,39,49,.11),
+            0 2px 4px rgba(21,43,59,.10),
+            0 12px 22px rgba(21,43,59,.18)}
+
+/* ── the header's floating nav pane, and the same glass on dark ──────
+   WOS-337: the desktop nav pill drops its stroke and becomes the same
+   translucent pane as everything else -- the notch under the active
+   module is cut from this pane by clip-path, so losing the stroke costs
+   it nothing. Order matters: `filter` applies BEFORE `clip-path`, so a
+   shadow on the clipped element is generated from its unclipped
+   rectangle and then cut; the pane's own drop-shadow is split onto a
+   sibling layer (.sp-navpane) for exactly that reason. On dark sections
+   the header inverts wholesale, and a backdrop-filter samples what is
+   behind it and gets inverted too -- so over dark the pane stops
+   sampling and becomes an opaque one, specified as what it should look
+   like BEFORE the inversion (the two colours below are deliberately
+   "wrong": #E3D0C3/#D7BCAD are the complements of the steel #1C2F3C/
+   #284352 this is meant to read as once inverted). */
+.header nav>ul{border-color:transparent}
+.header nav>ul::before{border:0;
+  background:linear-gradient(180deg,rgba(255,255,255,.66),rgba(223,236,245,.48));
+  -webkit-backdrop-filter:blur(16px) saturate(150%);
+  backdrop-filter:blur(16px) saturate(150%);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.95),
+             inset 0 0 0 1px rgba(24,39,49,.07)}
+.nav-notch path{stroke:none}
+@media (min-width:744px){
+  .header nav>ul::before{display:block;content:"";position:absolute;
+    inset:-1.5px;z-index:0;pointer-events:none;
+    border:0;background:none;box-shadow:none;border-radius:999px;
+    -webkit-backdrop-filter:blur(16px) saturate(150%);
+    backdrop-filter:blur(16px) saturate(150%);
+    clip-path:polygon(0 0,100% 0,100% 100%,
+      calc(var(--x,0px) + var(--w,0px) + 12px) 100%,
+      calc(var(--x,0px) + var(--w,0px) + 5px) calc(100% - 6.5px),
+      calc(var(--x,0px) - 5px) calc(100% - 6.5px),
+      calc(var(--x,0px) - 12px) 100%,0 100%)}
+}
+.sp-navpane{position:absolute;inset:-1.5px;z-index:0;pointer-events:none;
+  filter:drop-shadow(0 1px 0 rgba(24,39,49,.13))
+         drop-shadow(0 2px 3px rgba(21,43,59,.10))
+         drop-shadow(0 10px 20px rgba(21,43,59,.16))}
+.sp-navpane::before{content:"";position:absolute;inset:0;border-radius:999px;
+  background:linear-gradient(180deg,rgba(255,255,255,.66),rgba(223,236,245,.48));
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.95),
+             inset 0 0 0 1px rgba(24,39,49,.07);
+  clip-path:polygon(0 0,100% 0,100% 100%,
+    calc(var(--x,0px) + var(--w,0px) + 12px) 100%,
+    calc(var(--x,0px) + var(--w,0px) + 5px) calc(100% - 6.5px),
+    calc(var(--x,0px) - 5px) calc(100% - 6.5px),
+    calc(var(--x,0px) - 12px) 100%,0 100%)}
+.header.is-dark nav>ul::before{
+  -webkit-backdrop-filter:none;backdrop-filter:none}
+.header.is-dark .sp-navpane::before{
+  -webkit-backdrop-filter:none;backdrop-filter:none;
+  background:linear-gradient(180deg,#E3D0C3,#D7BCAD);
+  box-shadow:inset 0 0 0 1px rgba(24,39,49,.10)}
+.header nav>ul>li>a{position:relative;z-index:1}
+
+/* ── the page gutter, and the band edge outside it ────────────────────
+   WOS-337: the content column ran to exactly where a sticky band's edge
+   ended, so the first card sat on the 16px curve instead of inside it --
+   the corner crossed the content rather than enclosing it. The gutter
+   opens to 56px from 744 up (this port still had the base layer's 40,
+   then 48 from 1200), and the band's edge below is pulled back OUT by
+   16px on each side -- the radius -- so the curve has exactly its own
+   width to turn in before the content begins. Both numbers move together
+   on purpose. */
+@media (min-width:744px){ :root{--gutter:56px} }
+
+/* ── the sticky tab band gets a ground ────────────────────────────────
+   The band was `background:none`, so page content scrolled visibly
+   THROUGH the tabs -- the pill floated on live text. It now carries the
+   page ground, and the content passes underneath it instead.
+
+   The lower edge is a hairline, then a short downward gradient falling
+   onto whatever is scrolling past -- fading to the same colour at zero
+   alpha rather than to `transparent`, which some engines interpolate
+   through transparent BLACK and leave a grey cast halfway down.
+
+   Not applied inside the company rail: there the tab row sits in a navy
+   band that already has a surface, and .seg is static there, so a
+   top:100% pseudo would hang off the wrong box. */
+:root{
+  --edge-h:22px;
+  --edge-line:rgba(211,211,211,.60);
+  --edge-fade:linear-gradient(180deg,
+    rgba(38,64,80,.24) 0%,  rgba(38,64,80,.188) 11%, rgba(38,64,80,.142) 22%,
+    rgba(38,64,80,.102) 33%, rgba(38,64,80,.069) 45%, rgba(38,64,80,.043) 57%,
+    rgba(38,64,80,.024) 69%, rgba(38,64,80,.011) 80%, rgba(38,64,80,.003) 90%,
+    rgba(38,64,80,0) 100%);
+  --edge-line-dark:var(--line-navy);
+  --edge-fade-dark:linear-gradient(180deg,
+    rgba(0,0,0,.34) 0%, rgba(0,0,0,.266) 11%, rgba(0,0,0,.201) 22%,
+    rgba(0,0,0,.145) 33%, rgba(0,0,0,.098) 45%, rgba(0,0,0,.061) 57%,
+    rgba(0,0,0,.034) 69%, rgba(0,0,0,.015) 80%, rgba(0,0,0,.004) 90%,
+    rgba(0,0,0,0) 100%);
+}
+.seg{background:var(--cream)}
+/* the ground is full-bleed, because its job is to cover the page. The
+   EDGE is not: the hairline and its shadow run the width of the content
+   column, inset by the gutter on both sides and capped at the container;
+   the 16px radius is on the TOP corners, since what is drawn is the top
+   edge of a rounded rectangle the content sits inside. */
+.seg::after{content:"";position:absolute;top:100%;left:50%;
+  transform:translateX(-50%);
+  width:min(100% - (var(--gutter) - 16px) * 2,
+            var(--container) - (var(--gutter) - 16px) * 2);
+  height:var(--edge-h);border-top:1.5px solid var(--edge-line);
+  border-radius:16px 16px 0 0;
+  background:var(--edge-fade);
+  pointer-events:none}
+.sp-rail-navrow .seg{background:none}
+.sp-rail-navrow .seg::after{display:none}
+/* the Company tab bar carries the same content-column edge the Work band
+   gets from .seg::after... */
+#company .sp-rail-tabs::after{content:"";position:absolute;top:100%;
+  left:50%;transform:translateX(-50%);
+  width:min(100% - (var(--gutter) - 16px) * 2,
+            var(--container) - (var(--gutter) - 16px) * 2);
+  height:var(--edge-h);border-top:1.5px solid var(--edge-line);
+  border-radius:16px 16px 0 0;
+  background:var(--edge-fade);
+  pointer-events:none}
+/* ...except on Our story, where the bar is followed immediately by the
+   navy instrument rather than by the page: laid over the band the edge
+   was a curve and a shadow with nothing passing beneath them. The band's
+   own ground (.sp-rail-ground::after) carries it lower down, where the
+   log does pass (v3 :6580). */
+#company.is-story .sp-rail-tabs::after{display:none}
 
 /* ── section tabs ────────────────────────────────────────────────────
    One material for every primary tab group, light page or dark: a deep
@@ -2176,9 +2482,9 @@ body{background:
 .seg button:hover{background:rgba(255,255,255,.08);color:var(--on-navy)}
 .seg button[aria-selected="true"]{color:var(--navy)}
 .seg-track>.track-pill{background:var(--on-navy)}
-/* on the rail the track sits on navy already, so it lightens instead */
-.sp-rail-navrow .seg-track{background:rgba(255,255,255,.10);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.16)}
+/* The Company track used to lighten against the navy band it sat in; the
+   tabs sit on the page's cream now (.sp-rail-tabs), so it keeps the same
+   deep steel glass — one tab control on the site, not two (v3 :6690). */
 
 /* the finder's card is the largest pane on the site, sitting on the navy
    inquiry screen: it lets the ground through rather than covering it */
@@ -2358,9 +2664,14 @@ html:lang(ko) .dp-caption{letter-spacing:.04em;text-transform:none}
    `aria-selected`/`role="tab"` on a `<button>`. Same visual contract as
    the source's `.seg button` rules (line ~301 above), extended to `<a>`
    since v3 never needed an anchor variant of this control. */
-.seg a{flex:none;min-height:40px;padding:0 18px;border-radius:var(--r-pill);display:inline-flex;align-items:center;text-decoration:none;font:600 14px/1 var(--body);color:var(--ink-2);transition:background .2s,color .2s}
-.seg a:hover{background:rgba(0,0,0,.05)}
-.seg a[aria-current="page"]{background:transparent;color:#fff}
+.seg a{flex:none;min-height:40px;padding:0 18px;border-radius:var(--r-pill);display:inline-flex;align-items:center;text-decoration:none;font:600 14px/1 var(--body);transition:background .2s,color .2s}
+/* WOS-336: the anchor variant takes the theme8 dark-track palette the
+   button rules got at ~line 2386 (this block sits after them in the
+   cascade, so restating the wireframe's ink/white here left the active
+   label white-on-light and the idle ones ink-on-navy). */
+.seg a{color:var(--on-navy-muted)}
+.seg a:hover{background:rgba(255,255,255,.08);color:var(--on-navy)}
+.seg a[aria-current="page"]{background:transparent;color:var(--navy)}
 
 /* Project detail page's prev/next nav (`.proj-nav`) is a real link now,
    not a `data-pdetail` sheet-opening `<button>` — same rules as v3's own
@@ -2422,6 +2733,45 @@ html:lang(ko) .post-body h3,html:lang(ko) .post-body h4{letter-spacing:-.03em;li
    to keep cells on this sheet's own tokens instead of its hardcoded #ccc. */
 .post-body .lexical-table-cell{border:1px solid var(--line)!important;padding:8px 12px!important;text-align:left}
 .post-body .lexical-table th{font-weight:700;color:var(--ink);background:var(--cream-2)}
+
+/* ── WOS-336: remaining v3 design parity ─────────────────────────────── */
+
+/* Company's tab-row gap now lives on the real .sp-rail-tabs wrapper the
+   layout renders — see the `#company` section above (v3 :1593/1606). */
+
+/* Project cards show the reference's dashed "Illustration" placeholder —
+   the user wants no artwork here for now (v3's wire-mode `.pvis::after`,
+   index.html:6726-6731, quieted values). */
+.pvis-ph{background:#fff;border-bottom:1px solid var(--line)}
+.pvis-ph::after{content:"Illustration";position:absolute;inset:14px;
+  display:grid;place-items:center;border:1.5px dashed rgba(24,39,49,.16);
+  border-radius:var(--r-s);color:var(--muted);
+  font:600 11px/1 var(--body);letter-spacing:.12em;text-transform:uppercase;
+  background:rgba(255,255,255,.35)}
+
+/* The dot-matrix globe behind the company surfaces — one WebP ALPHA MASK
+   painted with the page's own teal, so it reads on any ground (v3
+   theme8's block at index.html:~6880; the asset is
+   public/site/img/globe.webp, copied from the reference repo).
+   overflow:clip, not hidden: clip alone can't widen the document. */
+.company-teaser,.team-panel{position:relative;isolation:isolate;overflow:clip}
+.company-teaser::before,.team-panel::before{
+  content:"";position:absolute;z-index:-1;pointer-events:none;
+  aspect-ratio:1;background:var(--teal);
+  -webkit-mask:url(/site/img/globe.webp) center/contain no-repeat;
+          mask:url(/site/img/globe.webp) center/contain no-repeat;
+  opacity:.18}
+.company-teaser::before{width:min(90%,300px);left:50%;top:50%;
+  transform:translate(-50%,-50%);opacity:.26}
+.team-panel::before{width:min(72%,760px);left:50%;top:0;
+  transform:translateX(-50%)}
+@media (max-width:743.98px){
+  .company-teaser::before{width:min(86%,300px);opacity:.17}
+  .team-panel::before{width:min(92%,420px);opacity:.15}
+}
+
+/* Story panel rhythm now lives in the `#company` section above (rail
+   margin-bottom + CTA margin-top, v3 :1606-1611). */
 
 /* The blog list's thumbnail — .news-item (site.css:456, the model this
    list was ported from, see src/components/site/company/NewsList.tsx) has

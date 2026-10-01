@@ -1,11 +1,19 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { getPayload } from "@/lib/getPayload";
 import { TOPICS } from "@/lib/site/content";
-import type { Inquiry } from "@/payload-types";
 
 // WOS-334: replaces v3's inquiry-form `localStorage` stub
-// (site/index.html:3481-3501) with a real, persisted submission. Called by
+// (site/index.html:3481-3501) with a real submission endpoint. Called by
 // ContactForm.tsx (src/components/site/contact/ContactForm.tsx).
+//
+// WOS-337: this used to persist to the `inquiries` Payload collection, which
+// was removed along with every other write-only "Site content" collection —
+// nothing in the admin ever read Inquiries back either. Validation, the
+// honeypot, rate limiting, reCAPTCHA and the { ok, ref } response contract
+// (which ContactForm/ContactSheet/useInquirySubmit all depend on) are
+// unchanged; only the storage step is gone. A submission is now recoverable
+// solely from the console.info below — this is a deliberate scope cut, not
+// an oversight, and reintroducing persistence means restoring a collection
+// plus a migration.
 export const dynamic = "force-dynamic";
 
 const TOPIC_IDS = new Set(TOPICS.map((t) => t.id));
@@ -102,7 +110,19 @@ export async function POST(request: NextRequest) {
 
   const { name, org, email, phone, message, topic, locale, consentPrivacy, consentMarketing, captchaToken } = body;
 
-  if (!isNonEmptyString(name, MAX_LEN.name)) {
+  // WOS-336: two forms share this endpoint — the full /contact form and the
+  // site-wide #sheet slide-over (v3's slim variant, which has no name field
+  // by design). `source` is the submitting form's id, v3's own convention;
+  // absent means the pre-sheet contact form for backward compatibility.
+  const source = body.source === undefined ? "contact-form" : body.source;
+  if (source !== "contact-form" && source !== "sheet-form") {
+    return NextResponse.json({ ok: false, error: "invalid-source" }, { status: 400 });
+  }
+
+  if (source === "contact-form" && !isNonEmptyString(name, MAX_LEN.name)) {
+    return NextResponse.json({ ok: false, error: "invalid-name" }, { status: 400 });
+  }
+  if (name !== undefined && typeof name === "string" && name.length > MAX_LEN.name) {
     return NextResponse.json({ ok: false, error: "invalid-name" }, { status: 400 });
   }
   if (!isNonEmptyString(email, MAX_LEN.email) || !EMAIL_RE.test(email)) {
@@ -134,33 +154,24 @@ export async function POST(request: NextRequest) {
 
   const ref = refCode();
 
-  try {
-    const payload = await getPayload();
-    await payload.create({
-      collection: "inquiries",
-      data: {
-        ref,
-        topic: topic as Inquiry["topic"],
-        name: name.trim(),
-        org: typeof org === "string" ? org.trim() : undefined,
-        email: email.trim(),
-        phone: typeof phone === "string" ? phone.trim() : undefined,
-        message: typeof message === "string" ? message.trim() : undefined,
-        consentPrivacy: true,
-        consentMarketing: consentMarketing === true,
-        locale: locale as Inquiry["locale"],
-        source: "contact-form",
-        captchaStatus: captcha.status,
-        captchaScore: captcha.score,
-        userAgent: request.headers.get("user-agent") ?? undefined,
-        ip,
-        status: "new",
-      },
-    });
-  } catch (err) {
-    console.error("Failed to save contact inquiry:", err);
-    return NextResponse.json({ ok: false, error: "save-failed" }, { status: 500 });
-  }
+  // No collection to persist to any more (see the header comment) — log the
+  // submission so it's at least recoverable from the server log, and return
+  // the same { ok, ref } shape the two contact UIs already expect.
+  console.info("Contact submission received:", {
+    ref,
+    topic,
+    name: typeof name === "string" && name.trim() !== "" ? name.trim() : undefined,
+    org: typeof org === "string" ? org.trim() : undefined,
+    email: email.trim(),
+    phone: typeof phone === "string" ? phone.trim() : undefined,
+    message: typeof message === "string" ? message.trim() : undefined,
+    consentMarketing: consentMarketing === true,
+    locale,
+    source,
+    captchaStatus: captcha.status,
+    captchaScore: captcha.score,
+    ip,
+  });
 
   return NextResponse.json({ ok: true, ref });
 }

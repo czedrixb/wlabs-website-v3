@@ -1,12 +1,16 @@
 import type { Locale } from "@/lib/locale";
-import { siteFontVariables } from "@/lib/fonts";
 import { siteT } from "@/lib/site/dictionary";
+import { CHIP_TIPS, TOPICS } from "@/lib/site/content";
 import { Header } from "./Header";
 import { Masthead } from "./Masthead";
 import { TabBar } from "./TabBar";
 import { Footer } from "./Footer";
 import { LangToggle } from "./LangToggle";
+import { LogoSprite } from "./LogoSprite";
+import { Toaster } from "./Toaster";
 import { OrganizationJsonLd } from "./OrganizationJsonLd";
+import { ContactSheet } from "@/components/site/contact/ContactSheet";
+import { TipboxHost } from "@/components/site/modules/TipboxHost";
 
 type Props = { locale: Locale; children: React.ReactNode };
 
@@ -23,10 +27,14 @@ type Props = { locale: Locale; children: React.ReactNode };
 // layout so Next's per-segment CSS loading still attributes the stylesheet
 // to whichever route group is actually rendering it.
 export function SiteChrome({ locale, children }: Props) {
-  const chrome = siteT(locale).chrome;
+  const s = siteT(locale);
+  const chrome = s.chrome;
 
   return (
-    <div className={siteFontVariables}>
+    <div>
+      {/* First in the tree so #logo-icon-* symbols exist before any <use>
+          referencing them (Hero's dp-mark, the CTA panels' watermark). */}
+      <LogoSprite />
       <OrganizationJsonLd locale={locale} description={chrome.legal2} />
       <a className="skip" href="#main">
         {chrome.skip}
@@ -37,6 +45,11 @@ export function SiteChrome({ locale, children }: Props) {
       <Footer locale={locale} />
       <TabBar locale={locale} s={chrome} />
       <LangToggle locale={locale} s={chrome} />
+      {/* WOS-336 singletons: the [data-contact] sheet, the toast, and the
+          chip-glossary tooltip — one instance each for the whole page. */}
+      <ContactSheet locale={locale} s={s.sheet} topics={TOPICS} />
+      <Toaster />
+      <TipboxHost tips={CHIP_TIPS.map((t) => ({ term: t.term, tip: locale === "en" ? t.tip.en : t.tip.ko }))} />
     </div>
   );
 }

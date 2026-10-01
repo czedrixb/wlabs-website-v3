@@ -32,13 +32,15 @@ const STATIC_P = 0.55;
 
 // Canvas colour stops — NOT CSS custom properties, deliberately: they feed
 // ImageData directly and must survive independent of any theme/greyscale
-// pass. The source study's brand colours, unmodified.
-const C_CREAM: [number, number, number] = [251, 246, 238];
-const C_LTROUGH: [number, number, number] = [172, 210, 217];
-const C_LCREST: [number, number, number] = [255, 253, 248];
-const C_NAVY2: [number, number, number] = [18, 23, 63];
-const C_DTROUGH: [number, number, number] = [5, 6, 26];
-const C_DCREST: [number, number, number] = [21, 72, 120];
+// pass. WOS-336: the shipped theme8 palette (site/index.html ~3979) — the
+// earlier pre-Depth study triples read far too dark/indigo next to the
+// reference's steel-and-teal field.
+const C_CREAM: [number, number, number] = [244, 247, 249]; // --cream #F4F7F9, light ground
+const C_LTROUGH: [number, number, number] = [186, 212, 226]; // steel trough of the light field
+const C_LCREST: [number, number, number] = [253, 254, 255]; // near-white crest of the light field
+const C_NAVY2: [number, number, number] = [29, 59, 78]; // --navy-2 #1D3B4E, dark ground
+const C_DTROUGH: [number, number, number] = [10, 24, 33]; // deepest trough of the dark field
+const C_DCREST: [number, number, number] = [26, 135, 196]; // teal-lifted crest of the dark field
 
 const LN = 2048;
 const SIN = new Float32Array(LN);

@@ -14,7 +14,9 @@ export function TeamGrid({ locale, s }: Props) {
   const count = en ? `${TEAM.length} people` : `${TEAM.length}명`;
 
   return (
-    <div className="panel wrap" style={{ paddingBlock: "var(--s3) var(--sec)" }}>
+    // WOS-336: `team-panel` hosts the dot-matrix globe watermark behind the
+    // roster (v3's #panel-team::before — see site.css's WOS-336 block).
+    <div className="panel wrap team-panel" style={{ paddingBlock: "var(--s3) var(--sec)" }}>
       <div className="row-between" style={{ marginBottom: "var(--s2)" }}>
         <p className="lead" style={{ fontSize: 16 }}>
           {s.teamLead}

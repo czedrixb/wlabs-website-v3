@@ -34,7 +34,9 @@
 //
 // Usage: node scripts/extract-v3-content.mjs
 // Override the v3 repo location with V3_SITE_INDEX if it isn't the default
-// sibling checkout (D:\Submit\W Labs Website v3\site\index.html).
+// sibling checkout (D:\Submit\wlabs-website-v3\site\index.html — the git
+// repo; the older "W Labs Website v3" folder is a stale Sept-28 wireframe
+// snapshot, not the reference).
 import { readFileSync, writeFileSync, readdirSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
@@ -44,7 +46,7 @@ const repoRoot = path.resolve(__dirname, "..");
 
 const v3IndexPath =
   process.env.V3_SITE_INDEX ??
-  path.resolve(repoRoot, "..", "W Labs Website v3", "site", "index.html");
+  path.resolve(repoRoot, "..", "wlabs-website-v3", "site", "index.html");
 
 const outPath = path.resolve(repoRoot, "src", "lib", "site", "content.generated.ts");
 const teamPhotoDir = path.resolve(repoRoot, "public", "site", "team");
@@ -143,6 +145,65 @@ function resolveTeamPhotos(team) {
   return resolved;
 }
 
+// WOS-336: the 27 `li.sp-rail-entry` rows of the company reading log
+// (site/index.html:2588-2614). Unlike the const literals above, this is
+// markup — but rigidly regular, one entry per line, and the structural
+// fields (fractional-year `data-sp-t`, entry type, dates) are exactly the
+// values where a hand-transcription typo would silently misplace an entry
+// on the rail. Text is NOT harvested here: each row records its v3 `data-i`
+// key names, and src/lib/site/content.ts joins them onto the `rail`
+// dictionary namespace (v3-rail-manifest.mjs) by stripping the `spRail`
+// prefix.
+function parseRailEntries(source) {
+  const entryRe = /<li class="sp-rail-entry"[^>]*>[\s\S]*?<\/li>/g;
+  const entries = [];
+  for (const [block] of source.matchAll(entryRe)) {
+    const attr = (name) => block.match(new RegExp(`${name}="([^"]*)"`))?.[1];
+    const keyOf = (cls) =>
+      block.match(new RegExp(`class="${cls}[^"]*"[^>]*data-i="([^"]+)"`))?.[1];
+
+    const id = attr("id")?.replace(/^sp-rail-e-/, "");
+    const type = attr("data-sp-type");
+    const t = Number(attr("data-sp-t"));
+    const time = block.match(/<time datetime="([^"]+)"([^>]*)>([^<]*)<\/time>/);
+    const titleKey = keyOf("sp-rail-title");
+    const paraKey = keyOf("sp-rail-para");
+    if (!id || !type || !Number.isFinite(t) || !time || !titleKey || !paraKey) {
+      throw new Error(`sp-rail entry didn't parse (markup drifted?): ${block.slice(0, 120)}…`);
+    }
+
+    const enote = block.match(/class="sp-rail-enote( is-ruo)?"[^>]*data-i="([^"]+)"/);
+    const breakLine = block.includes("sp-rail-break")
+      ? {
+          named: Number(block.match(/id="sp-rail-b-named">(\d+)</)?.[1]),
+          undisclosed: Number(block.match(/<b>\+(\d+)<\/b>/)?.[1]),
+        }
+      : undefined;
+    const link = block.match(/<a class="sp-rail-link" href="([^"]+)"[^>]*>([^<]*)<\/a>/);
+    const total = attr("data-sp-total");
+
+    entries.push({
+      id,
+      type,
+      t,
+      ...(total ? { total: Number(total) } : {}),
+      datetime: time[1],
+      dateLabel: time[3].trim(),
+      circa: time[2].includes("sp-rail-circa"),
+      titleKey,
+      ...(keyOf("sp-rail-meta") ? { metaKey: keyOf("sp-rail-meta") } : {}),
+      paraKey,
+      ...(enote ? { enoteKey: enote[2], enoteRuo: Boolean(enote[1]) } : {}),
+      ...(breakLine ? { breakLine } : {}),
+      ...(link ? { link: { href: link[1], label: link[2].trim() } } : {}),
+    });
+  }
+  if (entries.length !== 27) {
+    throw new Error(`Expected 27 sp-rail entries in the v3 source, parsed ${entries.length}.`);
+  }
+  return entries;
+}
+
 function main() {
   const source = readV3Source();
 
@@ -155,6 +216,12 @@ function main() {
   // table, same evalConst treatment as the five literals above (no free
   // identifiers, one top-level `const TOPICS=` in the source).
   const topics = evalConst(source, "TOPICS");
+  // WOS-336: the chip-glossary tooltip table ({ Term: [en, ko] }, 23 terms —
+  // also indexed by search as kind "term"), the search result-group labels
+  // ({ kind: [en, ko] }), and the company reading-log's 27 structural rows.
+  const chipTips = evalConst(source, "CHIP_TIPS");
+  const searchKinds = evalConst(source, "KIND");
+  const rail = parseRailEntries(source);
 
   const banner = `// GENERATED FILE — do not hand-edit.
 // Regenerate with: node scripts/extract-v3-content.mjs
@@ -169,7 +236,7 @@ function main() {
 `;
 
   const body = `export const V3_CONTENT = ${JSON.stringify(
-    { team, groups, projects, cats, productPages, topics },
+    { team, groups, projects, cats, productPages, topics, chipTips, searchKinds, rail },
     null,
     2,
   )} as const;\n`;
@@ -178,7 +245,8 @@ function main() {
   console.log(`Wrote ${outPath}`);
   console.log(
     `  team=${team.length} groups=${groups.length} projects=${projects.length} ` +
-      `cats=${cats.length} products=${Object.keys(productPages).length} topics=${topics.length}`,
+      `cats=${cats.length} products=${Object.keys(productPages).length} topics=${topics.length} ` +
+      `chipTips=${Object.keys(chipTips).length} kinds=${Object.keys(searchKinds).length} rail=${rail.length}`,
   );
 }
 

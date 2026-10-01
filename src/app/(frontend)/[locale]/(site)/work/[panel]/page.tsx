@@ -1,11 +1,9 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import type { Locale } from "@/lib/locale";
-import { resolveLocale, withLocale } from "@/lib/locale";
+import { resolveLocale } from "@/lib/locale";
 import { siteT } from "@/lib/site/dictionary";
 import { siteMetadata } from "@/lib/site/metadata";
 import { PROJECT_CATS, PROJECTS, PRODUCT_ORDER, PRODUCTS } from "@/lib/site/content";
-import { SegNav } from "@/components/site/work/SegNav";
 import { ServiceDetail } from "@/components/site/work/ServiceDetail";
 import { ProductCard } from "@/components/site/work/ProductCard";
 import { ProjectGrid } from "@/components/site/work/ProjectGrid";
@@ -14,14 +12,6 @@ type Props = { params: Promise<{ locale: string; panel: string }> };
 
 const PANEL_KEYS = ["services", "products", "cases"] as const;
 type PanelKey = (typeof PANEL_KEYS)[number];
-
-function segItems(locale: Locale, chrome: ReturnType<typeof siteT>["chrome"]) {
-  return [
-    { key: "services", href: withLocale("/work/services", locale), label: chrome.segServices },
-    { key: "products", href: withLocale("/work/products", locale), label: chrome.segProducts },
-    { key: "cases", href: withLocale("/work/cases", locale), label: chrome.segCases },
-  ];
-}
 
 export function generateStaticParams() {
   return PANEL_KEYS.flatMap((panel) => [
@@ -41,7 +31,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 // Work's three segmented panels — services (ServiceDetail), products
 // (ProductCard grid) and cases (the shared ProjectGrid, unlimited). Each
 // panel is its own route rather than a client-side tab switch (see
-// SegNav's header for why), replacing the WOS-314 stub.
+// SegNav's header for why), replacing the WOS-314 stub. The shared
+// page-head + SegNav render from ../layout.tsx (WOS-336) so the sub-nav
+// survives panel navigation.
 export default async function WorkPanelPage({ params }: Props) {
   const { locale: localeParam, panel } = await params;
   const locale = resolveLocale(localeParam);
@@ -53,15 +45,6 @@ export default async function WorkPanelPage({ params }: Props) {
 
   return (
     <>
-      <div className="wrap page-head">
-        <div className="row-between">
-          <span className="eyebrow">{chrome.tabWork}</span>
-        </div>
-        <h1>{work.workH1}</h1>
-        <p className="lead">{work.workLead}</p>
-      </div>
-      <SegNav items={segItems(locale, chrome)} active={key} ariaLabel={chrome.workSeg} />
-
       {key === "services" && <ServiceDetail locale={locale} d={work} ctaDiscuss={chrome.ctaDiscuss} />}
 
       {key === "products" && (

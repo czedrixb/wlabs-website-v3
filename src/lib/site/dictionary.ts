@@ -1,5 +1,6 @@
 import type { Locale } from "@/lib/locale";
 import { V3_STRINGS } from "./dictionary.generated";
+import { V3_CONTENT } from "./content.generated";
 
 // The site chrome + Home dictionary — extends the STRINGS/t(locale) pattern
 // already used for the blog (src/lib/strings.ts) with namespaces matching
@@ -73,19 +74,22 @@ function parseRcNote(html: string): RcNote {
 // they're literals here instead of coming from dictionary.generated.ts.
 const STORY_ARIA_LABEL = "Intelligence in motion";
 
-// WOS-335: the blog's nav/footer label. v3 has no blog, so — same as
-// STORY_ARIA_LABEL above — there's no source key in dictionary.generated.ts
-// to harvest; hand-authored here instead.
-const BLOG_LABELS: Record<Locale, { tabBlog: string }> = {
-  ko: { tabBlog: "블로그" },
-  en: { tabBlog: "Blog" },
+// WOS-335: the blog's label. v3 has no blog, so — same as STORY_ARIA_LABEL
+// above — there's no source key in dictionary.generated.ts to harvest;
+// hand-authored here instead. Originally just the nav/footer tab label;
+// the blog listing's own removal repurposes `tabBlog` as the Insights
+// panel's new filter chip / `.pcat` kind label for posts, and adds
+// `readPost` as that chip's card link label (see `insights` below).
+const BLOG_LABELS: Record<Locale, { tabBlog: string; readPost: string }> = {
+  ko: { tabBlog: "블로그", readPost: "글 읽기" },
+  en: { tabBlog: "Blog", readPost: "Read post" },
 };
 
 function build(locale: Locale) {
   const v3 = V3_STRINGS[locale];
 
   return {
-    chrome: { ...v3.chrome, ...BLOG_LABELS[locale] },
+    chrome: { ...v3.chrome, tabBlog: BLOG_LABELS[locale].tabBlog },
     home: {
       ...v3.home,
       heading1: parseHeading(v3.home.heroH1),
@@ -97,6 +101,13 @@ function build(locale: Locale) {
       // Faq's ctaHistory CTA — reused rather than harvested twice, same
       // convention as band.eyebrow above.
       ctaHistory: v3.faq.ctaHistory,
+      // WOS-336: Home's products preview reuses the Work products panel's
+      // price/footer strings (v3 points both surfaces at the same
+      // priceAsk/monthly/productPage keys) — cross-referenced, not
+      // harvested twice.
+      priceAsk: v3.work.priceAsk,
+      monthly: v3.work.monthly,
+      productPage: v3.work.productPage,
     },
     proof: {
       ...v3.proof,
@@ -105,9 +116,10 @@ function build(locale: Locale) {
       // DOM order, which only reads correctly in Korean word order — the
       // EN fragment ("Delivering client work continuously since") needs
       // the year AFTER it, not before. "{year}" is a literal marker
-      // ProofBand.tsx splits on to place the animated counter in the right
-      // spot for each language, not real interpolation.
-      stat2: locale === "en" ? `${v3.proof.stat2Template} {year}` : `{year}${v3.proof.stat2Template}`,
+      // WOS-336: the caption under the big animated "2022" counter — v3's
+      // own proof2 string, used verbatim in both languages (the year lives
+      // in the <b data-count> above it, not in this sentence).
+      stat2: v3.proof.stat2Template,
     },
     band: {
       ...v3.band,
@@ -128,12 +140,98 @@ function build(locale: Locale) {
     // slice the way home/proof/band/faq have above.
     work: v3.work,
     company: v3.company,
-    insights: v3.insights,
+    // The blog listing's removal folds posts into this panel as a 4th
+    // filterable kind — `insBlog`/`insReadPost` are its chip/link labels,
+    // merged in from BLOG_LABELS (no source key for them in v3's own
+    // dictionary harvest, same reasoning as BLOG_LABELS itself above).
+    insights: { ...v3.insights, insBlog: BLOG_LABELS[locale].tabBlog, insReadPost: BLOG_LABELS[locale].readPost },
     // WOS-334: the /contact form. rcNote is the one markup-bearing string
     // in this slice — see parseRcNote above.
     contact: {
       ...v3.contact,
       rcNote: parseRcNote(v3.contact.rcNote),
+    },
+    // WOS-336: the sp-tuner resonance finder. Besides the flat per-card
+    // copy, the dial options / short forms / first steps are exposed as
+    // id-keyed records so SpTuner can look them up by the option ids its
+    // data tables use (tunerData.ts) instead of string-assembling key names.
+    tuner: {
+      ...v3.tuner,
+      optionLabels: {
+        ai: v3.tuner.o_ai,
+        software: v3.tuner.o_software,
+        imaging: v3.tuner.o_imaging,
+        interface: v3.tuner.o_interface,
+        modernise: v3.tuner.o_modernise,
+        idea: v3.tuner.o_idea,
+        spec: v3.tuner.o_spec,
+        prototype: v3.tuner.o_prototype,
+        production: v3.tuner.o_production,
+        exploring: v3.tuner.o_exploring,
+        quarter: v3.tuner.o_quarter,
+        urgent: v3.tuner.o_urgent,
+      },
+      optionShorts: {
+        ai: v3.tuner.s_ai,
+        software: v3.tuner.s_software,
+        imaging: v3.tuner.s_imaging,
+        interface: v3.tuner.s_interface,
+        modernise: v3.tuner.s_modernise,
+        idea: v3.tuner.s_idea,
+        spec: v3.tuner.s_spec,
+        prototype: v3.tuner.s_prototype,
+        production: v3.tuner.s_production,
+        exploring: v3.tuner.s_exploring,
+        quarter: v3.tuner.s_quarter,
+        urgent: v3.tuner.s_urgent,
+      },
+      steps: {
+        define: v3.tuner.step_define,
+        workshop: v3.tuner.step_workshop,
+        prototype: v3.tuner.step_prototype,
+        build: v3.tuner.step_build,
+        review: v3.tuner.step_review,
+        migration: v3.tuner.step_migration,
+      },
+    },
+    // WOS-336: the company reading-log rail. Entry text is joined onto the
+    // structural rows in content.ts (RAIL_ENTRIES); this slice carries the
+    // rail's own chrome (scrubber, pills, counters, rule aside, chips).
+    rail: v3.rail,
+    // WOS-336: /search. The result-group labels come from v3's `KIND`
+    // table (content.generated.ts), resolved per locale here so
+    // SearchClient gets one flat strings slice.
+    search: {
+      ...v3.search,
+      kinds: Object.fromEntries(
+        Object.entries(V3_CONTENT.searchKinds).map(([kind, [en, ko]]) => [
+          kind,
+          locale === "en" ? en : ko,
+        ]),
+      ) as Record<keyof typeof V3_CONTENT.searchKinds, string>,
+    },
+    // WOS-336: the #sheet contact slide-over. Its form reuses the /contact
+    // form's field labels, validation and status strings verbatim (v3's own
+    // sheet markup points at the same fTopic/fEmail/errEmail/consent2/send
+    // keys) — cross-referenced rather than harvested twice, same convention
+    // as band.eyebrow above.
+    sheet: {
+      ...v3.sheet,
+      fTopic: v3.contact.fTopic,
+      fEmail: v3.contact.fEmail,
+      errEmail: v3.contact.errEmail,
+      errTopic: v3.contact.errTopic,
+      consent2: v3.contact.consent2,
+      send: v3.contact.send,
+      sending: v3.contact.sending,
+      sent: v3.contact.sent,
+      failed: v3.contact.failed,
+      invalid: v3.contact.invalid,
+      needConsent: v3.contact.needConsent,
+      toastOkT: v3.contact.toastOkT,
+      toastOk: v3.contact.toastOk,
+      toastInvalidT: v3.contact.toastInvalidT,
+      toastFailT: v3.contact.toastFailT,
     },
   };
 }

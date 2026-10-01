@@ -24,10 +24,11 @@ type Props = {
 // Ported from src/mods/mod-band.html: "any number of stacks can live on a
 // page; every .sp-bands root is wired independently" — the class names
 // (.sp-bands-stack/.sp-band/.sp-band-*) are fixed, reused as-is for every
-// instance (Home's 5 services here; the design repo's own CSS shows the
-// same classes reused again for Contact's larger FAQ-as-bands stack,
-// #sp-bands-faq, not yet ported — hence no per-instance "prefix": there
-// isn't one in the source, only different container ids).
+// instance — hence no per-instance "prefix": there isn't one in the
+// source, only different container ids. (An earlier design pass also used
+// this stack for Contact's FAQ as #sp-bands-faq; today's built reference
+// renders that FAQ as a plain sp-faq2 accordion instead — see Faq.tsx —
+// so Home's 5 services are the one instance.)
 //
 // Texture: columns are time through the item's own question+answer text,
 // rows are frequency bins; a character's code lights a row with a weight
@@ -340,8 +341,20 @@ export function SpectrogramStack({ items }: Props) {
     setOpenKey((cur) => (cur === key ? null : key));
   }
 
+  // Escape closes the open band and returns focus to its trigger button —
+  // v3's stack-root keydown (WOS-336, index.html:4468-4472). On the ROOT,
+  // not the document, so it only fires while focus is inside this stack
+  // and two stacks on one page never fight; no preventDefault, matching
+  // the source (the sheet's own Escape handler is hidden-guarded anyway).
+  function onKeyDown(e: React.KeyboardEvent) {
+    if (e.key !== "Escape" || openKey === null) return;
+    const btn = rootRef.current?.querySelector<HTMLButtonElement>(".sp-band.is-open .sp-band-btn");
+    setOpenKey(null);
+    btn?.focus();
+  }
+
   return (
-    <ol ref={rootRef} className="sp-bands-stack">
+    <ol ref={rootRef} className="sp-bands-stack" onKeyDown={onKeyDown}>
       {items.map((item) => {
         const isOpen = openKey === item.key;
         const height = Math.round(BASE_HEIGHT * (item.weight ?? 1));

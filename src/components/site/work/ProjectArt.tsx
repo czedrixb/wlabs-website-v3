@@ -47,15 +47,15 @@ const ART: Record<ArtKey, ArtEntry> = {
   },
   bubbles: {
     tint: "#F3EEE8",
-    svg: `<svg viewBox="0 0 240 150"><rect x="36" y="34" width="110" height="40" rx="20" fill="#fff"/><rect x="94" y="84" width="110" height="40" rx="20" fill="${T}"/><text x="60" y="60" font-family="Raleway,sans-serif" font-size="15" fill="${INK}">Hello!</text><text x="118" y="110" font-family="Noto Sans KR,sans-serif" font-size="15" fill="#fff">안녕하세요!</text></svg>`,
+    svg: `<svg viewBox="0 0 240 150"><rect x="36" y="34" width="110" height="40" rx="20" fill="#fff"/><rect x="94" y="84" width="110" height="40" rx="20" fill="${T}"/><text x="60" y="60" style="font-family:var(--body)" font-size="15" fill="${INK}">Hello!</text><text x="118" y="110" style="font-family:var(--body)" font-size="15" fill="#fff">안녕하세요!</text></svg>`,
   },
   translate: {
     tint: "#EDF1F4",
-    svg: `<svg viewBox="0 0 240 150"><g transform="rotate(-6 80 75)"><rect x="46" y="42" width="66" height="66" rx="10" fill="#fff"/><text x="79" y="86" text-anchor="middle" font-family="Noto Sans KR,sans-serif" font-size="30" fill="${INK}">가</text></g><text x="120" y="82" text-anchor="middle" font-size="20" fill="${INK}">⇄</text><g transform="rotate(6 160 75)"><rect x="128" y="42" width="66" height="66" rx="10" fill="#fff"/><text x="161" y="86" text-anchor="middle" font-family="Quicksand,sans-serif" font-weight="700" font-size="30" fill="${T}">A</text></g></svg>`,
+    svg: `<svg viewBox="0 0 240 150"><g transform="rotate(-6 80 75)"><rect x="46" y="42" width="66" height="66" rx="10" fill="#fff"/><text x="79" y="86" text-anchor="middle" style="font-family:var(--body)" font-size="30" fill="${INK}">가</text></g><text x="120" y="82" text-anchor="middle" font-size="20" fill="${INK}">⇄</text><g transform="rotate(6 160 75)"><rect x="128" y="42" width="66" height="66" rx="10" fill="#fff"/><text x="161" y="86" text-anchor="middle" style="font-family:var(--display)" font-weight="700" font-size="30" fill="${T}">A</text></g></svg>`,
   },
   card: {
     tint: "#F1ECF3",
-    svg: `<svg viewBox="0 0 240 150"><g transform="rotate(-5 120 75)"><rect x="52" y="40" width="136" height="76" rx="8" fill="${T3}"/><rect x="60" y="34" width="136" height="76" rx="8" fill="#fff"/><path d="M84 58l3 7 7 3-7 3-3 7-3-7-7-3 7-3z" fill="${T2}"/><text x="82" y="94" font-family="Raleway,sans-serif" font-size="12" fill="${INK}">I support your efforts.</text></g></svg>`,
+    svg: `<svg viewBox="0 0 240 150"><g transform="rotate(-5 120 75)"><rect x="52" y="40" width="136" height="76" rx="8" fill="${T3}"/><rect x="60" y="34" width="136" height="76" rx="8" fill="#fff"/><path d="M84 58l3 7 7 3-7 3-3 7-3-7-7-3 7-3z" fill="${T2}"/><text x="82" y="94" style="font-family:var(--body)" font-size="12" fill="${INK}">I support your efforts.</text></g></svg>`,
   },
   checklist: {
     tint: "#EEF3EE",

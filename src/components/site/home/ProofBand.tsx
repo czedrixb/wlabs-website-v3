@@ -52,13 +52,6 @@ type Props = { s: SiteStrings["proof"] };
 export function ProofBand({ s }: Props) {
   const rootRef = useRef<HTMLDivElement | null>(null);
   const ranRef = useRef(false);
-  // dictionary.ts's stat2 is "{year}년부터..." (ko) / "...since {year}" (en)
-  // — a literal "{year}" marker, not real interpolation, so each language's
-  // word order can put the animated <b data-count> counter on its own side
-  // of the sentence (the WOS-314 counter-fragment fix, plan Step 5: v3's
-  // own markup always put the number first, which only reads correctly in
-  // Korean).
-  const [stat2Before, stat2After] = s.stat2.split("{year}");
 
   useEffect(() => {
     const root = rootRef.current;
@@ -105,14 +98,14 @@ export function ProofBand({ s }: Props) {
             </b>
             <span>{s.stat1}</span>
           </div>
+          {/* WOS-336: the year is its own big/small two-row stat like the
+              other cells — v3's own markup (index.html:2188), restored from
+              the WOS-331 inline-sentence variant at the user's request. */}
           <div className="proof-item">
-            <span className="stat2">
-              {stat2Before}
-              <b className="tnum" data-count="2022" data-from="2000">
-                2000
-              </b>
-              {stat2After}
-            </span>
+            <b className="tnum" data-count="2022" data-from="2000">
+              2000
+            </b>
+            <span>{s.stat2}</span>
           </div>
           <div className="proof-item">
             <b className="ok">

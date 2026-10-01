@@ -61,15 +61,14 @@ test("post banner renders through next/image", async ({ page, baseURL }) => {
     );
     expect(loaded).toBe(true);
 
-    // The list page 500'd on the same error — it must render the banner too.
-    await page.goto("/ko/blog");
-    // exact + level:1 — some seeded post titles contain "블로그" as a
-    // substring (e.g. "블로그를 다시 만든 이유"), which a loose name match
-    // would also pick up.
-    await expect(
-      page.getByRole("heading", { name: "블로그", exact: true, level: 1 }),
-    ).toBeVisible();
-    await expect(page.locator('img[src*="/_next/image"]').first()).toBeVisible();
+    // The list page 500'd on the same error. The old /blog listing is gone
+    // — this post's card now lives in the Company > Insights panel instead
+    // — but NewsList.tsx doesn't render post banners at all (cards are
+    // text + link only), so the regression can't resurface there. Not
+    // asserted here: that panel is ISR-cached (company/[panel]/page.tsx's
+    // `revalidate = 60`), and on-demand revalidateTag invalidation from
+    // Posts.ts's afterChange hook can take a request or two to propagate —
+    // a single immediate page.goto isn't a reliable window to observe it in.
   } finally {
     await api.delete(`/api/posts/${postId}`, { headers: origin });
     await api.delete(`/api/media/${mediaId}`, { headers: origin });

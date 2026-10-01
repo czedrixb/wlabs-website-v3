@@ -6,7 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import type { Locale } from "@/lib/locale";
 import { withLocale } from "@/lib/locale";
 import type { SiteStrings } from "@/lib/site/dictionary";
-import { isDarkAt } from "./lib/surfaceSampler";
+import { isDarkAtLines } from "./lib/surfaceSampler";
 import { buildNav } from "./siteNav";
 
 type Props = { locale: Locale; s: SiteStrings["chrome"] };
@@ -34,9 +34,15 @@ export function Header({ locale, s }: Props) {
   const [isDark, setIsDark] = useState(false);
   const [openSub, setOpenSub] = useState<string | null>(null);
 
-  // Luminance sampler: read what actually paints behind the lockup/nav and
-  // flip .is-dark so it stays legible — same technique as Masthead, ported
-  // from the built site's separate desktop `check()` function.
+  // Luminance sampler: read what actually paints behind the mark and flip
+  // .is-dark so it stays legible. WOS-336 brings this to full parity with
+  // the built site's desktop `check()` (index.html:3638-3642): sample
+  // points derive from the LOGO's own rect (left+4 / centre / right−4),
+  // two y-lines are tried in order (logo centre, then the header's bottom
+  // edge — alternatives, not averaged), an `.on-light` surface
+  // short-circuits its inner dark panels, and in-page changes that fire no
+  // scroll/resize (opening a band, a FAQ item, the sheet) are caught by a
+  // click+60ms re-check and a 600ms interval.
   useEffect(() => {
     const header = headerRef.current;
     if (!header) return;
@@ -49,10 +55,12 @@ export function Header({ locale, s }: Props) {
         setIsDark(false);
         return;
       }
-      const y = r.bottom - 1;
-      const xs = [r.left + r.width * 0.12, r.left + r.width * 0.5, r.left + r.width * 0.85];
-      const dark = isDarkAt(xs, y, header!);
-      if (dark !== null) setIsDark(dark);
+      const lr = header!.querySelector(".lockup")?.getBoundingClientRect() ?? null;
+      const xs = lr
+        ? [lr.left + 4, lr.left + lr.width / 2, lr.right - 4]
+        : [r.left + r.width * 0.12, r.left + r.width * 0.5, r.left + r.width * 0.85];
+      const ys = lr ? [lr.top + lr.height / 2, r.bottom - 1] : [r.bottom - 1];
+      setIsDark(isDarkAtLines(xs, ys, header!));
     }
     function ask() {
       if (queued) return;
@@ -62,12 +70,17 @@ export function Header({ locale, s }: Props) {
 
     ask();
     const t = setTimeout(read, 400);
+    const onClick = () => setTimeout(ask, 60);
+    const interval = setInterval(ask, 600);
     window.addEventListener("scroll", ask, { passive: true });
     window.addEventListener("resize", ask);
+    document.addEventListener("click", onClick);
     return () => {
       clearTimeout(t);
+      clearInterval(interval);
       window.removeEventListener("scroll", ask);
       window.removeEventListener("resize", ask);
+      document.removeEventListener("click", onClick);
     };
     // Re-sample on navigation too — the sections behind the header changed.
   }, [pathname]);

@@ -114,6 +114,15 @@ export const CATEGORY_SERVICE: Record<ProjectCatId, ServiceId> = {
   prod: "intelligence",
 };
 
+// Which contact TOPICS id a project page's inquiry CTA preselects — v3's
+// `CAT_TOPIC` (site/index.html:3597), verbatim (WOS-336).
+export const CATEGORY_TOPIC: Record<ProjectCatId, string> = {
+  health: "data",
+  edu: "custom",
+  lang: "ai",
+  prod: "ai",
+};
+
 // ── Services ────────────────────────────────────────────────────────────
 //
 // SVC_ROWS (src/splice.py:651) authors these five rows in Python, not in
@@ -135,8 +144,12 @@ export type ServiceId = "intelligence" | "creation" | "insight" | "experience" |
 // monogram the source hardcodes per entry (e.g. "YT" for YumTrack) — not
 // computed, since a couple (like Skin Optics' "SO") don't follow a
 // mechanical first-letters rule.
+// `short` on the project variant is the rail's display name — v3's rail
+// hardcodes the short product-style name per entry (`<span>YumTrack</span>`,
+// index.html:2455-2459, same literal in both languages), never the card's
+// full marketing title ("YumTrack — AI-Aided Diet and Calorie Tracker").
 export type ServiceRelatedRef =
-  | { kind: "project"; id: string; abbr: string }
+  | { kind: "project"; id: string; abbr: string; short: string }
   | { kind: "product"; id: ProductId; abbr: string }
   | { kind: "static"; abbr: string; label: Bilingual };
 
@@ -152,6 +165,10 @@ export type Service = {
   // reference.
   abbr: string;
   anchor: string; // the #svc-* id the Work services panel anchors to
+  // Which contact TOPICS id this service's inquiry CTA preselects — v3's
+  // own data-contact values on the five svc-detail cards (index.html:
+  // 2455-2459), also the tuner's service→topic hand-off map (WOS-336).
+  topic: string;
   weight?: number; // SpectrogramStack band weight; only `insight` deviates from 1
   // English-only technical-term chips shown under each svc-detail's body —
   // v3 never translates these (no bilingual span in the source markup).
@@ -171,11 +188,12 @@ export const SERVICES: Service[] = [
     name: bi("AI & Intelligent Automation", "AI·지능형 자동화"),
     abbr: "AI",
     anchor: "svc-ai",
+    topic: "ai",
     chips: ["Computer vision", "NLP / LLM", "Workflow AI"],
     related: [
-      { kind: "project", id: "yumtrack", abbr: "YT" },
-      { kind: "project", id: "kindleup", abbr: "KU" },
-      { kind: "project", id: "audiomint", abbr: "AM" },
+      { kind: "project", id: "yumtrack", abbr: "YT", short: "YumTrack" },
+      { kind: "project", id: "kindleup", abbr: "KU", short: "KindleUp" },
+      { kind: "project", id: "audiomint", abbr: "AM", short: "AudioMint" },
     ],
     relatedCaption: "relatedLabel",
   },
@@ -186,11 +204,12 @@ export const SERVICES: Service[] = [
     name: bi("Custom Software Development", "맞춤 소프트웨어 개발"),
     abbr: "CS",
     anchor: "svc-custom",
+    topic: "custom",
     chips: ["Web platforms", "SaaS", "Full-stack"],
     related: [
-      { kind: "project", id: "ulms", abbr: "UE" },
-      { kind: "project", id: "lingrid", abbr: "LG" },
-      { kind: "project", id: "todont", abbr: "TD" },
+      { kind: "project", id: "ulms", abbr: "UE", short: "U Education LMS" },
+      { kind: "project", id: "lingrid", abbr: "LG", short: "Lingrid" },
+      { kind: "project", id: "todont", abbr: "TD", short: "ToDon't" },
     ],
     relatedCaption: "relatedLabel",
   },
@@ -201,12 +220,13 @@ export const SERVICES: Service[] = [
     name: bi("Data & Imaging Intelligence", "데이터·이미징 인텔리전스"),
     abbr: "DI",
     anchor: "svc-data",
+    topic: "data",
     weight: 1.1,
     chips: ["LC-OCT", "Segmentation", "3D reconstruction"],
     related: [
       { kind: "product", id: "skinarch", abbr: "SA" },
       { kind: "product", id: "brainarch", abbr: "BA" },
-      { kind: "project", id: "skin", abbr: "SO" },
+      { kind: "project", id: "skin", abbr: "SO", short: "Skin Optics" },
     ],
     relatedCaption: "relatedProducts",
   },
@@ -217,9 +237,10 @@ export const SERVICES: Service[] = [
     name: bi("UI/UX & Product Design", "UI/UX·제품 디자인"),
     abbr: "UX",
     anchor: "svc-design",
+    topic: "design",
     chips: ["Interface design", "Prototyping", "Design systems"],
     related: [
-      { kind: "project", id: "pagoda", abbr: "PT" },
+      { kind: "project", id: "pagoda", abbr: "PT", short: "Pagoda Talking Plus" },
       { kind: "product", id: "wiz", abbr: "WZ" },
     ],
     relatedCaption: "relatedLabel",
@@ -231,6 +252,7 @@ export const SERVICES: Service[] = [
     name: bi("Modernization & Support", "현대화·운영 지원"),
     abbr: "MS",
     anchor: "svc-ops",
+    topic: "support",
     chips: ["Legacy migration", "Integration", "Maintenance"],
     related: [
       { kind: "static", abbr: "LD", label: bi("Logistics dispatch", "물류 배차") },
@@ -357,8 +379,13 @@ export const FAQ: FaqItem[] = [
 // source for WOS-333's `insights` collection to seed from, and NewsList.tsx
 // no longer needs its own private array.
 
-export type InsightKind = "news" | "product" | "case";
-export type InsightLink = { href: string; external?: boolean; labelKey?: "segProducts" };
+// "blog" isn't one of v3's own kinds — WOS-336(-follow-up) folds the
+// now-deleted /blog listing's posts into this panel as a 4th, separately
+// filterable group, since they can't be date-sorted into the other three
+// (see the `date` comment below). "readPost" is its link label, likewise
+// new.
+export type InsightKind = "news" | "product" | "case" | "blog";
+export type InsightLink = { href: string; external?: boolean; labelKey?: "segProducts" | "readPost" };
 
 export type InsightItem = {
   id: string;
@@ -425,4 +452,97 @@ export type Topic = { id: string; label: Bilingual };
 export const TOPICS: Topic[] = V3_CONTENT.topics.map(([id, ko, en]) => ({
   id,
   label: bi(en, ko),
+}));
+
+// ── Chip glossary (WOS-336) ─────────────────────────────────────────────
+//
+// v3's `CHIP_TIPS` (site/index.html:3688) — the 23 technical-term
+// definitions behind every `.chip[data-tip]` tooltip, and the search
+// index's `kind: "term"` glossary entries. The term itself is the chip's
+// visible English text (v3 never translates the terms, only the
+// definitions), so it doubles as the lookup key.
+
+export type ChipTip = { term: string; tip: Bilingual };
+
+export const CHIP_TIPS: ChipTip[] = Object.entries(V3_CONTENT.chipTips).map(([term, [en, ko]]) => ({
+  term,
+  tip: bi(en, ko),
+}));
+
+// ── Company reading log (WOS-336) ───────────────────────────────────────
+//
+// The sp-rail's 27 entries. Structure (ids, types, fractional-year rail
+// positions, dates, the p24 break-line figures) comes from the generated
+// V3_CONTENT.rail rows; each row's text arrives as v3 `data-i` key names
+// ("spRailTeamH") that join onto the `rail` dictionary namespace
+// (scripts/v3-rail-manifest.mjs keeps the same suffixes) — resolved here
+// into the Bilingual shape everything else in this file uses.
+
+export type RailEntryType = "milestone" | "service" | "product" | "project" | "proof";
+
+export type RailEntry = {
+  id: string;
+  type: RailEntryType;
+  t: number; // fractional year, the entry's position on the rail axis
+  total?: number; // the confirmed client-project total the p24 proof entry carries
+  datetime: string; // <time datetime> value ("2026-09", "2026")
+  dateLabel: string; // the displayed date ("2026-09", "c. 2026")
+  circa: boolean;
+  title: Bilingual;
+  meta?: Bilingual;
+  para: Bilingual;
+  enote?: Bilingual;
+  enoteRuo?: boolean;
+  breakLine?: { named: number; undisclosed: number };
+  link?: { href: string; label: string };
+};
+
+type RawRailEntry = {
+  id: string;
+  type: string;
+  t: number;
+  total?: number;
+  datetime: string;
+  dateLabel: string;
+  circa: boolean;
+  titleKey: string;
+  metaKey?: string;
+  paraKey: string;
+  enoteKey?: string;
+  enoteRuo?: boolean;
+  breakLine?: { named: number; undisclosed: number };
+  link?: { href: string; label: string };
+};
+
+const railKo = V3_STRINGS.ko.rail as Record<string, string>;
+const railEn = V3_STRINGS.en.rail as Record<string, string>;
+
+function railStr(v3Key: string): Bilingual {
+  const suffix = v3Key.replace(/^spRail/, "");
+  const field = suffix[0].toLowerCase() + suffix.slice(1);
+  const ko = railKo[field];
+  const en = railEn[field];
+  if (ko === undefined || en === undefined) {
+    throw new Error(
+      `Rail entry references "${v3Key}" but rail.${field} isn't in the generated dictionary — ` +
+        `add it to scripts/v3-rail-manifest.mjs and regenerate.`,
+    );
+  }
+  return { ko, en };
+}
+
+export const RAIL_ENTRIES: RailEntry[] = (V3_CONTENT.rail as readonly RawRailEntry[]).map((r) => ({
+  id: r.id,
+  type: r.type as RailEntryType,
+  t: r.t,
+  ...(r.total !== undefined ? { total: r.total } : {}),
+  datetime: r.datetime,
+  dateLabel: r.dateLabel,
+  circa: r.circa,
+  title: railStr(r.titleKey),
+  ...(r.metaKey ? { meta: railStr(r.metaKey) } : {}),
+  para: railStr(r.paraKey),
+  ...(r.enoteKey ? { enote: railStr(r.enoteKey), enoteRuo: Boolean(r.enoteRuo) } : {}),
+  ...(r.breakLine ? { breakLine: r.breakLine } : {}),
+  ...(r.link ? { link: r.link } : {}),
 }));

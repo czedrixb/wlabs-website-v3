@@ -47,12 +47,24 @@ function declaredDark(el: Element): boolean | null {
  * Sample the element stack at each x in `xs` (same y), ignoring anything
  * inside `ignore` (the bar doing the asking). Returns whether the majority
  * of samples that resolved to *anything* were dark, or null if none did.
+ *
+ * `onLightShortCircuit` is the desktop check()'s extra rule (WOS-336,
+ * site/index.html:3640): when the TOPMOST element under a point sits
+ * inside an `.on-light` ancestor, that sample counts as light without
+ * walking the rest of the stack — so a card that declares itself one
+ * light surface (the contact tuner) never reads as dark through its inner
+ * navy panels.
  */
-export function isDarkAt(xs: number[], y: number, ignore: Element): boolean | null {
+export function isDarkAt(xs: number[], y: number, ignore: Element, onLightShortCircuit = false): boolean | null {
   let dark = 0;
   let total = 0;
   for (const x of xs) {
     const stack = document.elementsFromPoint(x, y).filter((el) => !ignore.contains(el));
+    if (stack.length === 0) continue;
+    if (onLightShortCircuit && stack[0].closest(".on-light")) {
+      total++;
+      continue;
+    }
     for (const el of stack) {
       const declared = declaredDark(el);
       if (declared !== null) {
@@ -69,6 +81,21 @@ export function isDarkAt(xs: number[], y: number, ignore: Element): boolean | nu
     }
   }
   return total ? dark * 2 >= total : null;
+}
+
+/**
+ * The desktop header's full verdict (WOS-336, v3 check() at
+ * site/index.html:3638-3642): try each y-line in order and take the FIRST
+ * one that resolves — lines are alternatives (logo centre, then the
+ * header's bottom edge), never averaged. Nothing resolving anywhere means
+ * light, matching the source's `let dark=false` default.
+ */
+export function isDarkAtLines(xs: number[], ys: number[], ignore: Element): boolean {
+  for (const y of ys) {
+    const verdict = isDarkAt(xs, y, ignore, true);
+    if (verdict !== null) return verdict;
+  }
+  return false;
 }
 
 /**

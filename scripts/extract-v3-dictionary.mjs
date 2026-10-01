@@ -23,24 +23,39 @@
 //      (`spRailUndisclosed` has no EN) is exactly the bug class this
 //      guards against for every future manifest addition.
 //
-// Three manifests feed this script: v3-dictionary-manifest.mjs (WOS-331 —
+// Six manifests feed this script: v3-dictionary-manifest.mjs (WOS-331 —
 // chrome + Home's hero/proof/band/faq), v3-content-manifest.mjs (WOS-332 —
 // Work/Company panels, product/project detail pages, Home's project-strip/
-// company-teaser, and the rest of the FAQ), and v3-contact-manifest.mjs
-// (WOS-334 — the /contact form). They're merged namespace-by-namespace
-// before extraction — `home` and `faq` are extended by more than one
-// manifest rather than each owning a disjoint set of namespaces, since
-// more than one ticket adds fields to Home and to the FAQ.
+// company-teaser, and the rest of the FAQ), v3-contact-manifest.mjs
+// (WOS-334 — the /contact form), and WOS-336's v3-tuner-manifest.mjs /
+// v3-rail-manifest.mjs / v3-wos336-manifest.mjs (the sp-tuner, the sp-rail,
+// and search/sheet/Home-products/CTA/toast). They're merged
+// namespace-by-namespace before extraction — `home`, `faq` and `contact`
+// are extended by more than one manifest rather than each owning a
+// disjoint set of namespaces, since more than one ticket adds fields to
+// the same surface.
+//
+// A manifest entry may also be an inline literal `{ ko: "…", en: "…" }`
+// with no `v3Key` — for the handful of strings the v3 source only renders
+// from inline JS ternaries (the search states) or where one side is
+// missing from the source itself (spRailUndisclosed's EN). Those are
+// emitted verbatim and exempt from the harvest guard; the manifest entry
+// carries the provenance comment.
 //
 // Usage: node scripts/extract-v3-dictionary.mjs
 // Override the v3 repo location with V3_SITE_INDEX if it isn't the default
-// sibling checkout (D:\Submit\W Labs Website v3\site\index.html).
+// sibling checkout (D:\Submit\wlabs-website-v3\site\index.html — the git
+// repo; the older "W Labs Website v3" folder is a stale Sept-28 wireframe
+// snapshot, not the reference).
 import { readFileSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 import { MANIFEST as DICTIONARY_MANIFEST } from "./v3-dictionary-manifest.mjs";
 import { CONTENT_MANIFEST } from "./v3-content-manifest.mjs";
 import { CONTACT_MANIFEST } from "./v3-contact-manifest.mjs";
+import { TUNER_MANIFEST } from "./v3-tuner-manifest.mjs";
+import { RAIL_MANIFEST } from "./v3-rail-manifest.mjs";
+import { WOS336_MANIFEST } from "./v3-wos336-manifest.mjs";
 
 function mergeManifests(...manifests) {
   const merged = {};
@@ -52,14 +67,21 @@ function mergeManifests(...manifests) {
   return merged;
 }
 
-const MANIFEST = mergeManifests(DICTIONARY_MANIFEST, CONTENT_MANIFEST, CONTACT_MANIFEST);
+const MANIFEST = mergeManifests(
+  DICTIONARY_MANIFEST,
+  CONTENT_MANIFEST,
+  CONTACT_MANIFEST,
+  TUNER_MANIFEST,
+  RAIL_MANIFEST,
+  WOS336_MANIFEST,
+);
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(__dirname, "..");
 
 const v3IndexPath =
   process.env.V3_SITE_INDEX ??
-  path.resolve(repoRoot, "..", "W Labs Website v3", "site", "index.html");
+  path.resolve(repoRoot, "..", "wlabs-website-v3", "site", "index.html");
 
 const outPath = path.resolve(repoRoot, "src", "lib", "site", "dictionary.generated.ts");
 
@@ -213,6 +235,16 @@ function main() {
     ko[namespace] = {};
     en[namespace] = {};
     for (const [field, spec] of Object.entries(fields)) {
+      if (spec.v3Key === undefined) {
+        // Inline literal — both sides authored in the manifest (see header).
+        if (typeof spec.ko !== "string" || typeof spec.en !== "string") {
+          missing.push(`${namespace}.${field}: inline literal must carry both ko and en strings`);
+          continue;
+        }
+        ko[namespace][field] = spec.ko;
+        en[namespace][field] = spec.en;
+        continue;
+      }
       const { v3Key, type } = spec;
       const koRaw = KO[v3Key];
       const enRaw = EN[v3Key];

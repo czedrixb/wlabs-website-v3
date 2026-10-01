@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { siteFontVariables } from "@/lib/fonts";
 
 // Hints Next's build-time optimizer at the two real locales; on its own it
 // does NOT reject anything else — dynamicParams: false only 404s params
@@ -24,12 +25,24 @@ type Props = {
 // are left to each nested layout (both now import site.css and wrap their
 // pages in the shared <SiteChrome> — WOS-335) rather than applied here, so
 // neither group depends on the other for its title or its class list.
+//
+// WOS-337: siteFontVariables (the three next/font CSS variables) has to
+// live on <html> and NOT on some element inside <body> — site.css's
+// --display/--body tokens are declared on :root (and html:lang(ko)), and a
+// custom property whose value contains var(--font-quicksand) etc. is
+// invalid at computed-value time on whichever element declares it if those
+// variables aren't in scope there. They used to be mounted on a <div>
+// inside SiteChrome instead (see that file), which meant --display/--body
+// were poisoned right at :root and every font/line-height/weight shorthand
+// built on them silently dropped out site-wide, on every route — the
+// "wrong font on every page" bug. Mounting them here, above :root's own
+// scope, is what makes Quicksand/Raleway/Noto Sans KR actually resolve.
 export default async function LocaleRootLayout({ children, params }: Props) {
   const { locale } = await params;
   if (locale !== "ko" && locale !== "en") notFound();
 
   return (
-    <html lang={locale}>
+    <html lang={locale} className={siteFontVariables}>
       <body>{children}</body>
     </html>
   );
