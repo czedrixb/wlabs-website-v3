@@ -74,19 +74,22 @@ function parseRcNote(html: string): RcNote {
 // they're literals here instead of coming from dictionary.generated.ts.
 const STORY_ARIA_LABEL = "Intelligence in motion";
 
-// WOS-335: the blog's nav/footer label. v3 has no blog, so — same as
-// STORY_ARIA_LABEL above — there's no source key in dictionary.generated.ts
-// to harvest; hand-authored here instead.
-const BLOG_LABELS: Record<Locale, { tabBlog: string }> = {
-  ko: { tabBlog: "블로그" },
-  en: { tabBlog: "Blog" },
+// WOS-335: the blog's label. v3 has no blog, so — same as STORY_ARIA_LABEL
+// above — there's no source key in dictionary.generated.ts to harvest;
+// hand-authored here instead. Originally just the nav/footer tab label;
+// the blog listing's own removal repurposes `tabBlog` as the Insights
+// panel's new filter chip / `.pcat` kind label for posts, and adds
+// `readPost` as that chip's card link label (see `insights` below).
+const BLOG_LABELS: Record<Locale, { tabBlog: string; readPost: string }> = {
+  ko: { tabBlog: "블로그", readPost: "글 읽기" },
+  en: { tabBlog: "Blog", readPost: "Read post" },
 };
 
 function build(locale: Locale) {
   const v3 = V3_STRINGS[locale];
 
   return {
-    chrome: { ...v3.chrome, ...BLOG_LABELS[locale] },
+    chrome: { ...v3.chrome, tabBlog: BLOG_LABELS[locale].tabBlog },
     home: {
       ...v3.home,
       heading1: parseHeading(v3.home.heroH1),
@@ -113,9 +116,10 @@ function build(locale: Locale) {
       // DOM order, which only reads correctly in Korean word order — the
       // EN fragment ("Delivering client work continuously since") needs
       // the year AFTER it, not before. "{year}" is a literal marker
-      // ProofBand.tsx splits on to place the animated counter in the right
-      // spot for each language, not real interpolation.
-      stat2: locale === "en" ? `${v3.proof.stat2Template} {year}` : `{year}${v3.proof.stat2Template}`,
+      // WOS-336: the caption under the big animated "2022" counter — v3's
+      // own proof2 string, used verbatim in both languages (the year lives
+      // in the <b data-count> above it, not in this sentence).
+      stat2: v3.proof.stat2Template,
     },
     band: {
       ...v3.band,
@@ -136,7 +140,11 @@ function build(locale: Locale) {
     // slice the way home/proof/band/faq have above.
     work: v3.work,
     company: v3.company,
-    insights: v3.insights,
+    // The blog listing's removal folds posts into this panel as a 4th
+    // filterable kind — `insBlog`/`insReadPost` are its chip/link labels,
+    // merged in from BLOG_LABELS (no source key for them in v3's own
+    // dictionary harvest, same reasoning as BLOG_LABELS itself above).
+    insights: { ...v3.insights, insBlog: BLOG_LABELS[locale].tabBlog, insReadPost: BLOG_LABELS[locale].readPost },
     // WOS-334: the /contact form. rcNote is the one markup-bearing string
     // in this slice — see parseRcNote above.
     contact: {

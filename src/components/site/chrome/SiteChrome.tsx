@@ -1,5 +1,4 @@
 import type { Locale } from "@/lib/locale";
-import { siteFontVariables } from "@/lib/fonts";
 import { siteT } from "@/lib/site/dictionary";
 import { CHIP_TIPS, TOPICS } from "@/lib/site/content";
 import { Header } from "./Header";
@@ -32,7 +31,7 @@ export function SiteChrome({ locale, children }: Props) {
   const chrome = s.chrome;
 
   return (
-    <div className={siteFontVariables}>
+    <div>
       {/* First in the tree so #logo-icon-* symbols exist before any <use>
           referencing them (Hero's dp-mark, the CTA panels' watermark). */}
       <LogoSprite />

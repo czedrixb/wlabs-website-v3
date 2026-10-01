@@ -144,8 +144,12 @@ export type ServiceId = "intelligence" | "creation" | "insight" | "experience" |
 // monogram the source hardcodes per entry (e.g. "YT" for YumTrack) — not
 // computed, since a couple (like Skin Optics' "SO") don't follow a
 // mechanical first-letters rule.
+// `short` on the project variant is the rail's display name — v3's rail
+// hardcodes the short product-style name per entry (`<span>YumTrack</span>`,
+// index.html:2455-2459, same literal in both languages), never the card's
+// full marketing title ("YumTrack — AI-Aided Diet and Calorie Tracker").
 export type ServiceRelatedRef =
-  | { kind: "project"; id: string; abbr: string }
+  | { kind: "project"; id: string; abbr: string; short: string }
   | { kind: "product"; id: ProductId; abbr: string }
   | { kind: "static"; abbr: string; label: Bilingual };
 
@@ -187,9 +191,9 @@ export const SERVICES: Service[] = [
     topic: "ai",
     chips: ["Computer vision", "NLP / LLM", "Workflow AI"],
     related: [
-      { kind: "project", id: "yumtrack", abbr: "YT" },
-      { kind: "project", id: "kindleup", abbr: "KU" },
-      { kind: "project", id: "audiomint", abbr: "AM" },
+      { kind: "project", id: "yumtrack", abbr: "YT", short: "YumTrack" },
+      { kind: "project", id: "kindleup", abbr: "KU", short: "KindleUp" },
+      { kind: "project", id: "audiomint", abbr: "AM", short: "AudioMint" },
     ],
     relatedCaption: "relatedLabel",
   },
@@ -203,9 +207,9 @@ export const SERVICES: Service[] = [
     topic: "custom",
     chips: ["Web platforms", "SaaS", "Full-stack"],
     related: [
-      { kind: "project", id: "ulms", abbr: "UE" },
-      { kind: "project", id: "lingrid", abbr: "LG" },
-      { kind: "project", id: "todont", abbr: "TD" },
+      { kind: "project", id: "ulms", abbr: "UE", short: "U Education LMS" },
+      { kind: "project", id: "lingrid", abbr: "LG", short: "Lingrid" },
+      { kind: "project", id: "todont", abbr: "TD", short: "ToDon't" },
     ],
     relatedCaption: "relatedLabel",
   },
@@ -222,7 +226,7 @@ export const SERVICES: Service[] = [
     related: [
       { kind: "product", id: "skinarch", abbr: "SA" },
       { kind: "product", id: "brainarch", abbr: "BA" },
-      { kind: "project", id: "skin", abbr: "SO" },
+      { kind: "project", id: "skin", abbr: "SO", short: "Skin Optics" },
     ],
     relatedCaption: "relatedProducts",
   },
@@ -236,7 +240,7 @@ export const SERVICES: Service[] = [
     topic: "design",
     chips: ["Interface design", "Prototyping", "Design systems"],
     related: [
-      { kind: "project", id: "pagoda", abbr: "PT" },
+      { kind: "project", id: "pagoda", abbr: "PT", short: "Pagoda Talking Plus" },
       { kind: "product", id: "wiz", abbr: "WZ" },
     ],
     relatedCaption: "relatedLabel",
@@ -375,8 +379,13 @@ export const FAQ: FaqItem[] = [
 // source for WOS-333's `insights` collection to seed from, and NewsList.tsx
 // no longer needs its own private array.
 
-export type InsightKind = "news" | "product" | "case";
-export type InsightLink = { href: string; external?: boolean; labelKey?: "segProducts" };
+// "blog" isn't one of v3's own kinds — WOS-336(-follow-up) folds the
+// now-deleted /blog listing's posts into this panel as a 4th, separately
+// filterable group, since they can't be date-sorted into the other three
+// (see the `date` comment below). "readPost" is its link label, likewise
+// new.
+export type InsightKind = "news" | "product" | "case" | "blog";
+export type InsightLink = { href: string; external?: boolean; labelKey?: "segProducts" | "readPost" };
 
 export type InsightItem = {
   id: string;

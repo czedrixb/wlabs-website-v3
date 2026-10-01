@@ -11,13 +11,6 @@ import sharp from "sharp";
 import { Posts } from "./collections/Posts";
 import { Media } from "./collections/Media";
 import { Users } from "./collections/Users";
-import { Team } from "./collections/Team";
-import { Projects } from "./collections/Projects";
-import { Products } from "./collections/Products";
-import { Services } from "./collections/Services";
-import { Faq } from "./collections/Faq";
-import { Insights } from "./collections/Insights";
-import { Inquiries } from "./collections/Inquiries";
 import { csrfOrigins, serverURL } from "./lib/deployOrigins";
 
 const filename = fileURLToPath(import.meta.url);
@@ -71,7 +64,13 @@ export default buildConfig({
       actions: ["/components/admin/LanguageToggle#LanguageToggle"],
     },
   },
-  collections: [Posts, Media, Users, Team, Projects, Products, Services, Faq, Insights, Inquiries],
+  // WOS-337: trimmed back to the three collections the admin actually needs
+  // — the WOS-333 "Site content" six (Team/Projects/Products/Services/Faq/
+  // Insights) and Inquiries were write-only islands: every (site) page reads
+  // its content from the static src/lib/site/content.ts constants, never
+  // from these tables, and nothing else in the app read Inquiries back
+  // either (see src/app/api/contact/route.ts's console.info-only write now).
+  collections: [Posts, Media, Users],
   // Non-developer authors expect a persistent toolbar at the top of the
   // editor (like Word/Notion); the default Lexical toolbar only appears on
   // text selection, which reads as "there is no toolbar" (WOS-320).

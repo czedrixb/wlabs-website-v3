@@ -45,7 +45,6 @@ export function Footer({ locale }: Props) {
             <Link href={withLocale("/company/story", locale)}>{s.story}</Link>
             <Link href={withLocale("/company/team", locale)}>{s.team}</Link>
             <Link href={withLocale("/company/insights", locale)}>{s.insights}</Link>
-            <Link href={withLocale("/blog", locale)}>{s.tabBlog}</Link>
           </div>
           <div>
             <h4>

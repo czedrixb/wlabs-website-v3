@@ -65,10 +65,12 @@ test.describe("site i18n: English Home", () => {
     await expect(page.locator(".chapter").first().locator(".accent")).toHaveText("working software");
     await expect(page.getByText("Scroll to explore")).toBeVisible();
 
-    // Proof band — the counter-fragment fix (Step 5): the sentence reads in
-    // English word order with the counter inline, not glued Korean-style.
+    // Proof band — WOS-336: the year is its own big/small two-row stat
+    // (v3's own markup), the caption in English under the 2022 counter.
     await page.locator(".proof").scrollIntoViewIfNeeded();
-    await expect(page.locator(".stat2")).toContainText("Delivering client work continuously since");
+    await expect(
+      page.locator(".proof-item", { hasText: "Delivering client work continuously since" }),
+    ).toBeVisible();
     await expect(page.locator(".ok").first()).toContainText("Verified");
 
     // Services (mod-band).

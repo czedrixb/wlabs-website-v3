@@ -134,6 +134,17 @@ export function StoryRail({ s, entries }: Props) {
       const h = Math.round(band.getBoundingClientRect().height);
       if (h > 0 && h !== bandH) bandH = h;
       root!.style.setProperty("--sp-rail-off", `${hostOcc + bandH}px`);
+      // WOS-336: the band pins UNDER the Company tab bar, not under the
+      // header — the occlusion probe only counts boxes pinned at the very
+      // top of the window, and the tab bar sits below the header. v3's
+      // wiring publishes the measured height as --sp-tabs-h for the same
+      // reason (index.html:5425-5434); the band/ground/scroll-margin rules
+      // all read it from this root.
+      const tabs = document.querySelector("#company .sp-rail-tabs");
+      if (tabs) {
+        const th = Math.round(tabs.getBoundingClientRect().height);
+        if (th > 0) root!.style.setProperty("--sp-tabs-h", `${th}px`);
+      }
     }
     const stackOffset = () => hostOcc + bandH;
 
@@ -540,7 +551,23 @@ export function StoryRail({ s, entries }: Props) {
 
   return (
     <div className="sp-rail" ref={rootRef}>
+      {/* WOS-336: the band's ground — a sticky zero-height marker whose
+          pseudo-elements paint the cream slab behind the pinned tab bar +
+          band and hang the rounded page edge BELOW the band (v3 creates it
+          in wireCompanyRail(), index.html:5401-5404; CSS at :6594). */}
+      <div className="sp-rail-ground" aria-hidden="true" />
       <div className="sp-rail-band">
+        {/* WOS-336: filters first, timeline under them — v3's shipped
+            order (`band.appendChild(railRail)`, index.html:5421): the band
+            reads top-down from the controls to the instrument they scope. */}
+        <nav className="sp-rail-filters" aria-label={s.filterLabel}>
+          {/* no whitespace between pills — inline-block gap control, v3 :2556 */}
+          {FILTERS.map((f, i) => (
+            <button key={f.id} type="button" className="sp-rail-pill" data-sp-filter={f.id} aria-pressed={i === 0}>
+              <span>{s[f.labelField]}</span>
+            </button>
+          ))}
+        </nav>
         <div className="sp-rail-rail" role="region" aria-label={s.region}>
           <div className="sp-rail-head">
             <span>{s.reading}</span>
@@ -569,14 +596,6 @@ export function StoryRail({ s, entries }: Props) {
             </svg>
           </div>
         </div>
-        <nav className="sp-rail-filters" aria-label={s.filterLabel}>
-          {/* no whitespace between pills — inline-block gap control, v3 :2556 */}
-          {FILTERS.map((f, i) => (
-            <button key={f.id} type="button" className="sp-rail-pill" data-sp-filter={f.id} aria-pressed={i === 0}>
-              <span>{s[f.labelField]}</span>
-            </button>
-          ))}
-        </nav>
       </div>
 
       <div className="sp-rail-counters" aria-live="off">

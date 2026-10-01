@@ -1,5 +1,5 @@
 import { revalidateTag } from "next/cache";
-import type { CollectionConfig } from "payload";
+import type { CollectionAfterDeleteHook, CollectionConfig } from "payload";
 import { slugify } from "@/lib/slugify";
 
 // Every public read goes through src/lib/cachedPosts.ts, which tags its
@@ -11,9 +11,20 @@ import { slugify } from "@/lib/slugify";
 const invalidatePostsCache = () => {
   try {
     // Next 16 requires a cache-life profile as the second argument (bare
-    // revalidateTag(tag) is deprecated); "max" means invalidate immediately,
-    // matching the writer's intent — this is a hard write, not a soft nudge.
-    revalidateTag("posts", "max");
+    // revalidateTag(tag) is deprecated). profile:"max" does NOT mean
+    // "invalidate immediately" — per Next's own revalidateTag docs it's the
+    // opposite: a one-year stale-while-revalidate window, so the very next
+    // request (this hook's own test, or a real reader) is served the old
+    // cached value while a fresh fetch runs in the background. Confirmed by
+    // reproducing: publish a post, then immediately load its public page —
+    // with "max" it 404s because the previously-cached "no post at this
+    // slug" lookup is still being served stale.
+    // Payload's hooks run inside a Route Handler (its REST API), not a
+    // Server Action, so updateTag() isn't available here — the docs'
+    // prescribed alternative for that case is { expire: 0 }, which forces
+    // the next request to block on a fresh fetch instead of serving stale
+    // data. That's what "a hard write, not a soft nudge" actually requires.
+    revalidateTag("posts", { expire: 0 });
   } catch {
     // Payload's admin /create view auto-creates a blank draft server-side,
     // during the admin page's own React render — Next forbids calling
@@ -22,6 +33,30 @@ const invalidatePostsCache = () => {
     // nothing to invalidate for it; swallow it rather than break the admin
     // page. A real publish/update always runs from a route handler or
     // server action, outside render, where this succeeds normally.
+  }
+};
+
+// _posts_v_parent_id_posts_id_fk is ON DELETE SET NULL, so deleting a post
+// can leave its version rows behind with parent_id = NULL (and latest =
+// true, if the deleted post was itself the latest version). Every
+// draft:true read (the admin list view, BeforeDashboard) selects
+// _posts_v WHERE latest = true and returns { id: doc.parent, ...doc.version
+// }, so an orphaned row surfaces as a doc with id: null — Payload's <Table>
+// then falls back to the row index as its React key, which can collide with
+// a real post id on the same page ("Encountered two children with the same
+// key"). Sweep every parentless version row after each delete (not just
+// this doc's) so the table can't reaccumulate garbage from any delete path
+// (admin UI, REST, bulk). See migrations/20261001_220000_purge_orphan_post_versions
+// for the one-time cleanup of rows that already existed.
+const purgeOrphanedVersions: CollectionAfterDeleteHook = async ({ req }) => {
+  try {
+    await req.payload.db.deleteVersions({
+      collection: "posts",
+      req,
+      where: { parent: { equals: null } },
+    });
+  } catch (err) {
+    req.payload.logger.error({ err, msg: "Failed to sweep parentless post versions" });
   }
 };
 
@@ -55,7 +90,7 @@ export const Posts: CollectionConfig = {
   },
   hooks: {
     afterChange: [invalidatePostsCache],
-    afterDelete: [invalidatePostsCache],
+    afterDelete: [invalidatePostsCache, purgeOrphanedVersions],
   },
   versions: {
     drafts: {

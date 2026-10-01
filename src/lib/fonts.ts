@@ -10,12 +10,17 @@ import { Quicksand, Raleway, Noto_Sans_KR } from "next/font/google";
 // fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&family=
 // Raleway:wght@400;500;600;700&family=Noto+Sans+KR:wght@400;500;700
 //
-// Not wired into any layout yet — the (site) route group that will consume
-// these (via siteFontVariables on its root element, with the ported
-// stylesheet's --display/--body tokens rewritten to reference
-// var(--font-quicksand) etc. instead of the literal family names) lands in
-// a later WOS-314 step. The blog route group keeps its own Tailwind font
-// stack and never imports this module.
+// WOS-337: mounted as a className on the (frontend) group's root <html>
+// element (src/app/(frontend)/[locale]/layout.tsx) — both (site) and
+// (blog) nest under it and share it via SiteChrome, so one mount point
+// covers every frontend route. It has to be on <html>, not lower: the
+// ported stylesheet's --display/--body tokens (src/styles/site.css)
+// reference var(--font-quicksand) etc. from :root, and a custom property
+// containing a var() to something out of scope is invalid at
+// computed-value time on the element that declares it — mounting these
+// variables anywhere under <body> instead poisoned --display/--body right
+// at :root and silently dropped every font/weight/line-height shorthand
+// built on them, site-wide.
 export const quicksand = Quicksand({
   subsets: ["latin"],
   weight: ["500", "600", "700"],

@@ -37,21 +37,25 @@ export const BeforeDashboard = async ({ payload, user, i18n }: ServerProps) => {
   const t = translations[lang];
   const adminRoute = payload.config.routes.admin;
 
+  // draft:true merges in rows from the versions table, and a version whose
+  // parent post was deleted out-of-band surfaces as a doc with id: null
+  // (posts_v.parent_id is ON DELETE SET NULL — swept by Posts.ts's
+  // afterDelete hook, but old rows or an out-of-band delete can still leave
+  // some behind). Those sort by -updatedAt like anything else, so a run of
+  // them can crowd out every real post within a plain limit: 5 — the
+  // "아직 작성된 글이 없습니다" bug even though posts exist. Over-fetch, drop
+  // the null-id rows, then take 5, so a handful of orphans can't empty the
+  // list. Their edit links would 404 anyway, so they're never worth
+  // rendering.
   const { docs: rawDocs } = await payload.find({
     collection: "posts",
     draft: true,
-    limit: 5,
+    limit: 20,
     sort: "-updatedAt",
     depth: 0,
     select: { title: true, _status: true, updatedAt: true },
   });
-
-  // draft:true merges in rows from the versions table, and a version whose
-  // parent post was deleted out-of-band surfaces as a doc with id: null
-  // (posts_v.parent_id is ON DELETE SET NULL). Rendering those gives every
-  // <li> below the same "null" key — React then warns and may drop or
-  // duplicate rows — and their edit links would 404 anyway. Skip them.
-  const docs = rawDocs.filter((doc) => doc.id != null);
+  const docs = rawDocs.filter((doc) => doc.id != null).slice(0, 5);
 
   const displayName =
     user && "name" in user && typeof user.name === "string" && user.name

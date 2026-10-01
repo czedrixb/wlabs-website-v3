@@ -2,10 +2,16 @@ import { test, expect } from "@playwright/test";
 
 // WOS-334: replaces v3's inquiry-form `localStorage` stub
 // (site/index.html:3481-3501, its own `demoNote` disclaimer) with a real
-// backend — src/app/api/contact/route.ts + the `inquiries` Payload
-// collection. Covers the /contact form and its API route only, not the
-// unrelated pages this ticket doesn't touch (per the global testing
-// policy's "focus only on the changes").
+// backend — src/app/api/contact/route.ts. Covers the /contact form and its
+// API route only, not the unrelated pages this ticket doesn't touch (per
+// the global testing policy's "focus only on the changes").
+//
+// WOS-337: the `inquiries` Payload collection this used to persist to (and
+// read back via /api/inquiries for verification) was removed along with
+// every other write-only "Site content" collection — see
+// src/app/api/contact/route.ts's header comment. These specs now assert
+// only the API response contract (ok/ref, honeypot fake-success, rejection
+// codes), not that a document exists anywhere.
 
 const REF_RE = /WL-\d{6}-[A-Z0-9]{4}/;
 
@@ -58,7 +64,7 @@ test.describe("contact form", () => {
     expect(calls).toHaveLength(0);
   });
 
-  test("valid submission: shows a WL- reference and the inquiry is readable in Payload admin", async ({ page, baseURL }) => {
+  test("valid submission: shows a WL- reference", async ({ page }) => {
     const email = `wos334-${Date.now()}@example.com`;
 
     await page.goto("/ko/contact");
@@ -70,36 +76,16 @@ test.describe("contact form", () => {
     await page.locator("#c-privacy").check();
     await form.getByRole("button", { name: "문의 보내기" }).click();
 
+    // WOS-337: no `inquiries` collection to read back any more — the
+    // reference code in the success status is the full contract now.
     const status = form.locator(".form-status");
     await expect(status).toContainText(REF_RE, { timeout: 15_000 });
     const statusText = (await status.textContent()) ?? "";
-    const ref = statusText.match(REF_RE)?.[0];
-    expect(ref).toBeTruthy();
-
-    // Readable in admin: the same REST read the admin list view itself
-    // uses (cookie-authed — this project runs with the admin storageState).
-    // Origin satisfies Payload's CSRF check, which this app enforces on
-    // cookie-authed reads too, not just writes (see payload.config.ts's
-    // csrfOrigins comment) — same convention as editor-role.spec.ts's own
-    // REST cleanup.
-    const ctx = page.context().request;
-    const origin = { Origin: baseURL! };
-    const res = await ctx.get(`/api/inquiries?where[ref][equals]=${ref}&limit=1`, { headers: origin });
-    expect(res.status()).toBe(200);
-    const { docs } = await res.json();
-    expect(docs).toHaveLength(1);
-    expect(docs[0].email).toBe(email);
-    expect(docs[0].topic).toBe("general");
-    expect(docs[0].captchaStatus).toBe("skipped"); // no RECAPTCHA_SECRET configured
-
-    // Clean up — deterministic re-runs against the shared seeded DB, same
-    // convention as editor-role.spec.ts's own /create-draft sweep.
-    await ctx.delete(`/api/inquiries/${docs[0].id}`, { headers: origin });
+    expect(statusText.match(REF_RE)?.[0]).toBeTruthy();
   });
 
-  test("honeypot: a filled decoy field is silently accepted and creates no row", async ({ page, baseURL }) => {
+  test("honeypot: a filled decoy field is silently accepted", async ({ page }) => {
     const ctx = page.context().request;
-    const origin = { Origin: baseURL! };
     const res = await ctx.post("/api/contact", {
       // Unique client IP: the route rate-limits 5/min per IP, and the
       // browser-submitted tests in a full-suite run share the real one.
@@ -116,11 +102,7 @@ test.describe("contact form", () => {
     expect(res.status()).toBe(200);
     const body = await res.json();
     expect(body.ok).toBe(true);
-
-    const found = await (
-      await ctx.get(`/api/inquiries?where[email][equals]=bot@example.com&limit=10`, { headers: origin })
-    ).json();
-    expect(found.docs).toHaveLength(0);
+    expect(body.ref).toMatch(REF_RE);
   });
 
   test("API: missing consent is rejected", async ({ page }) => {

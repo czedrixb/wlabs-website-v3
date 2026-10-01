@@ -45,6 +45,10 @@ const nextConfig: NextConfig = {
     return [
       { source: "/", destination: "/ko", permanent: false },
       { source: "/posts/:slug", destination: "/ko/blog/:slug", permanent: true },
+      // The blog's own listing page is gone — its posts now render inside
+      // the Company > Insights panel (NewsList.tsx), alongside the panel's
+      // existing hardcoded items. /blog/[slug] detail pages are unaffected.
+      { source: "/:locale(ko|en)/blog", destination: "/:locale/company/insights", permanent: true },
     ];
   },
 };

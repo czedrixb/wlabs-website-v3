@@ -22,9 +22,15 @@ test.describe("company: team panel", () => {
 });
 
 test.describe("company: insights panel", () => {
+  // Scoped to the panel's 5 static news/product/case items — the deleted
+  // /blog listing's posts now render here too (see
+  // e2e/blog-into-insights.spec.ts), so a bare .news-item count would be
+  // seed-data-dependent.
   test("5 news items render; the kind filter narrows them", async ({ page }) => {
     await page.goto("/ko/company/insights");
-    await expect(page.locator(".news-item")).toHaveCount(5);
+    await expect(
+      page.locator('.news-item[data-kind="news"], .news-item[data-kind="product"], .news-item[data-kind="case"]'),
+    ).toHaveCount(5);
 
     await page.locator(".filters-track").getByRole("button", { name: "제품 노트" }).click();
     await expect(page.locator(".news-item")).toHaveCount(1);

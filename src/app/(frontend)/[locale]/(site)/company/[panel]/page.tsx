@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import type { Locale } from "@/lib/locale";
-import { resolveLocale, withLocale } from "@/lib/locale";
+import { resolveLocale, pick } from "@/lib/locale";
 import { siteT } from "@/lib/site/dictionary";
 import { siteMetadata } from "@/lib/site/metadata";
 import { INSIGHTS, RAIL_ENTRIES } from "@/lib/site/content";
-import { SegNav } from "@/components/site/work/SegNav";
+import { getPostsPage } from "@/lib/cachedPosts";
 import { TeamGrid } from "@/components/site/company/TeamGrid";
-import { NewsList } from "@/components/site/company/NewsList";
+import { NewsList, type NewsItem } from "@/components/site/company/NewsList";
 import { StoryTimeline } from "@/components/site/company/StoryTimeline";
 import { StoryRail, type ResolvedRailEntry } from "@/components/site/company/StoryRail";
 import { CtaPanel } from "@/components/site/modules/CtaPanel";
@@ -16,6 +16,12 @@ type Props = { params: Promise<{ locale: string; panel: string }> };
 
 const PANEL_KEYS = ["story", "team", "insights"] as const;
 type PanelKey = (typeof PANEL_KEYS)[number];
+
+// Matches src/lib/cachedPosts.ts's own unstable_cache TTL — the insights
+// panel's posts can be up to 60s stale, same as the old /blog listing was.
+// Not force-dynamic: generateStaticParams below prerenders all three
+// panels, and story/team are pure static content that shouldn't lose that.
+export const revalidate = 60;
 
 export function generateStaticParams() {
   return PANEL_KEYS.flatMap((panel) => [
@@ -45,12 +51,6 @@ export default async function CompanyPanelPage({ params }: Props) {
 
   const s = siteT(locale);
   const { chrome, company } = s;
-
-  const segItems = [
-    { key: "story", href: withLocale("/company/story", locale), label: chrome.story },
-    { key: "team", href: withLocale("/company/team", locale), label: chrome.team },
-    { key: "insights", href: withLocale("/company/insights", locale), label: chrome.insights },
-  ];
 
   const timelineItems = [
     { year: "2022", heading: company.tl1h, body: company.tl1p },
@@ -89,17 +89,35 @@ export default async function CompanyPanelPage({ params }: Props) {
     body: locale === "en" ? n.body.en : n.body.ko,
   }));
 
+  // The deleted /blog listing's posts, folded into this panel as a 4th
+  // group — fetched only for the panel that shows them, and caught rather
+  // than left to bubble: (site) has no (blog)/error.tsx equivalent, so a
+  // DB outage here should just fall back to INSIGHTS' static items instead
+  // of taking the whole Company page down.
+  let postItems: NewsItem[] = [];
+  if (key === "insights") {
+    try {
+      const { docs: posts } = await getPostsPage(1);
+      postItems = posts.map((post) => {
+        const iso = post.publishedAt ?? post.updatedAt;
+        const d = new Date(iso);
+        return {
+          id: `post-${post.slug}`,
+          date: `${d.getUTCFullYear()} · ${String(d.getUTCMonth() + 1).padStart(2, "0")}`,
+          datetime: iso,
+          kind: "blog",
+          link: { href: `/blog/${post.slug}`, labelKey: "readPost" },
+          heading: pick(locale, post.title, post.titleEn),
+          body: pick(locale, post.excerpt ?? "", post.excerptEn) ?? "",
+        };
+      });
+    } catch {
+      // DB unreachable — the panel still renders INSIGHTS' static items.
+    }
+  }
+
   return (
     <>
-      <div className="wrap page-head">
-        <div className="row-between">
-          <span className="eyebrow">{chrome.tabCompany}</span>
-        </div>
-        <h1>{company.coH1}</h1>
-        <p className="lead">{company.coLead2}</p>
-      </div>
-      <SegNav items={segItems} active={key} ariaLabel={chrome.coSeg} />
-
       {key === "team" && <TeamGrid locale={locale} s={company} />}
 
       {key === "insights" && (
@@ -113,12 +131,15 @@ export default async function CompanyPanelPage({ params }: Props) {
               {s.insights.insLead}
             </p>
           </div>
-          <NewsList locale={locale} items={newsItems} s={s.insights} segProducts={chrome.segProducts} />
+          <NewsList locale={locale} items={[...newsItems, ...postItems]} s={s.insights} segProducts={chrome.segProducts} />
         </div>
       )}
 
+      {/* WOS-336: story gets no top padding — the rail band follows the
+          sticky tab bar directly (the bar's own 10px padding is the gap,
+          v3 :1599); the other two panels keep their --s3. */}
       {key === "story" && (
-        <div className="panel wrap is-rail-host" id="panel-story" style={{ paddingBlock: "var(--s3) var(--sec)" }}>
+        <div className="panel wrap is-rail-host" id="panel-story" style={{ paddingBlock: "0 var(--sec)" }}>
           <StoryRail s={s.rail} entries={railEntries} />
           <div className="story-intro">
             <div>
@@ -143,7 +164,6 @@ export default async function CompanyPanelPage({ params }: Props) {
             h2={company.partnerH2}
             h2FontSize={24}
             primary={{ label: company.partnerCta, topic: "partnership" }}
-            style={{ marginTop: "var(--s4)" }}
           />
         </div>
       )}

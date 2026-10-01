@@ -6,7 +6,6 @@ import type { Locale } from "@/lib/locale";
 import { withLocale } from "@/lib/locale";
 import type { Project, ProjectCat } from "@/lib/site/content";
 import { useTrackPill } from "@/components/site/chrome/lib/trackPill";
-import { ProjectArt } from "./ProjectArt";
 
 // Shared by Home's project strip (`limit`, no status line) and Work →
 // Projects (`/work/cases`, unlimited, with the live count). Ported from
@@ -80,7 +79,10 @@ export function ProjectGrid({ locale, cats, projects, filterLabel, limit, showSt
       <div className="pgrid">
         {items.map((p) => (
           <article className="pcard" key={p.id}>
-            <ProjectArt art={p.art} />
+            {/* WOS-336: no artwork here for now — the reference design's
+                dashed "Illustration" placeholder instead (ProjectArt stays
+                in use on the project detail pages). */}
+            <div className="pvis pvis-ph" aria-hidden="true" />
             <div className="pbody">
               <span className="pcat">{locale === "en" ? p.tag.en : p.tag.ko}</span>
               <h3>{locale === "en" ? p.title.en : p.title.ko}</h3>

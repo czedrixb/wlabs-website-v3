@@ -15,6 +15,15 @@ export function ProductCard({ locale, product, s }: Props) {
 
   return (
     <article className="card">
+      {/* WOS-336: the product capture, above the tag row — v3 has no art
+          slot in this card's own markup either; its `shots()` wiring
+          injects one as firstChild with exactly these classes
+          (`.sp-shot-made` states the shape a created slot gets). */}
+      <div
+        className="art sp-shot sp-shot-made"
+        aria-hidden="true"
+        style={{ "--shot": `url(/site/img/${product.id}.webp)` } as React.CSSProperties}
+      />
       <div className="tag">
         <span>{locale === "en" ? product.cat.en : product.cat.ko}</span>
         {product.ruo && <span className="ruo">{locale === "en" ? "Research use only" : "연구용"}</span>}

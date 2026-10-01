@@ -2,12 +2,15 @@ import Link from "next/link";
 import type { Locale } from "@/lib/locale";
 import { withLocale } from "@/lib/locale";
 import type { SiteStrings } from "@/lib/site/dictionary";
-import { PROJECTS, PRODUCTS, SERVICES, type ServiceRelatedRef } from "@/lib/site/content";
+import { PRODUCTS, SERVICES, type ServiceRelatedRef } from "@/lib/site/content";
 
 type Props = { locale: Locale; d: SiteStrings["work"]; ctaDiscuss: string };
 
 function relatedLabel(locale: Locale, ref: ServiceRelatedRef): string {
-  if (ref.kind === "project") return locale === "en" ? PROJECTS.find((p) => p.id === ref.id)!.title.en : PROJECTS.find((p) => p.id === ref.id)!.title.ko;
+  // WOS-336: the rail shows the short display name (v3 hardcodes
+  // "YumTrack", not the card's full marketing title) — `short` for
+  // projects, the product name (already short) for products.
+  if (ref.kind === "project") return ref.short;
   if (ref.kind === "product") return PRODUCTS[ref.id].name;
   return locale === "en" ? ref.label.en : ref.label.ko;
 }

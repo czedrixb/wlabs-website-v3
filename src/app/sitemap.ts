@@ -6,7 +6,10 @@ import { PROJECTS, PRODUCT_ORDER } from "@/lib/site/content";
 
 // Every real (non-redirecting) site route. /work and /company both 302 to
 // a default panel (see their own page.tsx) — the panel URLs are listed
-// directly instead, so crawlers never index a redirect.
+// directly instead, so crawlers never index a redirect. /blog is gone too
+// (next.config.ts permanently redirects it to /company/insights, which
+// posts now render inside) — only its still-real per-post /blog/:slug
+// pages are listed below.
 const STATIC_PATHS = [
   "/",
   "/work/services",
@@ -17,7 +20,6 @@ const STATIC_PATHS = [
   "/company/insights",
   "/contact",
   "/search",
-  "/blog",
 ];
 
 function withAlternates(path: string): MetadataRoute.Sitemap[number] {

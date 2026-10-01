@@ -6,6 +6,12 @@ import { test, expect } from "@playwright/test";
 // Covers the sheet, its triggers and the widened API contract only, not
 // the unrelated pages this ticket doesn't touch (per the global testing
 // policy's "focus only on the changes").
+//
+// WOS-337: the `inquiries` Payload collection this used to persist to (and
+// read back via /api/inquiries for verification) was removed along with
+// every other write-only "Site content" collection — see
+// src/app/api/contact/route.ts's header comment. These specs now assert
+// only the API response contract, not that a document exists anywhere.
 
 const REF_RE = /WL-\d{6}-[A-Z0-9]{4}/;
 
@@ -46,7 +52,7 @@ test.describe("contact sheet", () => {
     await expect(sheet.getByRole("button", { name: "Send inquiry" })).toBeVisible();
   });
 
-  test("valid sheet submission: WL- reference, success toast, and a nameless sheet-form row in admin", async ({ page, baseURL }) => {
+  test("valid sheet submission: WL- reference and success toast", async ({ page }) => {
     const email = `wos336-sheet-${Date.now()}@example.com`;
 
     await page.goto("/ko");
@@ -61,29 +67,13 @@ test.describe("contact sheet", () => {
 
     const status = sheet.getByRole("status");
     await expect(status).toContainText(REF_RE, { timeout: 15_000 });
-    const ref = ((await status.textContent()) ?? "").match(REF_RE)?.[0];
-    expect(ref).toBeTruthy();
+    expect(((await status.textContent()) ?? "").match(REF_RE)?.[0]).toBeTruthy();
 
     // The toast (v3's index.html:3759 widget) fires alongside the status line.
     await expect(page.locator(".toast.on")).toContainText("문의가 접수되었습니다");
-
-    // Readable in admin (cookie-authed REST read, same convention as
-    // contact-form.spec.ts) — recorded as sheet-form, with no name.
-    const ctx = page.context().request;
-    const origin = { Origin: baseURL! };
-    const res = await ctx.get(`/api/inquiries?where[ref][equals]=${ref}&limit=1`, { headers: origin });
-    expect(res.status()).toBe(200);
-    const { docs } = await res.json();
-    expect(docs).toHaveLength(1);
-    expect(docs[0].email).toBe(email);
-    expect(docs[0].topic).toBe("newsletter");
-    expect(docs[0].source).toBe("sheet-form");
-    expect(docs[0].name ?? null).toBeNull();
-
-    await ctx.delete(`/api/inquiries/${docs[0].id}`, { headers: origin });
   });
 
-  test("API: sheet-form needs no name, but contact-form still does", async ({ page, baseURL }) => {
+  test("API: sheet-form needs no name, but contact-form still does", async ({ page }) => {
     const ctx = page.context().request;
     const base = { email: "wos336-api@example.com", topic: "general", consentPrivacy: true, locale: "ko" as const };
     // Unique client IP: the route rate-limits 5/min per IP, and the
@@ -100,14 +90,5 @@ test.describe("contact sheet", () => {
 
     const unknownRes = await ctx.post("/api/contact", { headers, data: { ...base, source: "not-a-form" } });
     expect(unknownRes.status()).toBe(400);
-
-    // Clean up the row the sheet-form call created.
-    const origin = { Origin: baseURL! };
-    const found = await (
-      await ctx.get(`/api/inquiries?where[email][equals]=wos336-api@example.com&limit=10`, { headers: origin })
-    ).json();
-    for (const doc of found.docs) {
-      await ctx.delete(`/api/inquiries/${doc.id}`, { headers: origin });
-    }
   });
 });

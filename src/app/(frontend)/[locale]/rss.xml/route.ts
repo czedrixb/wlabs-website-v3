@@ -34,7 +34,9 @@ export async function GET(_request: Request, { params }: Props) {
   const posts = await getFeedPosts();
 
   const channelTitle = xmlEscape(`W Labs — ${chrome.legal2}`);
-  const channelLink = `${siteUrl}${withLocale("/blog", locale)}`;
+  // Points at the Insights panel, not /blog — the listing that used to live
+  // there is gone; these items' own /blog/:slug links are unaffected.
+  const channelLink = `${siteUrl}${withLocale("/company/insights", locale)}`;
   const channelDescription = xmlEscape(chrome.legal2);
 
   const items = posts
