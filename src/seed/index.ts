@@ -1,12 +1,44 @@
 /**
  * Idempotent seed: one admin, one editor, ~5 posts (mixed draft/published,
- * KO+EN, a couple with banners) — enough to demonstrate pagination and the
+ * KO+EN, one with a banner) — enough to demonstrate pagination and the
  * publish toggle. Run with `pnpm seed`. Safe to re-run: skips anything that
- * already exists by unique key (email / slug).
+ * already exists by unique key (email / slug / media alt).
  */
+import sharp from "sharp";
 import { getPayload } from "payload";
 import config from "@payload-config";
 import type { Post } from "@/payload-types";
+
+const SEED_BANNER_ALT = "W Labs 블로그 시드 배너 이미지";
+
+async function upsertBanner(payload: Awaited<ReturnType<typeof getPayload>>) {
+  const existing = await payload.find({
+    collection: "media",
+    where: { alt: { equals: SEED_BANNER_ALT } },
+    limit: 1,
+  });
+  if (existing.docs[0]) return existing.docs[0];
+
+  // Generated, not a checked-in fixture (same technique as
+  // e2e/media-upload-s3.spec.ts) — 2000x1200 so Payload actually produces
+  // the `thumbnail` (400x300) and `banner` (1600x900) derivatives, not just
+  // the original. Without a seeded banner, production had zero posts with
+  // an image at all (WOS-339), so there was nothing to verify the fix
+  // against beyond a throwaway e2e-created post.
+  const buffer = await sharp({
+    create: { width: 2000, height: 1200, channels: 3, background: { r: 46, g: 90, b: 140 } },
+  })
+    .png()
+    .toBuffer();
+
+  const media = await payload.create({
+    collection: "media",
+    data: { alt: SEED_BANNER_ALT },
+    file: { data: buffer, mimetype: "image/png", name: "seed-banner.png", size: buffer.length },
+  });
+  console.log("created: seed banner media");
+  return media;
+}
 
 type NewPostData = Omit<Post, "id" | "createdAt" | "updatedAt" | "sizes">;
 
@@ -59,6 +91,8 @@ async function run() {
     role: "editor",
   });
 
+  const banner = await upsertBanner(payload);
+
   const richText = (paragraph: string) => ({
     root: {
       type: "root",
@@ -83,6 +117,7 @@ async function run() {
     en: { title: string; excerpt: string; body: string };
     author: number;
     daysAgo: number;
+    banner?: number;
   }> = [
     {
       slug: "welcome-to-the-w-labs-blog",
@@ -99,6 +134,7 @@ async function run() {
       },
       author: admin.id,
       daysAgo: 5,
+      banner: banner.id,
     },
     {
       slug: "why-we-rebuilt-the-blog",
@@ -176,6 +212,7 @@ async function run() {
       content: richText(p.ko.body),
       contentEn: richText(p.en.body),
       author: p.author,
+      banner: p.banner,
       publishedAt:
         p.status === "published"
           ? new Date(Date.now() - p.daysAgo * 86_400_000).toISOString()
