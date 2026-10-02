@@ -1,5 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { TOPICS } from "@/lib/site/content";
+import { resolveMailConfig, createTransporter, sendMailChecked } from "@/lib/site/mailer";
+import { buildInquiryEmail } from "@/lib/site/inquiryEmail";
 
 // WOS-334: replaces v3's inquiry-form `localStorage` stub
 // (site/index.html:3481-3501) with a real submission endpoint. Called by
@@ -8,13 +10,64 @@ import { TOPICS } from "@/lib/site/content";
 // WOS-337: this used to persist to the `inquiries` Payload collection, which
 // was removed along with every other write-only "Site content" collection —
 // nothing in the admin ever read Inquiries back either. Validation, the
-// honeypot, rate limiting, reCAPTCHA and the { ok, ref } response contract
-// (which ContactForm/ContactSheet/useInquirySubmit all depend on) are
-// unchanged; only the storage step is gone. A submission is now recoverable
-// solely from the console.info below — this is a deliberate scope cut, not
-// an oversight, and reintroducing persistence means restoring a collection
-// plus a migration.
+// honeypot, rate limiting and reCAPTCHA are unchanged; only the storage step
+// is gone, and reintroducing persistence means restoring a collection plus a
+// migration.
+//
+// Email (this change): a submission is now also emailed to
+// CONTACT_RECIPIENT_EMAIL via Gmail SMTP (see mailer.ts) — ported from
+// wsoftlabs-website-v2's own working /api/contact (WOS-286). Sending is
+// best-effort: a mail failure or unconfigured environment never changes the
+// { ok, ref } response contract ContactForm/ContactSheet/useInquirySubmit
+// depend on, it only changes the additive `mail` field. Reserved test
+// domains (example.com/net/org, .test, .invalid — RFC 2606) are never
+// mailed, so the existing e2e specs (which all submit @example.com
+// addresses) can't spam the inbox.
 export const dynamic = "force-dynamic";
+
+const RESERVED_TEST_DOMAINS = /@(?:[^@]+\.)?(?:example\.(?:com|net|org)|test|invalid)$/i;
+
+type MailOutcome = "sent" | "skipped" | "failed";
+
+async function sendInquiryMail(input: {
+  ref: string;
+  source: "contact-form" | "sheet-form";
+  name?: string;
+  org?: string;
+  email: string;
+  phone?: string;
+  topic: string;
+  message?: string;
+  locale: "ko" | "en";
+  consentMarketing: boolean;
+}): Promise<MailOutcome> {
+  if (RESERVED_TEST_DOMAINS.test(input.email)) return "skipped";
+
+  const config = resolveMailConfig();
+  if (!config) return "skipped";
+
+  try {
+    const transporter = createTransporter(config);
+    const { subject, html } = buildInquiryEmail(input);
+    // 8s cap: Gmail SMTP is typically 1-3s, and the two browser-driven
+    // contact specs assert a WL- ref renders within 15s — this guarantees
+    // the mail step can't eat that budget even on a slow send.
+    await Promise.race([
+      sendMailChecked(transporter, {
+        from: `"W Labs Contact Form" <${config.gmailUser}>`,
+        to: config.recipient,
+        replyTo: input.email,
+        subject,
+        html,
+      }),
+      new Promise((_, reject) => setTimeout(() => reject(new Error("mail timeout")), 8_000)),
+    ]);
+    return "sent";
+  } catch (err) {
+    console.error("Contact inquiry mail failed:", { ref: input.ref, err });
+    return "failed";
+  }
+}
 
 const TOPIC_IDS = new Set(TOPICS.map((t) => t.id));
 const MAX_LEN = { name: 200, org: 200, email: 254, phone: 40, message: 4000 };
@@ -154,17 +207,22 @@ export async function POST(request: NextRequest) {
 
   const ref = refCode();
 
+  const trimmedName = typeof name === "string" && name.trim() !== "" ? name.trim() : undefined;
+  const trimmedOrg = typeof org === "string" && org.trim() !== "" ? org.trim() : undefined;
+  const trimmedPhone = typeof phone === "string" && phone.trim() !== "" ? phone.trim() : undefined;
+  const trimmedMessage = typeof message === "string" && message.trim() !== "" ? message.trim() : undefined;
+
   // No collection to persist to any more (see the header comment) — log the
   // submission so it's at least recoverable from the server log, and return
   // the same { ok, ref } shape the two contact UIs already expect.
   console.info("Contact submission received:", {
     ref,
     topic,
-    name: typeof name === "string" && name.trim() !== "" ? name.trim() : undefined,
-    org: typeof org === "string" ? org.trim() : undefined,
+    name: trimmedName,
+    org: trimmedOrg,
     email: email.trim(),
-    phone: typeof phone === "string" ? phone.trim() : undefined,
-    message: typeof message === "string" ? message.trim() : undefined,
+    phone: trimmedPhone,
+    message: trimmedMessage,
     consentMarketing: consentMarketing === true,
     locale,
     source,
@@ -173,5 +231,18 @@ export async function POST(request: NextRequest) {
     ip,
   });
 
-  return NextResponse.json({ ok: true, ref });
+  const mail = await sendInquiryMail({
+    ref,
+    source: source as "contact-form" | "sheet-form",
+    name: trimmedName,
+    org: trimmedOrg,
+    email: email.trim(),
+    phone: trimmedPhone,
+    topic,
+    message: trimmedMessage,
+    locale: locale as "ko" | "en",
+    consentMarketing: consentMarketing === true,
+  });
+
+  return NextResponse.json({ ok: true, ref, mail });
 }
