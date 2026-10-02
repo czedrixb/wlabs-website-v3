@@ -6,6 +6,7 @@ import { RichText } from "@payloadcms/richtext-lexical/react";
 import { getPostBySlug } from "@/lib/cachedPosts";
 import { resolveLocale, withLocale, pick } from "@/lib/locale";
 import { mediaPath } from "@/lib/mediaPath";
+import { postRichTextConverters } from "@/lib/richText";
 import { siteMetadata } from "@/lib/site/metadata";
 import { siteT } from "@/lib/site/dictionary";
 import { t } from "@/lib/strings";
@@ -70,7 +71,12 @@ export default async function PostDetailPage({ params }: Props) {
       <div className="wrap" style={{ paddingBottom: "var(--sec)" }}>
         {banner?.url && (
           <Image
-            src={mediaPath(banner.url)}
+            // The 1600x900 derivative is already generated (Media.ts's
+            // imageSizes) and matches this <Image>'s own dimensions below —
+            // falling back to the full-size original only when a size is
+            // somehow missing avoids pushing a multi-MB upload through
+            // /_next/image on every cold cache.
+            src={mediaPath(banner.sizes?.banner?.url ?? banner.url)}
             alt={banner.alt ?? ""}
             width={1600}
             height={900}
@@ -79,7 +85,9 @@ export default async function PostDetailPage({ params }: Props) {
             priority
           />
         )}
-        <article className="post-body">{content && <RichText data={content} />}</article>
+        <article className="post-body">
+          {content && <RichText data={content} converters={postRichTextConverters} />}
+        </article>
       </div>
     </>
   );
