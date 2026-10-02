@@ -24,30 +24,32 @@
     "migrate:supabase:status": "node --env-file=.env.supabase ./node_modules/payload/bin.js migrate:status"
   },
   "dependencies": {
-    "next": "16.3.5",
-    "react": "19.2.8",
-    "react-dom": "19.2.8",
-    "payload": "3.89.0",
-    "@payloadcms/next": "3.89.0",
     "@payloadcms/db-postgres": "3.89.0",
+    "@payloadcms/next": "3.89.0",
     "@payloadcms/richtext-lexical": "3.89.0",
     "@payloadcms/storage-s3": "3.89.0",
     "@payloadcms/translations": "3.89.0",
     "@payloadcms/ui": "3.89.0",
     "graphql": "^16.8.1",
+    "next": "16.3.5",
+    "nodemailer": "^8.0.11",
+    "payload": "3.89.0",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
     "sharp": "^0.34.2"
   },
   "devDependencies": {
+    "@playwright/test": "^1.63.0",
     "@types/node": "^20",
+    "@types/nodemailer": "^8.0.2",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "autoprefixer": "^10",
     "eslint": "^9",
     "eslint-config-next": "16.3.5",
     "postcss": "^8",
-    "autoprefixer": "^10",
-    "typescript": "^5",
-    "@playwright/test": "^1.63.0",
-    "tsx": "^4.22.4"
+    "tsx": "^4.22.4",
+    "typescript": "^5"
   },
   "packageManager": "pnpm@12.4.1+sha512.2e81e399d73fe8390dab25e06aa788ab7a5908248d2f5a370f82b481147a6a7a367bf8048f9a6fdb6460f21a66f0542dedb8b94ca2c8723596741920b1656d4c"
 }
