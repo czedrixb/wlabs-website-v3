@@ -7,14 +7,15 @@ import { test, expect } from "@playwright/test";
 // the WOS-332 plan's M5 note).
 
 test.describe("company: team panel", () => {
-  // WOS-341 roster: Zyra/Winona departed; Francis, John Rey and Jericho
-  // gained photos — leaving Sean as the only monogram fallback.
-  test("21 members across 5 non-empty groups; 20 photos, 1 monogram", async ({ page }) => {
+  // WOS-341 roster: Zyra/Winona departed; Francis, John Rey, Jericho and
+  // Sean gained photos; Windy joined Marketing & Operations — every member
+  // now has a photo, so no monogram fallback renders.
+  test("22 members across 5 non-empty groups; all with photos", async ({ page }) => {
     await page.goto("/ko/company/team");
     await expect(page.locator(".team-group")).toHaveCount(5);
-    await expect(page.locator(".member")).toHaveCount(21);
-    await expect(page.locator(".member.has-av")).toHaveCount(20);
-    await expect(page.locator(".member:not(.has-av)")).toHaveCount(1);
+    await expect(page.locator(".member")).toHaveCount(22);
+    await expect(page.locator(".member.has-av")).toHaveCount(22);
+    await expect(page.locator(".member:not(.has-av)")).toHaveCount(0);
   });
 
   // WOS-341: the specific roster changes, not just the totals.
@@ -22,7 +23,7 @@ test.describe("company: team panel", () => {
     await page.goto("/ko/company/team");
     const panel = page.locator(".team-panel");
 
-    for (const name of ["Francis", "John Rey", "Jericho"]) {
+    for (const name of ["Francis", "John Rey", "Jericho", "Sean", "Windy"]) {
       const card = panel.locator(".member", { has: page.getByRole("heading", { name, exact: true }) });
       await expect(card).toHaveClass(/has-av/);
       const img = card.locator("img");
@@ -37,7 +38,19 @@ test.describe("company: team panel", () => {
     await expect(panel.getByText("Zyra")).toHaveCount(0);
     await expect(panel.getByText("Winona")).toHaveCount(0);
     // TeamGrid's live count reflects the amended roster
-    await expect(page.locator(".team-panel .row-between .cap")).toHaveText("21명");
+    await expect(page.locator(".team-panel .row-between .cap")).toHaveText("22명");
+  });
+
+  // WOS-341: Windy slots into Marketing & Operations directly after Gale.
+  test("WOS-341: Windy is in Marketing & Operations, right after Gale", async ({ page }) => {
+    await page.goto("/ko/company/team");
+    const bizGroup = page.locator(".team-group", { has: page.getByText("마케팅·운영") });
+    const names = await bizGroup.locator(".member h3").allTextContents();
+    expect(names.indexOf("Windy")).toBe(names.indexOf("Gale") + 1);
+    const windy = bizGroup.locator(".member", {
+      has: page.getByRole("heading", { name: "Windy", exact: true }),
+    });
+    await expect(windy).toContainText("마케팅 스페셜리스트");
   });
 
   // WOS-341 AC: layout holds on PC, tablet and mobile.
@@ -49,7 +62,7 @@ test.describe("company: team panel", () => {
     test(`WOS-341: team grid lays out without overflow on ${device}`, async ({ page }) => {
       await page.setViewportSize(viewport);
       await page.goto("/ko/company/team");
-      await expect(page.locator(".member")).toHaveCount(21);
+      await expect(page.locator(".member")).toHaveCount(22);
       // no horizontal page overflow at this width
       const overflow = await page.evaluate(
         () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
