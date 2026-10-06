@@ -118,10 +118,15 @@ async function run() {
     author: number;
     daysAgo: number;
     banner?: number;
+    // WOS-342: the Insights taxonomy (Posts.ts `categories`). Omitted on
+    // purpose for publishing-workflow-for-editors so the seed exercises
+    // insightsIndex.ts's untagged→["notes"] read-time default.
+    categories?: ("news" | "notes" | "research")[];
   }> = [
     {
       slug: "welcome-to-the-w-labs-blog",
       status: "published",
+      categories: ["news"],
       ko: {
         title: "W Labs 블로그에 오신 것을 환영합니다",
         excerpt: "새로운 블로그 프로토타입을 소개합니다.",
@@ -139,6 +144,7 @@ async function run() {
     {
       slug: "why-we-rebuilt-the-blog",
       status: "published",
+      categories: ["research", "notes"],
       ko: {
         title: "블로그를 다시 만든 이유",
         excerpt: "이전 블로그의 문제와 새 구조에 대한 설명.",
@@ -213,6 +219,7 @@ async function run() {
       contentEn: richText(p.en.body),
       author: p.author,
       banner: p.banner,
+      categories: p.categories,
       publishedAt:
         p.status === "published"
           ? new Date(Date.now() - p.daysAgo * 86_400_000).toISOString()

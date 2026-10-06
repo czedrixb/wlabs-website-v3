@@ -403,74 +403,11 @@ export const FAQ: FaqItem[] = [
 
 // ── Insights ────────────────────────────────────────────────────────────
 //
-// Unlike every domain above, Insights' 5 items have no single source: publish
-// metadata (date, kind, optional outbound/internal link) used to be
-// hand-authored directly in NewsList.tsx — not part of any generated table —
-// while the heading/body text went through WOS-331's dictionary harvest
-// (`insights.n1h..n5p`). Joined here by array index, the same way FAQ above
-// joins the raw dictionary's two halves, so this is one locale-agnostic
-// source for WOS-333's `insights` collection to seed from, and NewsList.tsx
-// no longer needs its own private array.
-
-// "blog" isn't one of v3's own kinds — WOS-336(-follow-up) folds the
-// now-deleted /blog listing's posts into this panel as a 4th, separately
-// filterable group, since they can't be date-sorted into the other three
-// (see the `date` comment below). "readPost" is its link label, likewise
-// new.
-export type InsightKind = "news" | "product" | "case" | "blog";
-export type InsightLink = { href: string; external?: boolean; labelKey?: "segProducts" | "readPost" };
-
-export type InsightItem = {
-  id: string;
-  date: string; // v3's own display string ("2026 · 03", "2023") — not a parseable date
-  kind: InsightKind;
-  link?: InsightLink;
-  heading: Bilingual;
-  body: Bilingual;
-};
-
-const insKo = V3_STRINGS.ko.insights;
-const insEn = V3_STRINGS.en.insights;
-
-export const INSIGHTS: InsightItem[] = [
-  {
-    id: "ins-1",
-    date: "2026 · 03",
-    kind: "news",
-    link: { href: "https://www.scienceexchange.com", external: true },
-    heading: bi(insEn.n1h, insKo.n1h),
-    body: bi(insEn.n1p, insKo.n1p),
-  },
-  {
-    id: "ins-2",
-    date: "2026 · 01",
-    kind: "news",
-    heading: bi(insEn.n2h, insKo.n2h),
-    body: bi(insEn.n2p, insKo.n2p),
-  },
-  {
-    id: "ins-3",
-    date: "2026",
-    kind: "news",
-    heading: bi(insEn.n3h, insKo.n3h),
-    body: bi(insEn.n3p, insKo.n3p),
-  },
-  {
-    id: "ins-4",
-    date: "2026 · 08",
-    kind: "product",
-    link: { href: "/work/products", labelKey: "segProducts" },
-    heading: bi(insEn.n4h, insKo.n4h),
-    body: bi(insEn.n4p, insKo.n4p),
-  },
-  {
-    id: "ins-5",
-    date: "2023",
-    kind: "case",
-    heading: bi(insEn.n5h, insKo.n5h),
-    body: bi(insEn.n5p, insKo.n5p),
-  },
-];
+// WOS-342: the old 5-item INSIGHTS table (headed by WOS-331's n1h..n5p
+// dictionary harvest) is gone — v3's Insights rebuild replaced those list-
+// only items with six fully-written articles, which live with their bodies,
+// figures and sources in src/lib/site/insightArticles.ts and merge with the
+// CMS posts in src/lib/site/insightsIndex.ts.
 
 // ── Contact topics ──────────────────────────────────────────────────────
 //

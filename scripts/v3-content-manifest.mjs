@@ -82,24 +82,24 @@ export const CONTENT_MANIFEST = {
     partnerH2: { v3Key: "partnerH2" },
     partnerCta: { v3Key: "partnerCta" },
   },
+  // WOS-342: the listing's chrome only. v3's Insights rebuild (its commit
+  // 2021e81) replaced the old news/product/case taxonomy with news/notes/
+  // research — `insProduct`/`insCase` no longer exist as data-i keys in the
+  // source, so they're gone from here too (the extractor fails loudly on
+  // missing keys). The per-card copy (n1h..n6p) still exists in the source
+  // but now lives with the rest of each article's content in
+  // src/lib/site/insightArticles.ts — one article, one source — so those
+  // keys aren't harvested anymore either.
   insights: {
     insH2: { v3Key: "insH2" },
     insLead: { v3Key: "insLead" },
     insFilter: { v3Key: "insFilter", type: "attr" },
     insAll: { v3Key: "insAll" },
     insNews: { v3Key: "insNews" },
-    insProduct: { v3Key: "insProduct" },
-    insCase: { v3Key: "insCase" },
-    n1h: { v3Key: "n1h" },
-    n1p: { v3Key: "n1p" },
-    n2h: { v3Key: "n2h" },
-    n2p: { v3Key: "n2p" },
-    n3h: { v3Key: "n3h" },
-    n3p: { v3Key: "n3p" },
-    n4h: { v3Key: "n4h" },
-    n4p: { v3Key: "n4p" },
-    n5h: { v3Key: "n5h" },
-    n5p: { v3Key: "n5p" },
+    insNotes: { v3Key: "insNotes" },
+    insResearch: { v3Key: "insResearch" },
+    insRead: { v3Key: "insRead" },
+    insPages: { v3Key: "insPages", type: "attr" },
     insNote: { v3Key: "insNote" },
   },
   // Extends WOS-331's `faq` namespace (Home shows q1-q4; the full 8-item
