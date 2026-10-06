@@ -8,9 +8,11 @@ import "@/styles/site.css";
 // (WOS-313's standalone-prototype title, applying here because (blog) set
 // none of its own). WOS-335 gives (blog) its own generateMetadata, same as
 // (site)/layout.tsx already had, so neither group depends on the other.
+// WOS-342: the group now serves /insights/{slug} (the detail URL moved off
+// /blog/{slug}), so the fallback naming follows.
 const BLOG_METADATA: Record<Locale, Metadata> = {
-  ko: { title: "W Labs 블로그", description: "W Labs 블로그" },
-  en: { title: "W Labs Blog", description: "W Labs blog" },
+  ko: { title: "W Labs 인사이트", description: "W Labs 인사이트" },
+  en: { title: "W Labs Insights", description: "W Labs insights" },
 };
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
