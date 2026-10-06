@@ -52,7 +52,24 @@ const WOS341_PHOTOS: Record<string, string> = {
   Francis: "/site/team/Francis.webp",
   "John Rey": "/site/team/JohnRey.webp",
   Jericho: "/site/team/Jericho.webp",
+  Sean: "/site/team/Sean.webp",
 };
+
+// Members who joined after the v3 harvest. `after` names the flat-order
+// anchor they slot in behind — TEAM_GROUPS filters the flat array in
+// order, so this also fixes their position within their group.
+const WOS341_JOINED: { after: string; member: TeamMember }[] = [
+  {
+    after: "Gale",
+    member: {
+      name: "Windy",
+      nameKo: null,
+      role: bi("Marketing Specialist", "마케팅 스페셜리스트"),
+      photo: "/site/team/Windy.webp",
+      group: "biz",
+    },
+  },
+];
 
 // Flat, source order — Home's six-face teaser is TEAM.slice(0, 6), same as
 // v3's own `TEAM.slice(0,6)` (site/index.html's renderTeam()).
@@ -65,6 +82,10 @@ export const TEAM: TeamMember[] = V3_CONTENT.team
     photo: WOS341_PHOTOS[name] ?? (photo || null),
     group: group as TeamGroupId,
   }));
+
+for (const { after, member } of WOS341_JOINED) {
+  TEAM.splice(TEAM.findIndex((m) => m.name === after) + 1, 0, member);
+}
 
 // GROUPS order, with empty groups dropped — `tbc` ("role to be confirmed")
 // has no members in the current roster, so it never renders.
