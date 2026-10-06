@@ -104,7 +104,8 @@ test.describe("home: company teaser (WOS-332)", () => {
     const avatars = page.locator(".company-teaser .avatars");
     await avatars.scrollIntoViewIfNeeded();
     await expect(avatars.locator("> img, > span.initial")).toHaveCount(6);
-    await expect(avatars.getByText("+17")).toBeVisible();
+    // WOS-341: 21-member roster − 6 shown = +15
+    await expect(avatars.getByText("+15")).toBeVisible();
   });
 });
 

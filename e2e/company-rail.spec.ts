@@ -66,6 +66,7 @@ test.describe("company reading-log rail", () => {
     const rail = page.locator(".sp-rail");
     await expect(rail.locator("#sp-rail-status")).toHaveText("27 entries shown · newest first");
     await expect(rail.locator(".sp-rail-today-label")).toHaveText("Today 2026-09");
-    await expect(rail.getByRole("heading", { name: "Team · 23 people" })).toBeVisible();
+    // WOS-341: headcount re-derived from TEAM.length (23 → 21)
+    await expect(rail.getByRole("heading", { name: "Team · 21 people" })).toBeVisible();
   });
 });

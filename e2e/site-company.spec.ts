@@ -7,13 +7,59 @@ import { test, expect } from "@playwright/test";
 // the WOS-332 plan's M5 note).
 
 test.describe("company: team panel", () => {
-  test("23 members across 5 non-empty groups; 19 photos, 4 monograms", async ({ page }) => {
+  // WOS-341 roster: Zyra/Winona departed; Francis, John Rey and Jericho
+  // gained photos — leaving Sean as the only monogram fallback.
+  test("21 members across 5 non-empty groups; 20 photos, 1 monogram", async ({ page }) => {
     await page.goto("/ko/company/team");
     await expect(page.locator(".team-group")).toHaveCount(5);
-    await expect(page.locator(".member")).toHaveCount(23);
-    await expect(page.locator(".member.has-av")).toHaveCount(19);
-    await expect(page.locator(".member:not(.has-av)")).toHaveCount(4);
+    await expect(page.locator(".member")).toHaveCount(21);
+    await expect(page.locator(".member.has-av")).toHaveCount(20);
+    await expect(page.locator(".member:not(.has-av)")).toHaveCount(1);
   });
+
+  // WOS-341: the specific roster changes, not just the totals.
+  test("WOS-341: new member photos render; departed members are gone", async ({ page }) => {
+    await page.goto("/ko/company/team");
+    const panel = page.locator(".team-panel");
+
+    for (const name of ["Francis", "John Rey", "Jericho"]) {
+      const card = panel.locator(".member", { has: page.getByRole("heading", { name, exact: true }) });
+      await expect(card).toHaveClass(/has-av/);
+      const img = card.locator("img");
+      await card.scrollIntoViewIfNeeded();
+      await expect(img).toBeVisible();
+      // the photo actually loaded (not a broken src)
+      await expect
+        .poll(async () => img.evaluate((el: HTMLImageElement) => el.complete && el.naturalWidth > 0))
+        .toBe(true);
+    }
+
+    await expect(panel.getByText("Zyra")).toHaveCount(0);
+    await expect(panel.getByText("Winona")).toHaveCount(0);
+    // TeamGrid's live count reflects the amended roster
+    await expect(page.locator(".team-panel .row-between .cap")).toHaveText("21명");
+  });
+
+  // WOS-341 AC: layout holds on PC, tablet and mobile.
+  for (const [device, viewport] of [
+    ["pc", { width: 1440, height: 900 }],
+    ["tablet", { width: 834, height: 1194 }],
+    ["mobile", { width: 390, height: 844 }],
+  ] as const) {
+    test(`WOS-341: team grid lays out without overflow on ${device}`, async ({ page }) => {
+      await page.setViewportSize(viewport);
+      await page.goto("/ko/company/team");
+      await expect(page.locator(".member")).toHaveCount(21);
+      // no horizontal page overflow at this width
+      const overflow = await page.evaluate(
+        () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+      );
+      expect(overflow).toBeLessThanOrEqual(0);
+      await page.locator(".team-panel").screenshot({
+        path: `e2e/screenshots/wos341-team-${device}.png`,
+      });
+    });
+  }
 
   test("SegNav marks Team active", async ({ page }) => {
     await page.goto("/ko/company/team");
