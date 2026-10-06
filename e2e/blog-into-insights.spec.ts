@@ -105,6 +105,66 @@ test.describe("insights panel: static articles + posts, one taxonomy", () => {
     await expect(page.locator(".insights-item")).toHaveCount(6);
   });
 
+  test("every card shares one height, even when a post's excerpt is very long", async ({
+    page,
+    baseURL,
+  }) => {
+    // Prod regression (WOS-342 follow-up): a CMS post with a ~20-line
+    // excerpt stretched its whole grid row to 2.2× the next row. The fix is
+    // a 4-line excerpt clamp + grid-auto-rows:1fr, so this creates the same
+    // runaway post and asserts the grid stays uniform.
+    test.setTimeout(120_000);
+    const api = page.context().request;
+    const origin = { Origin: baseURL! };
+    const SLUG = "e2e-wos342-long-excerpt";
+
+    const stale = await (
+      await api.get(`/api/posts?where[slug][equals]=${SLUG}&depth=0`, { headers: origin })
+    ).json();
+    for (const doc of stale.docs ?? []) {
+      await api.delete(`/api/posts/${doc.id}`, { headers: origin });
+    }
+
+    const postRes = await api.post("/api/posts", {
+      headers: origin,
+      data: {
+        title: "아주 긴 요약을 가진 회귀 테스트 글",
+        slug: SLUG,
+        excerpt:
+          "대장내시경 검사에서 용종의 상당수가 발견되지 않는다는 문제의식에서 출발한 긴 요약입니다. ".repeat(12),
+        _status: "published",
+      },
+    });
+    expect(postRes.ok()).toBe(true);
+    const postId = (await postRes.json()).doc.id;
+
+    try {
+      await page.setViewportSize({ width: 1440, height: 900 });
+      // The panel is ISR-cached (revalidate 60) — the afterChange tag
+      // invalidation can take a request or two to reach the route, so
+      // reload until the new card is on page 1 (it sorts newest).
+      const card = page.locator(".insights-item", { hasText: "아주 긴 요약을 가진" });
+      await expect(async () => {
+        await page.goto("/ko/company/insights");
+        await expect(card).toBeVisible({ timeout: 2_000 });
+      }).toPass({ timeout: 90_000, intervals: [2_000] });
+
+      // Its excerpt really is clamped (the text overflows the box) …
+      expect(
+        await card.locator("> div > p").evaluate((el) => el.scrollHeight > el.clientHeight + 1),
+      ).toBe(true);
+
+      // … and every visible card renders at one height (±1px).
+      const heights = await page
+        .locator(".insights-item")
+        .evaluateAll((els) => els.map((el) => el.getBoundingClientRect().height));
+      expect(heights.length).toBe(6);
+      expect(Math.max(...heights) - Math.min(...heights)).toBeLessThanOrEqual(1);
+    } finally {
+      await api.delete(`/api/posts/${postId}`, { headers: origin });
+    }
+  });
+
   test("the old 블로그 chip is gone; the taxonomy is 전체/뉴스/노트/리서치", async ({ page }) => {
     await page.goto("/ko/company/insights");
     const chips = page.locator(".filters-track button");
