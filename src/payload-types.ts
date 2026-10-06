@@ -192,6 +192,10 @@ export interface Post {
    */
   publishedAt?: string | null;
   author?: (number | null) | User;
+  /**
+   * Filter categories on the Insights listing. More than one can be selected.
+   */
+  categories?: ('news' | 'notes' | 'research')[] | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -358,6 +362,7 @@ export interface PostsSelect<T extends boolean = true> {
   slug?: T;
   publishedAt?: T;
   author?: T;
+  categories?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;

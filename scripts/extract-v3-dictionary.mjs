@@ -56,6 +56,7 @@ import { CONTACT_MANIFEST } from "./v3-contact-manifest.mjs";
 import { TUNER_MANIFEST } from "./v3-tuner-manifest.mjs";
 import { RAIL_MANIFEST } from "./v3-rail-manifest.mjs";
 import { WOS336_MANIFEST } from "./v3-wos336-manifest.mjs";
+import { WOS342_MANIFEST } from "./v3-wos342-manifest.mjs";
 
 function mergeManifests(...manifests) {
   const merged = {};
@@ -74,6 +75,7 @@ const MANIFEST = mergeManifests(
   TUNER_MANIFEST,
   RAIL_MANIFEST,
   WOS336_MANIFEST,
+  WOS342_MANIFEST,
 );
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));

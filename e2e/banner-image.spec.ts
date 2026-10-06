@@ -1,11 +1,13 @@
 import { test, expect } from "@playwright/test";
 
-// Regression: Payload returns media URLs prefixed with serverURL, and
-// next/image only allows same-app media via images.localPatterns (which
-// matches LOCAL paths) — the absolute URL threw "hostname is not configured
-// under images" and 500'd every page with a banner. mediaPath() strips the
-// origin before the URL reaches <Image>. Seed data has no banner posts, so
-// this spec creates (and removes) its own.
+// WOS-342 reshaped this regression's surface: the detail page no longer
+// renders the banner through next/image above the article — the banner now
+// paints the navy hero itself, as the `--shot` CSS background on
+// .ins-hero>.ins-shot (InsightHero.tsx). What still matters from the
+// original WOS-339 regression is that the URL reaching the browser is the
+// LOCAL /api/media path (mediaPath() strips Payload's serverURL origin) and
+// that it actually serves. Seed data has no banner posts, so this spec
+// creates (and removes) its own.
 
 // 1x1 transparent PNG.
 const PNG = Buffer.from(
@@ -14,7 +16,7 @@ const PNG = Buffer.from(
 );
 const SLUG = "e2e-banner-image-regression";
 
-test("post banner renders through next/image", async ({ page, baseURL }) => {
+test("post banner paints the insight hero's shot layer", async ({ page, baseURL }) => {
   const api = page.context().request;
   const origin = { Origin: baseURL! };
 
@@ -49,26 +51,28 @@ test("post banner renders through next/image", async ({ page, baseURL }) => {
   const postId = (await postRes.json()).doc.id;
 
   try {
-    await page.goto(`/ko/blog/${SLUG}`);
+    await page.goto(`/ko/insights/${SLUG}`);
     await expect(
       page.getByRole("heading", { name: "E2E 배너 이미지 회귀 테스트" }),
     ).toBeVisible();
-    const banner = page.locator('img[src*="/_next/image"]').first();
-    await expect(banner).toBeVisible();
-    // The optimizer must actually serve it (a broken src still "renders").
-    const loaded = await banner.evaluate(
-      (img: HTMLImageElement) => img.complete && img.naturalWidth > 0,
-    );
-    expect(loaded).toBe(true);
 
-    // The list page 500'd on the same error. The old /blog listing is gone
-    // — this post's card now lives in the Company > Insights panel instead
-    // — but NewsList.tsx doesn't render post banners at all (cards are
-    // text + link only), so the regression can't resurface there. Not
-    // asserted here: that panel is ISR-cached (company/[panel]/page.tsx's
-    // `revalidate = 60`), and on-demand revalidateTag invalidation from
-    // Posts.ts's afterChange hook can take a request or two to propagate —
-    // a single immediate page.goto isn't a reliable window to observe it in.
+    const hero = page.locator(".ins-hero.has-shot");
+    await expect(hero).toBeVisible();
+
+    // The shot layer must carry a LOCAL media URL (mediaPath stripped the
+    // serverURL origin) …
+    const shotUrl = await hero.locator(".ins-shot").evaluate((el) => {
+      const m = /url\("?([^")]+)"?\)/.exec(getComputedStyle(el).backgroundImage);
+      return m ? m[1] : null;
+    });
+    expect(shotUrl).toBeTruthy();
+    expect(shotUrl!).toMatch(/\/api\/media\//);
+    expect(new URL(shotUrl!, baseURL).origin).toBe(new URL(baseURL!).origin);
+
+    // … and it must actually serve (a broken background still "renders").
+    const res = await api.get(shotUrl!);
+    expect(res.ok()).toBe(true);
+    expect(res.headers()["content-type"]).toMatch(/^image\//);
   } finally {
     await api.delete(`/api/posts/${postId}`, { headers: origin });
     await api.delete(`/api/media/${mediaId}`, { headers: origin });

@@ -44,11 +44,15 @@ const nextConfig: NextConfig = {
   async redirects() {
     return [
       { source: "/", destination: "/ko", permanent: false },
-      { source: "/posts/:slug", destination: "/ko/blog/:slug", permanent: true },
-      // The blog's own listing page is gone — its posts now render inside
-      // the Company > Insights panel (NewsList.tsx), alongside the panel's
-      // existing hardcoded items. /blog/[slug] detail pages are unaffected.
+      // WOS-342: detail pages moved to /insights/{slug}. The legacy Laravel
+      // /posts/:slug points straight at the new home (not at /blog/:slug,
+      // which would stack two 308s).
+      { source: "/posts/:slug", destination: "/ko/insights/:slug", permanent: true },
+      // The blog's own listing page is gone — its posts render inside the
+      // Company > Insights panel (InsightsList.tsx). No :slug here, so this
+      // never shadows the detail redirect below.
       { source: "/:locale(ko|en)/blog", destination: "/:locale/company/insights", permanent: true },
+      { source: "/:locale(ko|en)/blog/:slug", destination: "/:locale/insights/:slug", permanent: true },
     ];
   },
 };

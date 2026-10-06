@@ -270,5 +270,29 @@ export const Posts: CollectionConfig = {
       label: { en: "Author", ko: "작성자" },
       admin: { position: "sidebar" },
     },
+    {
+      // WOS-342: v3's Insights taxonomy (INS_LABEL, wlabs-01-wired.html:1789)
+      // — three fixed categories, multi-select per post, matching the static
+      // articles' own multi-tagging (src/lib/site/insightArticles.ts). Reads
+      // also default untagged legacy posts to ["notes"] at mapping time
+      // (insightsIndex.ts), so no backfill migration is needed.
+      name: "categories",
+      type: "select",
+      hasMany: true,
+      defaultValue: ["notes"],
+      options: [
+        { value: "news", label: { en: "News", ko: "뉴스" } },
+        { value: "notes", label: { en: "Notes", ko: "노트" } },
+        { value: "research", label: { en: "Research", ko: "리서치" } },
+      ],
+      label: { en: "Categories", ko: "분류" },
+      admin: {
+        position: "sidebar",
+        description: {
+          ko: "인사이트 목록의 필터 분류입니다. 여러 개 선택할 수 있습니다.",
+          en: "Filter categories on the Insights listing. More than one can be selected.",
+        },
+      },
+    },
   ],
 };

@@ -35,7 +35,9 @@ export async function GET(_request: Request, { params }: Props) {
 
   const channelTitle = xmlEscape(`W Labs — ${chrome.legal2}`);
   // Points at the Insights panel, not /blog — the listing that used to live
-  // there is gone; these items' own /blog/:slug links are unaffected.
+  // there is gone. The feed stays posts-only: the six static articles
+  // (insightArticles.ts) carry month-precision dates with no pubDate to
+  // offer a reader, so they aren't folded in (WOS-342).
   const channelLink = `${siteUrl}${withLocale("/company/insights", locale)}`;
   const channelDescription = xmlEscape(chrome.legal2);
 
@@ -43,7 +45,7 @@ export async function GET(_request: Request, { params }: Props) {
     .map((post) => {
       const title = pick(locale, post.title, post.titleEn);
       const excerpt = pick(locale, post.excerpt ?? null, post.excerptEn) ?? "";
-      const link = `${siteUrl}${withLocale(`/blog/${post.slug}`, locale)}`;
+      const link = `${siteUrl}${withLocale(`/insights/${post.slug}`, locale)}`;
       const pubDate = post.publishedAt ? new Date(post.publishedAt).toUTCString() : new Date(post.updatedAt).toUTCString();
 
       return `  <item>
