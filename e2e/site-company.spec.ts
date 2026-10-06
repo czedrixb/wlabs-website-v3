@@ -81,26 +81,31 @@ test.describe("company: team panel", () => {
 });
 
 test.describe("company: insights panel", () => {
-  // Scoped to the panel's 5 static news/product/case items — the deleted
-  // /blog listing's posts now render here too (see
-  // e2e/blog-into-insights.spec.ts), so a bare .news-item count would be
-  // seed-data-dependent.
-  test("5 news items render; the kind filter narrows them", async ({ page }) => {
+  // WOS-342: the panel renders the union of the six static v3 articles and
+  // the CMS posts, six to a page newest-first — so bare counts are paging-
+  // and seed-dependent; the static cards are addressed by their ins-N ids.
+  test("the six static articles render across the pager; the 노트 chip narrows", async ({
+    page,
+  }) => {
     await page.goto("/ko/company/insights");
-    await expect(
-      page.locator('.news-item[data-kind="news"], .news-item[data-kind="product"], .news-item[data-kind="case"]'),
-    ).toHaveCount(5);
+    // Page 1 always holds exactly six cards when more than six entries exist.
+    await expect(page.locator(".insights-item")).toHaveCount(6);
 
-    await page.locator(".filters-track").getByRole("button", { name: "제품 노트" }).click();
-    await expect(page.locator(".news-item")).toHaveCount(1);
-    await expect(page.locator(".news-item").first()).toHaveAttribute("data-kind", "product");
+    await page.locator(".filters-track").getByRole("button", { name: "노트", exact: true }).click();
+    for (const item of await page.locator(".insights-item").all()) {
+      const kinds = ((await item.getAttribute("data-kind")) ?? "").split(" ");
+      expect(kinds).toContain("notes");
+    }
+    // ins-1..ins-5 are all notes-tagged; the newest four land on page 1.
+    await expect(page.locator(".insights-item#ins-4")).toBeVisible();
   });
 
-  test("the product-note item links to Work → Products", async ({ page }) => {
+  test("a static article card's read link opens its /insights page", async ({ page }) => {
     await page.goto("/ko/company/insights");
-    const productNote = page.locator('.news-item[data-kind="product"]');
-    await productNote.getByRole("link").click();
-    await expect(page).toHaveURL(/\/ko\/work\/products$/);
+    const card = page.locator(".insights-item#ins-4");
+    await card.getByRole("link").click();
+    await expect(page).toHaveURL(/\/ko\/insights\/ins-4$/);
+    await expect(page.locator(".ins-hero h1")).toContainText("SkinArch");
   });
 });
 
@@ -125,7 +130,7 @@ test.describe("company: /en translates", () => {
     await expect(page.locator(".member").first()).toContainText("CEO");
 
     await page.goto("/en/company/insights");
-    await expect(page.locator(".news-item").first()).toContainText("Science Exchange");
+    await expect(page.locator(".insights-item#ins-1")).toContainText("Science Exchange");
 
     await page.goto("/en/company/story");
     await expect(page.locator(".cta-panel")).toContainText("Partnership");

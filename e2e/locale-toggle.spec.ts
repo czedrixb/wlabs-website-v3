@@ -9,9 +9,9 @@ import { test, expect } from "@playwright/test";
 // (site) routes).
 //
 // A later pass removed the /blog listing page — its posts now render as
-// data-kind="blog" cards inside Company > Insights (see
-// e2e/blog-into-insights.spec.ts) — and switched both those cards and the
-// /blog/[slug] detail page from always-Korean post content to
+// cards inside Company > Insights (see e2e/blog-into-insights.spec.ts;
+// WOS-342 moved the detail pages to /insights/[slug]) — and switched both
+// those cards and the detail page from always-Korean post content to
 // pick(locale, ko, en) (src/lib/locale.ts), so unlike the old blog listing,
 // post title/excerpt/body now DO switch with the locale toggle, falling
 // back to Korean only when a post has no `*En` value.
@@ -31,7 +31,7 @@ test.describe("reader-facing language toggle", () => {
 
     // A post card's own title renders in Korean by default.
     await expect(
-      page.locator(".news-item h3", { hasText: "편집자를 위한 발행 워크플로우" }),
+      page.locator(".insights-item h3", { hasText: "편집자를 위한 발행 워크플로우" }),
     ).toBeVisible();
   });
 
@@ -46,19 +46,19 @@ test.describe("reader-facing language toggle", () => {
 
     // The seeded post's title now reads in English too (titleEn).
     await expect(
-      page.locator(".news-item h3", { hasText: "Publishing Workflow for Editors" }),
+      page.locator(".insights-item h3", { hasText: "Publishing Workflow for Editors" }),
     ).toBeVisible();
   });
 
   test("locale survives clicking through to a post, content switches with it", async ({ page }) => {
     await page.goto("/en/company/insights");
 
-    const postCard = page.locator('.news-item[data-kind="blog"]', {
+    const postCard = page.locator(".insights-item", {
       hasText: "Publishing Workflow for Editors",
     });
     await postCard.getByRole("link").click();
 
-    await expect(page).toHaveURL(/\/en\/blog\/publishing-workflow-for-editors/);
+    await expect(page).toHaveURL(/\/en\/insights\/publishing-workflow-for-editors/);
 
     // Chrome (the lang-float toggle) reflects English on the detail page too.
     await expect(page.locator(".lang-float a[lang='en']")).toHaveAttribute("aria-pressed", "true");
@@ -67,7 +67,7 @@ test.describe("reader-facing language toggle", () => {
     await expect(
       page.getByRole("heading", { name: "Publishing Workflow for Editors" }),
     ).toBeVisible();
-    await expect(page.locator("article")).toContainText(
+    await expect(page.locator("article.post-body")).toContainText(
       "Editors log in with email and password",
     );
   });

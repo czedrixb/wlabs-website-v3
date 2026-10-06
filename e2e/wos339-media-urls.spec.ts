@@ -68,14 +68,21 @@ test.describe("WOS-339: media URLs stay resolvable from the serving host", () =>
     expect(loaded).toBe(true);
   });
 
-  test("existing seeded post hero image renders on the frontend", async ({ page }) => {
-    await page.goto("/ko/blog/welcome-to-the-w-labs-blog");
-    const hero = page.locator('img[src*="/_next/image"]').first();
-    await expect(hero).toBeVisible();
-    const loaded = await hero.evaluate(
-      (img: HTMLImageElement) => img.complete && img.naturalWidth > 0,
-    );
-    expect(loaded).toBe(true);
+  test("existing seeded post hero image renders on the frontend", async ({ page, baseURL }) => {
+    // WOS-342: the banner is the article hero's CSS background now
+    // (InsightHero.tsx), not a next/image above the body — so "renders"
+    // means the --shot URL is local and actually serves.
+    await page.goto("/ko/insights/welcome-to-the-w-labs-blog");
+    const shot = page.locator(".ins-hero .ins-shot");
+    await expect(shot).toBeAttached();
+    const shotUrl = await shot.evaluate((el) => {
+      const m = /url\("?([^")]+)"?\)/.exec(getComputedStyle(el).backgroundImage);
+      return m ? m[1] : null;
+    });
+    expect(shotUrl).toBeTruthy();
+    expect(new URL(shotUrl!, baseURL).origin).toBe(new URL(baseURL!).origin);
+    const res = await page.context().request.get(shotUrl!);
+    expect(res.ok()).toBe(true);
   });
 
   test("new post: banner and an inline body image both render", async ({ page, baseURL }) => {
@@ -144,16 +151,14 @@ test.describe("WOS-339: media URLs stay resolvable from the serving host", () =>
     const postId = (await postRes.json()).doc.id;
 
     try {
-      await page.goto(`/ko/blog/${SLUG}`);
+      await page.goto(`/ko/insights/${SLUG}`);
       await expect(
         page.getByRole("heading", { name: "E2E WOS-339 미디어 URL 회귀 테스트" }),
       ).toBeVisible();
 
-      const hero = page.locator('img[src*="/_next/image"]').first();
-      await expect(hero).toBeVisible();
-      expect(
-        await hero.evaluate((img: HTMLImageElement) => img.complete && img.naturalWidth > 0),
-      ).toBe(true);
+      // WOS-342: the banner paints the hero's --shot layer (see the seeded-
+      // post test above for the full URL assertions; here presence suffices).
+      await expect(page.locator(".ins-hero.has-shot .ins-shot")).toBeAttached();
 
       // The inline body image — rendered by postRichTextConverters'
       // `upload` override (src/lib/richText.tsx), not next/image, so no
