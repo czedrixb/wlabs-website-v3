@@ -44,15 +44,27 @@ export type TeamGroup = {
   members: TeamMember[];
 };
 
+// WOS-341: roster amendments on top of the v3 harvest — the v3 design
+// repo's index.html predates these changes (and content.generated.ts must
+// stay a verbatim harvest), so departures and new photos are applied here.
+const WOS341_DEPARTED = new Set(["Zyra", "Winona"]);
+const WOS341_PHOTOS: Record<string, string> = {
+  Francis: "/site/team/Francis.webp",
+  "John Rey": "/site/team/JohnRey.webp",
+  Jericho: "/site/team/Jericho.webp",
+};
+
 // Flat, source order — Home's six-face teaser is TEAM.slice(0, 6), same as
 // v3's own `TEAM.slice(0,6)` (site/index.html's renderTeam()).
-export const TEAM: TeamMember[] = V3_CONTENT.team.map(([name, nameKo, roleEn, roleKo, photo, group]) => ({
-  name,
-  nameKo: nameKo || null,
-  role: bi(roleEn, roleKo),
-  photo: photo || null,
-  group: group as TeamGroupId,
-}));
+export const TEAM: TeamMember[] = V3_CONTENT.team
+  .filter(([name]) => !WOS341_DEPARTED.has(name))
+  .map(([name, nameKo, roleEn, roleKo, photo, group]) => ({
+    name,
+    nameKo: nameKo || null,
+    role: bi(roleEn, roleKo),
+    photo: WOS341_PHOTOS[name] ?? (photo || null),
+    group: group as TeamGroupId,
+  }));
 
 // GROUPS order, with empty groups dropped — `tbc` ("role to be confirmed")
 // has no members in the current roster, so it never renders.
@@ -531,6 +543,17 @@ function railStr(v3Key: string): Bilingual {
   return { ko, en };
 }
 
+// WOS-341: the team milestone's harvested title bakes in v3's "23 people"/
+// "23명" headcount; the roster amendments above change TEAM.length, so the
+// count is re-derived here. Same fragment-scoped replace as dictionary.ts's
+// fixTeamCount (which can't be imported — it lives downstream of this file).
+function fixRailTeamCount(title: Bilingual): Bilingual {
+  return {
+    ko: title.ko.replace(/23명/g, `${TEAM.length}명`),
+    en: title.en.replace(/23 people/g, `${TEAM.length} people`),
+  };
+}
+
 export const RAIL_ENTRIES: RailEntry[] = (V3_CONTENT.rail as readonly RawRailEntry[]).map((r) => ({
   id: r.id,
   type: r.type as RailEntryType,
@@ -539,7 +562,7 @@ export const RAIL_ENTRIES: RailEntry[] = (V3_CONTENT.rail as readonly RawRailEnt
   datetime: r.datetime,
   dateLabel: r.dateLabel,
   circa: r.circa,
-  title: railStr(r.titleKey),
+  title: r.id === "team" ? fixRailTeamCount(railStr(r.titleKey)) : railStr(r.titleKey),
   ...(r.metaKey ? { meta: railStr(r.metaKey) } : {}),
   para: railStr(r.paraKey),
   ...(r.enoteKey ? { enote: railStr(r.enoteKey), enoteRuo: Boolean(r.enoteRuo) } : {}),

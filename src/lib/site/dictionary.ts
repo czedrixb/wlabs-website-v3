@@ -1,6 +1,7 @@
 import type { Locale } from "@/lib/locale";
 import { V3_STRINGS } from "./dictionary.generated";
 import { V3_CONTENT } from "./content.generated";
+import { TEAM } from "./content";
 
 // The site chrome + Home dictionary — extends the STRINGS/t(locale) pattern
 // already used for the blog (src/lib/strings.ts) with namespaces matching
@@ -85,11 +86,21 @@ const BLOG_LABELS: Record<Locale, { tabBlog: string; readPost: string }> = {
   en: { tabBlog: "Blog", readPost: "Read post" },
 };
 
+// WOS-341: v3 baked the headcount into prose at harvest time ("23 people"/
+// "23명" — nav's subTeam, the story rail's team milestone, FAQ a4/a5).
+// The roster now diverges from that harvest (see content.ts's WOS-341
+// amendments), so re-derive those counts from TEAM.length. Scoped to the
+// exact "23 people"/"23명" fragments — the strings' other numerals are
+// years, which this leaves alone.
+function fixTeamCount(s: string): string {
+  return s.replace(/23 people/g, `${TEAM.length} people`).replace(/23명/g, `${TEAM.length}명`);
+}
+
 function build(locale: Locale) {
   const v3 = V3_STRINGS[locale];
 
   return {
-    chrome: { ...v3.chrome, tabBlog: BLOG_LABELS[locale].tabBlog },
+    chrome: { ...v3.chrome, tabBlog: BLOG_LABELS[locale].tabBlog, subTeam: fixTeamCount(v3.chrome.subTeam) },
     home: {
       ...v3.home,
       heading1: parseHeading(v3.home.heroH1),
@@ -134,6 +145,9 @@ function build(locale: Locale) {
       // "필요한 것부터 찾아보기") — reused rather than harvested twice.
       ctaSeeAll: v3.band.ctaSeeAll,
       ctaFind: v3.band.ctaFind,
+      // WOS-341: both answers state the headcount in prose.
+      a4: fixTeamCount(v3.faq.a4),
+      a5: fixTeamCount(v3.faq.a5),
     },
     // WOS-332: Work/Company panels + product/project detail pages. Plain
     // passthroughs — no markup-bearing strings or cross-references in this
@@ -197,7 +211,8 @@ function build(locale: Locale) {
     // WOS-336: the company reading-log rail. Entry text is joined onto the
     // structural rows in content.ts (RAIL_ENTRIES); this slice carries the
     // rail's own chrome (scrubber, pills, counters, rule aside, chips).
-    rail: v3.rail,
+    // WOS-341: the team milestone's title carries the headcount.
+    rail: { ...v3.rail, teamH: fixTeamCount(v3.rail.teamH) },
     // WOS-336: /search. The result-group labels come from v3's `KIND`
     // table (content.generated.ts), resolved per locale here so
     // SearchClient gets one flat strings slice.
