@@ -32,6 +32,10 @@ export const Media: CollectionConfig = {
   ],
   upload: {
     staticDir: process.env.MEDIA_DIR || "media",
+    // Without this, the admin media list/picker falls back to the full
+    // original (thumbnailURL was null in production — e.g. 700KB+ per row)
+    // instead of the 400x300 derivative generated below.
+    adminThumbnail: "thumbnail",
     imageSizes: [
       {
         name: "thumbnail",

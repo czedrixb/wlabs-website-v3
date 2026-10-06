@@ -30,7 +30,9 @@ export default defineConfig({
       dependencies: ["setup"],
       // editor-role.spec.ts asserts the trimmed-down EDITOR view (WOS-320);
       // running it with the admin storage state would fail it by design.
-      testIgnore: /editor-role\.spec\.ts/,
+      // wos337-deploy-smoke.spec.ts is unauthenticated on purpose (see that
+      // file) — it belongs to the "smoke" project below, not this one.
+      testIgnore: /editor-role\.spec\.ts|wos337-deploy-smoke\.spec\.ts/,
     },
     {
       name: "chromium-editor",
@@ -40,6 +42,15 @@ export default defineConfig({
       },
       dependencies: ["setup-editor"],
       testMatch: /editor-role\.spec\.ts/,
+    },
+    {
+      // WOS-337: a deploy smoke check against a real (Vercel) URL — no
+      // dependency on the "setup" project's admin login/storageState, since
+      // that would drive a real login attempt against whatever is deployed.
+      // Only ever run explicitly via --project=smoke.
+      name: "smoke",
+      use: { ...devices["Desktop Chrome"] },
+      testMatch: /wos337-deploy-smoke\.spec\.ts/,
     },
   ],
   webServer: process.env.E2E_BASE_URL
