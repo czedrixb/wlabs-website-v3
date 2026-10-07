@@ -1,7 +1,7 @@
 import { V3_STRINGS } from "./dictionary.generated";
+import { INSIGHT_ARTICLES } from "./insightArticles";
 import {
   CHIP_TIPS,
-  INSIGHTS,
   PROJECTS,
   PRODUCTS,
   PRODUCT_ORDER,
@@ -112,13 +112,14 @@ export function buildSearchIndex(): SearchIndexEntry[] {
     });
   }
 
-  for (const ins of INSIGHTS) {
+  // WOS-342: articles are real pages now (/insights/{slug}), so a result
+  // opens the article itself instead of scroll-flashing a listing card.
+  for (const ins of INSIGHT_ARTICLES) {
     entries.push({
       kind: "insight",
-      title: ins.heading,
-      body: ins.body,
-      href: "/company/insights",
-      hash: ins.id,
+      title: ins.title,
+      body: ins.dek,
+      href: `/insights/${ins.slug}`,
     });
   }
 

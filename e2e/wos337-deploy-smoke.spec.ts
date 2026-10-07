@@ -28,15 +28,17 @@ test.describe("WOS-337 deploy smoke", () => {
 
   test("/ko/company/insights lists posts from the DB", async ({ page }) => {
     await page.goto("/ko/company/insights");
-    await expect(page.locator(".news-item").first()).toBeVisible();
-    const postItems = page.locator('.news-item[data-kind="blog"]');
+    await expect(page.locator(".insights-item").first()).toBeVisible();
+    // WOS-342: posts carry the same taxonomy as the six static articles —
+    // a DB-backed card is any card that isn't one of the ins-N statics.
+    const postItems = page.locator('.insights-item:not([id^="ins-"])');
     expect(await postItems.count()).toBeGreaterThan(0);
     await page.screenshot({ path: path.join(SCREENSHOT_DIR, "wos337-insights.png"), fullPage: false });
   });
 
   test("a post detail page renders its content", async ({ page }) => {
     await page.goto("/ko/company/insights");
-    const firstPost = page.locator('.news-item[data-kind="blog"]').first();
+    const firstPost = page.locator('.insights-item:not([id^="ins-"])').first();
     await firstPost.getByRole("link").click();
     await expect(page.locator("article.post-body")).toBeVisible();
     await page.screenshot({ path: path.join(SCREENSHOT_DIR, "wos337-post-detail.png"), fullPage: false });

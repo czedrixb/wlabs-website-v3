@@ -75,17 +75,6 @@ function parseRcNote(html: string): RcNote {
 // they're literals here instead of coming from dictionary.generated.ts.
 const STORY_ARIA_LABEL = "Intelligence in motion";
 
-// WOS-335: the blog's label. v3 has no blog, so — same as STORY_ARIA_LABEL
-// above — there's no source key in dictionary.generated.ts to harvest;
-// hand-authored here instead. Originally just the nav/footer tab label;
-// the blog listing's own removal repurposes `tabBlog` as the Insights
-// panel's new filter chip / `.pcat` kind label for posts, and adds
-// `readPost` as that chip's card link label (see `insights` below).
-const BLOG_LABELS: Record<Locale, { tabBlog: string; readPost: string }> = {
-  ko: { tabBlog: "블로그", readPost: "글 읽기" },
-  en: { tabBlog: "Blog", readPost: "Read post" },
-};
-
 // WOS-341: v3 baked the headcount into prose at harvest time ("23 people"/
 // "23명" — nav's subTeam, the story rail's team milestone, FAQ a4/a5).
 // The roster now diverges from that harvest (see content.ts's WOS-341
@@ -100,7 +89,7 @@ function build(locale: Locale) {
   const v3 = V3_STRINGS[locale];
 
   return {
-    chrome: { ...v3.chrome, tabBlog: BLOG_LABELS[locale].tabBlog, subTeam: fixTeamCount(v3.chrome.subTeam) },
+    chrome: { ...v3.chrome, subTeam: fixTeamCount(v3.chrome.subTeam) },
     home: {
       ...v3.home,
       heading1: parseHeading(v3.home.heroH1),
@@ -154,11 +143,12 @@ function build(locale: Locale) {
     // slice the way home/proof/band/faq have above.
     work: v3.work,
     company: v3.company,
-    // The blog listing's removal folds posts into this panel as a 4th
-    // filterable kind — `insBlog`/`insReadPost` are its chip/link labels,
-    // merged in from BLOG_LABELS (no source key for them in v3's own
-    // dictionary harvest, same reasoning as BLOG_LABELS itself above).
-    insights: { ...v3.insights, insBlog: BLOG_LABELS[locale].tabBlog, insReadPost: BLOG_LABELS[locale].readPost },
+    // WOS-342: posts are no longer a separate "blog" chip — they carry the
+    // same news/notes/research taxonomy as the static articles (Posts.ts's
+    // categories field), so the old hand-authored insBlog/insReadPost labels
+    // are gone and the whole namespace is a plain passthrough (the single-
+    // page strings arrive via scripts/v3-wos342-manifest.mjs).
+    insights: v3.insights,
     // WOS-334: the /contact form. rcNote is the one markup-bearing string
     // in this slice — see parseRcNote above.
     contact: {

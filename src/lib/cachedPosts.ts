@@ -1,28 +1,32 @@
 import { unstable_cache } from "next/cache";
 import { getPayload } from "@/lib/getPayload";
 
-export const POSTS_PAGE_SIZE = 10;
+// unstable_cache serves the stored entry and refreshes in the background,
+// so a Postgres outage degrades to ≤60s-stale pages instead of a site-wide
+// 500 (WOS-329). Post content is bilingual via explicit ko/en fields, not
+// Payload locales, so `locale` is not part of either cache key.
 
-// Both pages await searchParams, so route-segment `revalidate` can't cache
-// them — the data layer has to. unstable_cache serves the stored entry and
-// refreshes in the background, so a Postgres outage degrades to ≤60s-stale
-// pages instead of a site-wide 500 (WOS-329). Post content is bilingual via
-// explicit ko/en fields, not Payload locales, so `locale` is not part of
-// either cache key.
-
-export const getPostsPage = unstable_cache(
-  async (page: number) => {
+// WOS-342: the Insights panel paginates client-side over the full merged
+// set of static articles + posts (6 per page, v3's applyInsights), so this
+// replaced the old getPostsPage(page) 10-per-page fetch. The limit is a
+// sanity cap, not a page size — at 200 published posts the panel's payload
+// would need a server-paged rethink anyway. The "posts" tag is load-bearing:
+// Posts.ts's afterChange/afterDelete hooks revalidate exactly that tag, and
+// an untagged read here would sit on stale data for the full 60s after a
+// publish.
+export const getInsightPosts = unstable_cache(
+  async () => {
     const payload = await getPayload();
-    return payload.find({
+    const { docs } = await payload.find({
       collection: "posts",
       overrideAccess: false,
       sort: "-publishedAt",
-      limit: POSTS_PAGE_SIZE,
-      page,
+      limit: 200,
       depth: 1,
     });
+    return docs;
   },
-  ["posts-list"],
+  ["posts-insights"],
   { tags: ["posts"], revalidate: 60 },
 );
 

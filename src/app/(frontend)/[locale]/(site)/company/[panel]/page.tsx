@@ -4,10 +4,10 @@ import type { Locale } from "@/lib/locale";
 import { resolveLocale, pick } from "@/lib/locale";
 import { siteT } from "@/lib/site/dictionary";
 import { siteMetadata } from "@/lib/site/metadata";
-import { INSIGHTS, RAIL_ENTRIES } from "@/lib/site/content";
-import { getPostsPage } from "@/lib/cachedPosts";
+import { RAIL_ENTRIES } from "@/lib/site/content";
+import { getInsightEntries } from "@/lib/site/insightsIndex";
 import { TeamGrid } from "@/components/site/company/TeamGrid";
-import { NewsList, type NewsItem } from "@/components/site/company/NewsList";
+import { InsightsList, type InsightListItem } from "@/components/site/company/InsightsList";
 import { StoryTimeline } from "@/components/site/company/StoryTimeline";
 import { StoryRail, type ResolvedRailEntry } from "@/components/site/company/StoryRail";
 import { CtaPanel } from "@/components/site/modules/CtaPanel";
@@ -80,40 +80,22 @@ export default async function CompanyPanelPage({ params }: Props) {
     ...(e.breakLine ? { breakLine: e.breakLine } : {}),
     ...(e.link ? { link: e.link } : {}),
   }));
-  const newsItems = INSIGHTS.map((n) => ({
-    id: n.id,
-    date: n.date,
-    kind: n.kind,
-    link: n.link,
-    heading: locale === "en" ? n.heading.en : n.heading.ko,
-    body: locale === "en" ? n.body.en : n.body.ko,
-  }));
-
-  // The deleted /blog listing's posts, folded into this panel as a 4th
-  // group — fetched only for the panel that shows them, and caught rather
-  // than left to bubble: (site) has no (blog)/error.tsx equivalent, so a
-  // DB outage here should just fall back to INSIGHTS' static items instead
-  // of taking the whole Company page down.
-  let postItems: NewsItem[] = [];
+  // WOS-342: one newest-first union of the six static v3 articles and the
+  // CMS posts (insightsIndex.ts resolves the interleave, the untagged→notes
+  // default and the DB-outage fallback to statics) — resolved to plain
+  // strings here, same client-boundary convention as timelineItems above.
+  let insightItems: InsightListItem[] = [];
   if (key === "insights") {
-    try {
-      const { docs: posts } = await getPostsPage(1);
-      postItems = posts.map((post) => {
-        const iso = post.publishedAt ?? post.updatedAt;
-        const d = new Date(iso);
-        return {
-          id: `post-${post.slug}`,
-          date: `${d.getUTCFullYear()} · ${String(d.getUTCMonth() + 1).padStart(2, "0")}`,
-          datetime: iso,
-          kind: "blog",
-          link: { href: `/blog/${post.slug}`, labelKey: "readPost" },
-          heading: pick(locale, post.title, post.titleEn),
-          body: pick(locale, post.excerpt ?? "", post.excerptEn) ?? "",
-        };
-      });
-    } catch {
-      // DB unreachable — the panel still renders INSIGHTS' static items.
-    }
+    const entries = await getInsightEntries();
+    insightItems = entries.map((e) => ({
+      slug: e.slug,
+      dateLabel: pick(locale, e.dateLabel.ko, e.dateLabel.en),
+      datetime: e.datetime,
+      categories: e.categories,
+      title: pick(locale, e.title.ko, e.title.en),
+      excerpt: pick(locale, e.excerpt.ko, e.excerpt.en),
+      ...(e.shot ? { shot: e.shot } : {}),
+    }));
   }
 
   return (
@@ -131,7 +113,7 @@ export default async function CompanyPanelPage({ params }: Props) {
               {s.insights.insLead}
             </p>
           </div>
-          <NewsList locale={locale} items={[...newsItems, ...postItems]} s={s.insights} segProducts={chrome.segProducts} />
+          <InsightsList locale={locale} items={insightItems} s={s.insights} />
         </div>
       )}
 

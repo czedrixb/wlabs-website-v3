@@ -9,7 +9,21 @@ const dirname = path.dirname(__filename);
 // Vercel sets VERCEL=1 at both build and runtime.
 const isVercel = Boolean(process.env.VERCEL);
 
+// WOS-343: Next's own blocking-metadata bot list (shared/lib/router/utils/
+// html-bots.ts) already covers facebookexternalhit/Twitterbot/LinkedInBot/
+// Slackbot/Discordbot/WhatsApp/Yeti, but NOT KakaoTalk's link-preview
+// scraper — the ticket's background text names KakaoTalk explicitly as one
+// of the previews this fix is for. A custom htmlLimitedBots value replaces
+// Next's default list wholesale rather than extending it (its own docs say
+// so), so this copies that default verbatim and appends the Kakao/Daum UAs.
+// Matters specifically for insights/[slug]/page.tsx: it's `force-dynamic`
+// (the one route that actually streams metadata), where an unlisted bot
+// would be served a <head> with no og:* tags at all.
+const HTML_LIMITED_BOTS =
+  /[\w-]+-Google|Google-[\w-]+|Chrome-Lighthouse|Slurp|DuckDuckBot|baiduspider|yandex|sogou|bitlybot|tumblr|vkShare|quora link preview|redditbot|ia_archiver|Bingbot|BingPreview|applebot|facebookexternalhit|facebookcatalog|Twitterbot|LinkedInBot|Slackbot|Discordbot|WhatsApp|SkypeUriPreview|Yeti|googleweblight|kakaotalk-scrap|KAKAOTALK|Daumoa/i;
+
 const nextConfig: NextConfig = {
+  htmlLimitedBots: HTML_LIMITED_BOTS,
   // Self-hosted deploy (bitbucket-pipelines.yml + deploy.sh): ships a
   // minimal .next/standalone/ + server.js instead of full node_modules,
   // so the blue/green directory swap stays small and fast.
@@ -44,11 +58,15 @@ const nextConfig: NextConfig = {
   async redirects() {
     return [
       { source: "/", destination: "/ko", permanent: false },
-      { source: "/posts/:slug", destination: "/ko/blog/:slug", permanent: true },
-      // The blog's own listing page is gone — its posts now render inside
-      // the Company > Insights panel (NewsList.tsx), alongside the panel's
-      // existing hardcoded items. /blog/[slug] detail pages are unaffected.
+      // WOS-342: detail pages moved to /insights/{slug}. The legacy Laravel
+      // /posts/:slug points straight at the new home (not at /blog/:slug,
+      // which would stack two 308s).
+      { source: "/posts/:slug", destination: "/ko/insights/:slug", permanent: true },
+      // The blog's own listing page is gone — its posts render inside the
+      // Company > Insights panel (InsightsList.tsx). No :slug here, so this
+      // never shadows the detail redirect below.
       { source: "/:locale(ko|en)/blog", destination: "/:locale/company/insights", permanent: true },
+      { source: "/:locale(ko|en)/blog/:slug", destination: "/:locale/insights/:slug", permanent: true },
     ];
   },
 };

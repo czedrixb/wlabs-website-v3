@@ -27,9 +27,9 @@ test.describe("fonts: Quicksand/Raleway/Noto Sans KR actually apply", () => {
   });
 
   test("(blog) route: shares the same font stack as (site)", async ({ page }) => {
-    // The /blog listing page is gone — /blog/[slug] is the one (blog)-group
-    // route left (its layout.tsx is otherwise unchanged by that removal).
-    await page.goto("/ko/blog/publishing-workflow-for-editors");
+    // The /blog listing page is gone and WOS-342 moved the detail route —
+    // /insights/[slug] is the one (blog)-group route left.
+    await page.goto("/ko/insights/publishing-workflow-for-editors");
     const bodyFont = await page.evaluate(() => getComputedStyle(document.body).fontFamily);
     expect(bodyFont.toLowerCase()).toMatch(/raleway|noto sans kr/);
   });

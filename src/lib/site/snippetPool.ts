@@ -2,6 +2,7 @@ import type { Locale } from "@/lib/locale";
 import { withLocale } from "@/lib/locale";
 import { siteT } from "./dictionary";
 import { PROJECTS, PRODUCTS, PRODUCT_ORDER, SERVICES, TEAM, TEAM_GROUPS } from "./content";
+import { INSIGHT_ARTICLES } from "./insightArticles";
 
 export type SnippetPoolItem = {
   kind: string;
@@ -117,15 +118,17 @@ export function buildSnippetPool(locale: Locale): SnippetPoolItem[] {
     });
   }
 
-  const insightHeads = [s.insights.n1h, s.insights.n2h, s.insights.n3h, s.insights.n4h, s.insights.n5h];
-  insightHeads.forEach((head, i) => {
+  // WOS-342: articles are real pages now, so a snippet opens the article
+  // itself instead of hash-targeting a listing card.
+  for (const article of INSIGHT_ARTICLES) {
+    const head = en ? article.title.en : article.title.ko;
     items.push({
       kind: en ? "Insights" : "인사이트",
       title: truncate(head, en),
       sub: head,
-      href: withLocale(`/company/insights#ins-${i + 1}`, locale),
+      href: withLocale(`/insights/${article.slug}`, locale),
     });
-  });
+  }
 
   const principles = [s.company.v1h, s.company.v2h, s.company.v3h, s.company.v4h];
   principles.forEach((head, i) => {
