@@ -157,4 +157,23 @@ test.describe("Open Graph + Twitter Card — site-wide, not just Insights", () =
     await page.goto("/og?t=Test%20Title&k=Notes&l=ko");
     await page.screenshot({ path: path.join(SCREENSHOT_DIR, "wos343-og-card.png") });
   });
+
+  test("a CMS post's own banner photo is used as og:image instead of the generated card", async ({
+    page,
+  }) => {
+    // src/seed/index.ts seeds exactly this post with a banner (`banner:
+    // banner.id`) — the other seeded posts' banner status can drift via
+    // admin edits, so this is the one slug the test can rely on.
+    await page.goto("/ko/insights/welcome-to-the-w-labs-blog");
+    const tags = await ogTags(page);
+
+    expect(tags["og:image"]).toMatch(/\/api\/media\/file\//);
+    expect(tags["og:image"]).not.toContain("/og?");
+    expect(Number(tags["og:image:width"])).toBeGreaterThan(0);
+    expect(Number(tags["og:image:height"])).toBeGreaterThan(0);
+
+    const imgRes = await page.request.get(tags["og:image"]!);
+    expect(imgRes.status()).toBe(200);
+    expect(imgRes.headers()["content-type"]).toMatch(/^image\//);
+  });
 });

@@ -4,6 +4,9 @@ import { withLocale } from "@/lib/locale";
 import { siteUrl } from "@/lib/siteUrl";
 import { ogImageUrl } from "@/lib/site/ogImage";
 
+/** A real photo (e.g. a CMS post's own banner) in place of the generated /og card. */
+type OgImageOverride = { url: string; width?: number; height?: number; alt?: string };
+
 type Props = {
   locale: Locale;
   /** Locale-less path, e.g. "/work/products" — withLocale() adds the /ko or /en prefix. */
@@ -14,6 +17,8 @@ type Props = {
   type?: "website" | "article";
   /** Article-only eyebrow (e.g. a category label) carried onto the OG card. */
   kicker?: string;
+  /** When set, used as og:image/twitter:image instead of the generated /og card. */
+  image?: OgImageOverride;
 };
 
 const SITE_NAME = "W Labs";
@@ -33,9 +38,16 @@ function ogAndTwitter({
   description,
   type = "website",
   kicker,
+  image,
 }: Omit<Props, "path"> & { path?: string }): Pick<Metadata, "openGraph" | "twitter"> {
   const url = path !== undefined ? withLocale(path, locale) : undefined;
-  const image = ogImageUrl({ title, kicker, locale });
+  // A caller-supplied real photo (a CMS post's own banner) wins over the
+  // generated branded card — only fall back to /og when there isn't one.
+  const resolvedImage: OgImageOverride = image ?? {
+    url: ogImageUrl({ title, kicker, locale }),
+    width: 1200,
+    height: 630,
+  };
   return {
     // title/description are deliberately omitted when undefined, not
     // defaulted here: Next's own metadata resolver backfills og:title/
@@ -51,7 +63,14 @@ function ogAndTwitter({
       ...(url !== undefined ? { url } : {}),
       ...(title !== undefined ? { title } : {}),
       ...(description !== undefined ? { description } : {}),
-      images: [{ url: image, width: 1200, height: 630, alt: title ?? SITE_NAME }],
+      images: [
+        {
+          url: resolvedImage.url,
+          ...(resolvedImage.width !== undefined ? { width: resolvedImage.width } : {}),
+          ...(resolvedImage.height !== undefined ? { height: resolvedImage.height } : {}),
+          alt: resolvedImage.alt ?? title ?? SITE_NAME,
+        },
+      ],
     },
     // card alone would actually be enough — Next infers title/description/
     // images from openGraph when twitter is present but incomplete — stated
@@ -82,7 +101,7 @@ export function siteOpenGraphDefaults(locale: Locale, description?: string): Met
 // WOS-343: also the single place that emits Open Graph + Twitter Card tags
 // site-wide (every one of this function's 8 call sites), backed by a
 // generated preview image at /og (src/app/og/route.tsx).
-export function siteMetadata({ locale, path, title, description, type, kicker }: Props): Metadata {
+export function siteMetadata({ locale, path, title, description, type, kicker, image }: Props): Metadata {
   return {
     ...(title !== undefined ? { title } : {}),
     ...(description !== undefined ? { description } : {}),
@@ -94,6 +113,6 @@ export function siteMetadata({ locale, path, title, description, type, kicker }:
         en: withLocale(path, "en"),
       },
     },
-    ...ogAndTwitter({ locale, path, title, description, type, kicker }),
+    ...ogAndTwitter({ locale, path, title, description, type, kicker, image }),
   };
 }
