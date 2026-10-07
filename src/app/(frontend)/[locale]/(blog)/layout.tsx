@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import type { Locale } from "@/lib/locale";
 import { resolveLocale } from "@/lib/locale";
+import { siteOpenGraphDefaults } from "@/lib/site/metadata";
 import { SiteChrome } from "@/components/site/chrome/SiteChrome";
 import "@/styles/site.css";
 
@@ -15,9 +16,16 @@ const BLOG_METADATA: Record<Locale, Metadata> = {
   en: { title: "W Labs Insights", description: "W Labs insights" },
 };
 
+// WOS-343: spreads siteOpenGraphDefaults — insights/[slug]/page.tsx DOES
+// call siteMetadata and replaces this wholesale for its own route, but this
+// is the group's only metadata source for anything that isn't a detail
+// page (there is none today, but this keeps the group self-sufficient the
+// way (site)/layout.tsx now is too).
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
-  const { locale } = await params;
-  return BLOG_METADATA[resolveLocale(locale)];
+  const { locale: localeParam } = await params;
+  const locale = resolveLocale(localeParam);
+  const base = BLOG_METADATA[locale];
+  return { ...base, ...siteOpenGraphDefaults(locale, base.description as string) };
 }
 
 type Props = {

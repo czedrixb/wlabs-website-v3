@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import type { Locale } from "@/lib/locale";
 import { resolveLocale } from "@/lib/locale";
 import { siteT } from "@/lib/site/dictionary";
+import { siteOpenGraphDefaults } from "@/lib/site/metadata";
 import { SiteChrome } from "@/components/site/chrome/SiteChrome";
 import "@/styles/site.css";
 
@@ -16,10 +17,20 @@ type Props = {
 // tagline ("성장과 디지털 전환의 파트너" / "Partner for growth and digital
 // transformation") — the same string Footer.tsx already renders, reused
 // here rather than a separate title-only key.
+//
+// WOS-343: spreads siteOpenGraphDefaults so a leaf page that defines no
+// generateMetadata of its own (company/page.tsx, work/page.tsx — their own
+// [panel] siblings DO call siteMetadata and replace this wholesale) still
+// carries metadataBase + openGraph + twitter instead of nothing at all.
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale: localeParam } = await params;
-  const { chrome } = siteT(resolveLocale(localeParam));
-  return { title: `W Labs — ${chrome.legal2}`, description: chrome.legal2 };
+  const locale = resolveLocale(localeParam);
+  const { chrome } = siteT(locale);
+  return {
+    title: `W Labs — ${chrome.legal2}`,
+    description: chrome.legal2,
+    ...siteOpenGraphDefaults(locale, chrome.legal2),
+  };
 }
 
 // The v3 site's own chrome — header/masthead/tab bar/footer/language float,

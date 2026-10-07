@@ -9,7 +9,21 @@ const dirname = path.dirname(__filename);
 // Vercel sets VERCEL=1 at both build and runtime.
 const isVercel = Boolean(process.env.VERCEL);
 
+// WOS-343: Next's own blocking-metadata bot list (shared/lib/router/utils/
+// html-bots.ts) already covers facebookexternalhit/Twitterbot/LinkedInBot/
+// Slackbot/Discordbot/WhatsApp/Yeti, but NOT KakaoTalk's link-preview
+// scraper — the ticket's background text names KakaoTalk explicitly as one
+// of the previews this fix is for. A custom htmlLimitedBots value replaces
+// Next's default list wholesale rather than extending it (its own docs say
+// so), so this copies that default verbatim and appends the Kakao/Daum UAs.
+// Matters specifically for insights/[slug]/page.tsx: it's `force-dynamic`
+// (the one route that actually streams metadata), where an unlisted bot
+// would be served a <head> with no og:* tags at all.
+const HTML_LIMITED_BOTS =
+  /[\w-]+-Google|Google-[\w-]+|Chrome-Lighthouse|Slurp|DuckDuckBot|baiduspider|yandex|sogou|bitlybot|tumblr|vkShare|quora link preview|redditbot|ia_archiver|Bingbot|BingPreview|applebot|facebookexternalhit|facebookcatalog|Twitterbot|LinkedInBot|Slackbot|Discordbot|WhatsApp|SkypeUriPreview|Yeti|googleweblight|kakaotalk-scrap|KAKAOTALK|Daumoa/i;
+
 const nextConfig: NextConfig = {
+  htmlLimitedBots: HTML_LIMITED_BOTS,
   // Self-hosted deploy (bitbucket-pipelines.yml + deploy.sh): ships a
   // minimal .next/standalone/ + server.js instead of full node_modules,
   // so the blue/green directory swap stays small and fast.

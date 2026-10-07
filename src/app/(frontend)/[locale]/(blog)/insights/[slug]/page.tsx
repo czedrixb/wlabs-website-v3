@@ -62,7 +62,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const description = r.article
     ? pick(locale, r.article.dek.ko, r.article.dek.en)
     : (pick(locale, r.post!.excerpt ?? null, r.post!.excerptEn) ?? undefined);
-  return siteMetadata({ locale, path: `/insights/${r.slug}`, title, description });
+  // WOS-343: "article" (not the siteMetadata default "website") so the OG
+  // card picks up article semantics, and the article's own first category
+  // becomes the card's kicker — the same label the hero/listing cards show.
+  const categories = r.article ? r.article.categories : postCategories(r.post!);
+  const kicker = pick(locale, INSIGHT_CATEGORY_LABELS[categories[0]].ko, INSIGHT_CATEGORY_LABELS[categories[0]].en);
+  return siteMetadata({ locale, path: `/insights/${r.slug}`, title, description, type: "article", kicker });
 }
 
 // The standfirst goes on the first PARAGRAPH, not the first block — an
