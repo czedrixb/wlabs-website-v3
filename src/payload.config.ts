@@ -1,4 +1,5 @@
 import { postgresAdapter } from "@payloadcms/db-postgres";
+import { nodemailerAdapter } from "@payloadcms/email-nodemailer";
 import { FixedToolbarFeature, lexicalEditor } from "@payloadcms/richtext-lexical";
 import { s3Storage } from "@payloadcms/storage-s3";
 import { en } from "@payloadcms/translations/languages/en";
@@ -12,6 +13,7 @@ import { Posts } from "./collections/Posts";
 import { Media } from "./collections/Media";
 import { Users } from "./collections/Users";
 import { csrfOrigins, serverURL } from "./lib/deployOrigins";
+import { createTransporter, resolveMailConfig } from "./lib/site/mailer";
 
 const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
@@ -30,6 +32,13 @@ if (process.env.VERCEL && !process.env.S3_BUCKET) {
     "S3_BUCKET is not set on Vercel — media uploads will try the local filesystem and fail (ENOENT).",
   );
 }
+
+// Resolved once at module scope, like csrfOrigins above — reading env vars
+// here costs nothing at boot (createTransporter() opens no socket; the
+// connection is made per sendMail), and CLI entrypoints (`payload migrate`,
+// `generate:types`) import this same config, so it must stay side-effect-free
+// when unset rather than throw.
+const mailConfig = resolveMailConfig();
 
 export default buildConfig({
   serverURL,
@@ -113,6 +122,35 @@ export default buildConfig({
     // Vercel build command (see vercel.json) and the `migrate` script below.
   }),
   sharp,
+  // WOS-338: Payload's own transactional mail (admin forgot-password /
+  // verify — Users has auth: true) goes out over the same company Gmail
+  // transport as the contact form. One set of credentials, validated in one
+  // place (lib/site/mailer.ts).
+  //
+  // Conditional for the same reason the s3Storage plugin below is: local
+  // dev, CI and e2e all run with GMAIL_* unset, and the `email` key must be
+  // omitted *entirely* there — nodemailerAdapter() with no args is NOT a
+  // safe default, it calls nodemailer.createTestAccount() against
+  // ethereal.email at boot and throws when that network call fails. Omitting
+  // the key instead makes Payload fall back to its built-in console email
+  // adapter (a startup warning, never a failure).
+  //
+  // Not awaited on purpose: `email` accepts EmailAdapter | Promise<EmailAdapter>
+  // and Payload awaits it internally during init, so this file stays a plain
+  // synchronous module. skipVerify because the adapter's own verify step
+  // only console.error()s on failure (no safety gained) and would otherwise
+  // turn every cold start into a live SMTP handshake that can hang behind a
+  // firewall.
+  ...(mailConfig
+    ? {
+        email: nodemailerAdapter({
+          defaultFromAddress: mailConfig.gmailUser,
+          defaultFromName: "W Labs",
+          transport: createTransporter(mailConfig),
+          skipVerify: true,
+        }),
+      }
+    : {}),
   // Non-devs publish unaided (WOS-312 §5) — the admin UI opens in Korean by
   // default. Post content is bilingual via explicit ko/en fields on Posts
   // (see src/collections/Posts.ts), not Payload's locale switcher — a

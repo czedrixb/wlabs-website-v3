@@ -32,7 +32,9 @@ export default defineConfig({
       // running it with the admin storage state would fail it by design.
       // wos337-deploy-smoke.spec.ts is unauthenticated on purpose (see that
       // file) — it belongs to the "smoke" project below, not this one.
-      testIgnore: /editor-role\.spec\.ts|wos337-deploy-smoke\.spec\.ts/,
+      // wos338-company-smtp.spec.ts drives a real Gmail send when GMAIL_* are
+      // configured — it belongs to the "mail" project below, run explicitly.
+      testIgnore: /editor-role\.spec\.ts|wos337-deploy-smoke\.spec\.ts|wos338-company-smtp\.spec\.ts/,
     },
     {
       name: "chromium-editor",
@@ -51,6 +53,15 @@ export default defineConfig({
       name: "smoke",
       use: { ...devices["Desktop Chrome"] },
       testMatch: /wos337-deploy-smoke\.spec\.ts/,
+    },
+    {
+      // WOS-338: company Gmail SMTP + the Payload email adapter.
+      // Unauthenticated (no storageState / no "setup" dependency) — the
+      // forgot-password flow it exercises is a logged-out flow by
+      // definition. Only ever run explicitly via --project=mail.
+      name: "mail",
+      use: { ...devices["Desktop Chrome"] },
+      testMatch: /wos338-company-smtp\.spec\.ts/,
     },
   ],
   webServer: process.env.E2E_BASE_URL
