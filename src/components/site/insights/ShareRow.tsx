@@ -8,7 +8,36 @@ import type { SiteStrings } from "@/lib/site/dictionary";
 // anchors; the copy button writes the URL to the clipboard and rings teal
 // (.sh.done, a check icon) for two seconds. The URL is built server-side
 // and passed in, so this stays independent of window.location.
+//
+// WOS-343: the anchors stay plain anchors (not buttons) — keeps the
+// existing href/target/rel intact for middle-click, "copy link address",
+// and no-JS, and lets e2e still assert on a.sh[href*="facebook.com/sharer"].
+// openShare() intercepts a plain left-click and reopens the same href as a
+// window.open() popup instead: sharer.php, opened as a top-level
+// navigation, redirects a user who's logged into Facebook to a blank
+// facebook.com/share_channel/# page rather than the share dialog — that
+// endpoint only renders correctly inside a popup/dialog context.
 type Props = { s: SiteStrings["insights"]; url: string };
+
+function openShare(e: React.MouseEvent<HTMLAnchorElement>) {
+  // Modified clicks (new tab/window, middle-click) keep the browser's
+  // native behaviour instead of being hijacked into a popup.
+  if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+  const href = e.currentTarget.href;
+  // Deliberately no "noopener" feature here: per the WHATWG spec, passing
+  // it makes window.open() return null even on success, which would make
+  // the popup-blocked check below always look like a failure and let the
+  // anchor's own navigation fire too. The targets are two hardcoded,
+  // trusted sharer domains, so the window.opener handle this leaves behind
+  // isn't a meaningful reverse-tabnabbing risk.
+  const popup = window.open(href, "wlabs-share", "popup,width=620,height=680");
+  // A blocked popup (null) falls through to the anchor's own target="_blank"
+  // navigation rather than swallowing the click.
+  if (popup) {
+    e.preventDefault();
+    popup.focus?.();
+  }
+}
 
 const ICON_FB = (
   <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -79,6 +108,7 @@ export function ShareRow({ s, url }: Props) {
         href={`https://www.facebook.com/sharer/sharer.php?u=${u}`}
         target="_blank"
         rel="noopener noreferrer"
+        onClick={openShare}
         aria-label={s.shareFb}
         title={s.shareFb}
       >
@@ -89,6 +119,7 @@ export function ShareRow({ s, url }: Props) {
         href={`https://www.linkedin.com/sharing/share-offsite/?url=${u}`}
         target="_blank"
         rel="noopener noreferrer"
+        onClick={openShare}
         aria-label={s.shareLi}
         title={s.shareLi}
       >
