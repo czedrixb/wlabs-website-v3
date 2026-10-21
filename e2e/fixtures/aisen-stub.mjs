@@ -95,8 +95,25 @@ const server = createServer((req, res) => {
     }
     const slug = decodeURIComponent(postMatch[1]);
     const post = POSTS[locale].find((p) => p.slug === slug);
-    if (!post) return problem(res, 404, "Not Found", `No published post "${slug}" in ${locale}`);
-    return send(res, 200, { data: post });
+    if (post) return send(res, 200, { data: post });
+    // Reproduce the live dev API's observed bug (2026-10-21): when the
+    // requested language version isn't published, the detail endpoint falls
+    // back to the default language's CONTENT while mislabeling `locale` as
+    // the requested one and fabricating a `translations` entry — instead of
+    // the documented 404. src/lib/aisen.ts guards against this by gating on
+    // the (accurate) list endpoint; serving the same wrong shape here keeps
+    // the "/en/insights/ins-1 → HTTP 404" specs honest regression tests.
+    const fallback = POSTS[PROJECT.language || "ko"].find((p) => p.slug === slug);
+    if (fallback) {
+      return send(res, 200, {
+        data: {
+          ...fallback,
+          locale,
+          translations: [{ locale: PROJECT.language || "ko", slug }],
+        },
+      });
+    }
+    return problem(res, 404, "Not Found", `No published post "${slug}" in ${locale}`);
   }
 
   return problem(res, 404, "Not Found", `Unknown path: ${url.pathname}`);
