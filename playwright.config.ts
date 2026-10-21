@@ -3,6 +3,20 @@ import { defineConfig, devices } from "@playwright/test";
 const PORT = process.env.E2E_PORT || "3100";
 const baseURL = process.env.E2E_BASE_URL || `http://127.0.0.1:${PORT}`;
 
+// WOS-346: Insights are served from the AISEN Blog API, so e2e runs against
+// a local stub (e2e/fixtures/aisen-stub.mjs) instead of the live service —
+// specs assert exact fixture content, and the browser must never see the
+// real host or key. These three land in BOTH servers' env; process env
+// outranks .env, so a developer's real AISEN_* values are overridden for
+// the test run. When E2E_BASE_URL points at a manually started server,
+// start the stub manually too and give the app server the same values.
+const AISEN_STUB_PORT = process.env.AISEN_STUB_PORT || "3101";
+const AISEN_ENV = {
+  AISEN_API_URL: `http://127.0.0.1:${AISEN_STUB_PORT}`,
+  AISEN_KEY_ID: "e2e-key",
+  AISEN_SECRET: "e2e-secret",
+};
+
 export default defineConfig({
   testDir: "./e2e",
   fullyParallel: false, // shares one seeded Postgres DB; keep it deterministic
@@ -66,14 +80,28 @@ export default defineConfig({
   ],
   webServer: process.env.E2E_BASE_URL
     ? undefined
-    : {
-        command: `pnpm build && pnpm start -p ${PORT}`,
-        url: baseURL,
-        reuseExistingServer: !process.env.CI,
-        timeout: 180_000,
-        // NEXT_PUBLIC_SERVER_URL must equal the origin the browser drives:
-        // Payload derives its CSRF origin allowlist from it, and a mismatch
-        // 403s every admin write (the old "prod-only Save Draft" bug).
-        env: { PORT, NEXT_PUBLIC_SERVER_URL: baseURL },
-      },
+    : [
+        {
+          command: "node e2e/fixtures/aisen-stub.mjs",
+          url: `http://127.0.0.1:${AISEN_STUB_PORT}/healthz`,
+          reuseExistingServer: !process.env.CI,
+          timeout: 15_000,
+          env: {
+            AISEN_STUB_PORT,
+            // Fixture image URLs resolve to the app's own /site assets.
+            AISEN_STUB_COVER_ORIGIN: baseURL,
+            ...AISEN_ENV,
+          },
+        },
+        {
+          command: `pnpm build && pnpm start -p ${PORT}`,
+          url: baseURL,
+          reuseExistingServer: !process.env.CI,
+          timeout: 180_000,
+          // NEXT_PUBLIC_SERVER_URL must equal the origin the browser drives:
+          // Payload derives its CSRF origin allowlist from it, and a mismatch
+          // 403s every admin write (the old "prod-only Save Draft" bug).
+          env: { PORT, NEXT_PUBLIC_SERVER_URL: baseURL, ...AISEN_ENV },
+        },
+      ],
 });

@@ -1,0 +1,10 @@
+{
+  "slug": "w-soft-lab-website",
+  "name": "WSoft Lab Website",
+  "website_url": "https://wlabs-website-v3.vercel.app/",
+  "language": "ko",
+  "available_locales": [
+    "en",
+    "ko"
+  ]
+}

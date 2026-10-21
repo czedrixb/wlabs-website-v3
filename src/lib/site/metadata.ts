@@ -14,6 +14,20 @@ type Props = {
   type?: "website" | "article";
   /** Article-only eyebrow (e.g. a category label) carried onto the OG card. */
   kicker?: string;
+  /**
+   * WOS-346: hreflang override. By default every route advertises both /ko
+   * and /en versions of `path`, which is right for the fully bilingual
+   * routes but wrong for AISEN insight posts, where a language version only
+   * exists once a writer publishes it — advertising a missing one would
+   * point crawlers at a real 404. Pass only the locales that resolve
+   * (locale-prefixed paths); omit to keep the default pair.
+   */
+  languages?: Partial<Record<Locale, string>>;
+  /**
+   * WOS-346: Open Graph image override (absolute URL, e.g. an AISEN
+   * cover_image). Omit to keep the generated /og card.
+   */
+  ogImage?: { url: string; width?: number; height?: number; alt?: string };
 };
 
 const SITE_NAME = "W Labs";
@@ -33,9 +47,15 @@ function ogAndTwitter({
   description,
   type = "website",
   kicker,
+  ogImage,
 }: Omit<Props, "path"> & { path?: string }): Pick<Metadata, "openGraph" | "twitter"> {
   const url = path !== undefined ? withLocale(path, locale) : undefined;
-  const image = ogImageUrl({ title, kicker, locale });
+  const image = ogImage ?? {
+    url: ogImageUrl({ title, kicker, locale }),
+    width: 1200,
+    height: 630,
+    alt: title ?? SITE_NAME,
+  };
   return {
     // title/description are deliberately omitted when undefined, not
     // defaulted here: Next's own metadata resolver backfills og:title/
@@ -51,7 +71,7 @@ function ogAndTwitter({
       ...(url !== undefined ? { url } : {}),
       ...(title !== undefined ? { title } : {}),
       ...(description !== undefined ? { description } : {}),
-      images: [{ url: image, width: 1200, height: 630, alt: title ?? SITE_NAME }],
+      images: [image],
     },
     // card alone would actually be enough — Next infers title/description/
     // images from openGraph when twitter is present but incomplete — stated
@@ -82,18 +102,27 @@ export function siteOpenGraphDefaults(locale: Locale, description?: string): Met
 // WOS-343: also the single place that emits Open Graph + Twitter Card tags
 // site-wide (every one of this function's 8 call sites), backed by a
 // generated preview image at /og (src/app/og/route.tsx).
-export function siteMetadata({ locale, path, title, description, type, kicker }: Props): Metadata {
+export function siteMetadata({
+  locale,
+  path,
+  title,
+  description,
+  type,
+  kicker,
+  languages,
+  ogImage,
+}: Props): Metadata {
   return {
     ...(title !== undefined ? { title } : {}),
     ...(description !== undefined ? { description } : {}),
     metadataBase: new URL(siteUrl),
     alternates: {
       canonical: withLocale(path, locale),
-      languages: {
+      languages: languages ?? {
         ko: withLocale(path, "ko"),
         en: withLocale(path, "en"),
       },
     },
-    ...ogAndTwitter({ locale, path, title, description, type, kicker }),
+    ...ogAndTwitter({ locale, path, title, description, type, kicker, ogImage }),
   };
 }

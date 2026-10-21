@@ -6,6 +6,7 @@ import { Masthead } from "./Masthead";
 import { TabBar } from "./TabBar";
 import { Footer } from "./Footer";
 import { LangToggle } from "./LangToggle";
+import { LangTargetProvider } from "./LangTargetContext";
 import { LogoSprite } from "./LogoSprite";
 import { Toaster } from "./Toaster";
 import { OrganizationJsonLd } from "./OrganizationJsonLd";
@@ -31,6 +32,11 @@ export function SiteChrome({ locale, children }: Props) {
   const chrome = s.chrome;
 
   return (
+    // WOS-346: LangTargetProvider is a client component with server children
+    // — fine across the RSC boundary — so a page under <main> can point the
+    // floating LangToggle at the right other-language URL (AISEN posts whose
+    // translation has its own slug, or doesn't exist). See LangTargetContext.
+    <LangTargetProvider>
     <div>
       {/* First in the tree so #logo-icon-* symbols exist before any <use>
           referencing them (Hero's dp-mark, the CTA panels' watermark). */}
@@ -51,5 +57,6 @@ export function SiteChrome({ locale, children }: Props) {
       <Toaster />
       <TipboxHost tips={CHIP_TIPS.map((t) => ({ term: t.term, tip: locale === "en" ? t.tip.en : t.tip.ko }))} />
     </div>
+    </LangTargetProvider>
   );
 }

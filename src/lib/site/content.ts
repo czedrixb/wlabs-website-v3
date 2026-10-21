@@ -405,9 +405,10 @@ export const FAQ: FaqItem[] = [
 //
 // WOS-342: the old 5-item INSIGHTS table (headed by WOS-331's n1h..n5p
 // dictionary harvest) is gone — v3's Insights rebuild replaced those list-
-// only items with six fully-written articles, which live with their bodies,
-// figures and sources in src/lib/site/insightArticles.ts and merge with the
-// CMS posts in src/lib/site/insightsIndex.ts.
+// only items with six fully-written static articles, and WOS-346 moved the
+// articles themselves into the AISEN Blog Creator: they now arrive through
+// src/lib/aisen.ts and merge with the CMS posts in
+// src/lib/site/insightsIndex.ts (taxonomy in insightTaxonomy.ts).
 
 // ── Contact topics ──────────────────────────────────────────────────────
 //

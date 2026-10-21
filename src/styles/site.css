@@ -2777,6 +2777,10 @@ html:lang(ko) .post-body h3,html:lang(ko) .post-body h4{letter-spacing:-.03em;li
 .post-body li.list-item-checkbox input{margin:0;accent-color:var(--teal)}
 .post-body blockquote{margin:0;padding:14px 18px;color:var(--ink-2);border-left:3px solid var(--teal-soft);background:var(--cream-2);border-radius:0 var(--r-s) var(--r-s) 0}
 .post-body code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.9em;background:var(--cream-2);border:1px solid var(--line);border-radius:var(--r-xs);padding:.1em .38em}
+/* WOS-346: AISEN content_html allows <pre>/<code> blocks (Blog-integration
+   §6.2); Lexical never emitted <pre>, so this slot was missing */
+.post-body pre{margin:0 0 1.15em;background:var(--cream-2);border:1px solid var(--line);border-radius:var(--r-s);padding:12px 16px;overflow-x:auto}
+.post-body pre code{background:none;border:0;padding:0}
 .post-body hr{border:0;border-top:1px solid var(--line);margin-block:var(--s3)}
 .post-body img,.post-body picture{max-width:100%;height:auto;display:block;border-radius:var(--r-m);background:var(--cream-2)}
 .post-body .lexical-table-container{overflow-x:auto;-webkit-overflow-scrolling:touch}
@@ -2897,22 +2901,12 @@ html:lang(ko) .post-body h3,html:lang(ko) .post-body h4{letter-spacing:-.03em;li
 .lbox-close:hover{background:rgba(255,255,255,.26)}
 .lbox-close svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round}
 .ins-body p{margin:0 0 1.15em;font:400 17px/1.75 var(--body);color:var(--ink)}
-.ins-body p.stand{font-size:19px;line-height:1.68}
 .ins-body h2{margin:var(--s4) 0 10px;font:700 19px/1.35 var(--display);color:var(--ink);letter-spacing:-.01em}
 .ins-body h2:first-child{margin-top:0}
-/* a CMS post's Lexical body renders inside .ins-prose through .post-body
-   (above) — the shared measure comes from .ins-prose, so the old 72ch cap
-   steps aside inside the article grid */
+/* a post body (AISEN content_html or a CMS post's Lexical output) renders
+   inside .ins-prose through .post-body (above) — the shared measure comes
+   from .ins-prose, so the old 72ch cap steps aside inside the article grid */
 .ins-prose .post-body{max-width:none}
-/* sources: set as caption, so the claims above can be checked without the
-   list competing with the article; .todo marks an unverified claim */
-.ins-src{margin-top:var(--s4);padding-top:var(--s3);border-top:1px solid var(--line)}
-.ins-src h3{margin:0 0 10px;font:700 11px/1 var(--body);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
-.ins-src ol{margin:0;padding-left:1.3em;display:grid;gap:7px}
-.ins-src li{font:400 13px/1.6 var(--body);color:var(--muted)}
-.ins-src a{color:var(--muted);text-decoration:underline;text-underline-offset:3px}
-.ins-src a:hover{color:var(--teal)}
-.ins-src .todo{color:var(--teal)}
 /* byline + share row (v3 :589-604; .sh chrome from theme8) */
 .ins-foot{display:flex;flex-wrap:wrap;gap:var(--s3);align-items:center;justify-content:space-between;border-top:1px solid var(--line);padding-block:var(--s4);margin-top:var(--s3);margin-bottom:var(--s4)}
 .ins-by{display:flex;align-items:center;gap:10px}
@@ -2973,10 +2967,9 @@ html:lang(ko) .post-body h3,html:lang(ko) .post-body h4{letter-spacing:-.03em;li
 @media (max-width:743.98px){
   .ins-dek{font-size:17px;line-height:1.6}
   .ins-body p{font-size:16px;line-height:1.72}
-  .ins-body p.stand{font-size:18px;line-height:1.62}
   .ins-body h2{font-size:18px;margin-top:var(--s3)}
   .ins-nav .t{font-size:14px}
-  .ins-fig figcaption,.ins-src li{font-size:12px}
+  .ins-fig figcaption{font-size:12px}
   .insights-item h3{font-size:18px}
   .insights-item p{font-size:14px}
   .ins-card h3{font-size:15px}
@@ -2991,7 +2984,6 @@ html:lang(ko) .post-body h3,html:lang(ko) .post-body h4{letter-spacing:-.03em;li
 @media (max-width:480px){
   .ins-hero h1{font-size:clamp(24px,6.4vw,30px)}
   .ins-dek{font-size:16px}
-  .ins-body p.stand{font-size:17px}
   .ins-body h2{font-size:17px}
   .ins-meta{font-size:11px}
 }

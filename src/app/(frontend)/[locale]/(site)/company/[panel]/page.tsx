@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import type { Locale } from "@/lib/locale";
-import { resolveLocale, pick } from "@/lib/locale";
+import { resolveLocale } from "@/lib/locale";
 import { siteT } from "@/lib/site/dictionary";
 import { siteMetadata } from "@/lib/site/metadata";
 import { RAIL_ENTRIES } from "@/lib/site/content";
@@ -80,20 +80,21 @@ export default async function CompanyPanelPage({ params }: Props) {
     ...(e.breakLine ? { breakLine: e.breakLine } : {}),
     ...(e.link ? { link: e.link } : {}),
   }));
-  // WOS-342: one newest-first union of the six static v3 articles and the
-  // CMS posts (insightsIndex.ts resolves the interleave, the untagged→notes
-  // default and the DB-outage fallback to statics) — resolved to plain
-  // strings here, same client-boundary convention as timelineItems above.
+  // WOS-342/WOS-346: one newest-first union of the AISEN posts in this
+  // locale and the CMS posts (insightsIndex.ts resolves the interleave, the
+  // untagged→notes default and the outage fallbacks). Entries arrive already
+  // locale-resolved — AISEN content is per-locale, so the pick() step moved
+  // into the index.
   let insightItems: InsightListItem[] = [];
   if (key === "insights") {
-    const entries = await getInsightEntries();
+    const entries = await getInsightEntries(locale);
     insightItems = entries.map((e) => ({
       slug: e.slug,
-      dateLabel: pick(locale, e.dateLabel.ko, e.dateLabel.en),
+      dateLabel: e.dateLabel,
       datetime: e.datetime,
       categories: e.categories,
-      title: pick(locale, e.title.ko, e.title.en),
-      excerpt: pick(locale, e.excerpt.ko, e.excerpt.en),
+      title: e.title,
+      excerpt: e.excerpt,
       ...(e.shot ? { shot: e.shot } : {}),
     }));
   }
