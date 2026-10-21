@@ -2884,12 +2884,24 @@ html:lang(ko) .post-body h3,html:lang(ko) .post-body h4{letter-spacing:-.03em;li
 .ins-fig-btn img{display:block;width:100%;height:auto}
 .ins-fig-btn:hover{box-shadow:var(--pane-lift)}
 .ins-fig figcaption{margin-top:10px;font:400 13px/1.55 var(--body);color:var(--muted)}
+/* WOS-347: an AISEN body image wrapped in place (the mobile presentation) —
+   figure margin matches the .ins-body p rhythm the consumed caption <p>
+   used to provide; caption typography mirrors .ins-fig figcaption */
+.ins-inline-fig{margin:0 0 1.15em}
+.ins-inline-fig img{display:block;width:100%;height:auto;border-radius:var(--r-m)}
+.ins-inline-fig figcaption{margin-top:10px;font:400 13px/1.55 var(--body);color:var(--muted)}
 @media (min-width:900px){
   .ins-body{grid-template-columns:2fr 3fr;gap:var(--s5);align-items:start}
   .ins-figs{position:sticky;top:96px}
+  /* WOS-347: ≥900px a body image lives in the rail only — its inline twin
+     (figure + caption) hides, keeping each image visible exactly once */
+  .ins-prose .ins-inline-fig{display:none}
 }
 @media (max-width:899.98px){
-  .ins-figs:empty{display:none}
+  /* WOS-347: <900px the images live inline only — the rail hides whether
+     empty or populated (subsumes the old .ins-figs:empty rule; the grid is
+     single-column here, so there is no column to reserve) */
+  .ins-figs{display:none}
 }
 /* the expanded capture (v3 :322-332) */
 .lbox{position:fixed;inset:0;z-index:200;display:grid;place-items:center;padding:var(--s4) var(--s3);background:rgba(13,26,36,.84);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}

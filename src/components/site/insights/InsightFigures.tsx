@@ -41,8 +41,12 @@ export function InsightFigures({ s, figs }: Props) {
   return (
     <>
       <aside className="ins-figs">
-        {figs.map((f) => (
-          <figure className="ins-fig" key={f.src}>
+        {/* WOS-347: figure srcs are absolute AISEN URLs (Supabase in prod)
+            and next.config.ts deliberately has no remotePatterns, so both
+            <Image>s are unoptimized — /_next/image would reject the host.
+            The same URL can appear twice in a body, hence the indexed key. */}
+        {figs.map((f, i) => (
+          <figure className="ins-fig" key={`${i}-${f.src}`}>
             <button
               type="button"
               className="ins-fig-btn"
@@ -52,7 +56,7 @@ export function InsightFigures({ s, figs }: Props) {
                 setOpen(f);
               }}
             >
-              <Image src={f.src} width={f.width} height={f.height} alt="" />
+              <Image src={f.src} width={f.width} height={f.height} alt="" unoptimized />
             </button>
             <figcaption>{f.caption}</figcaption>
           </figure>
@@ -74,7 +78,7 @@ export function InsightFigures({ s, figs }: Props) {
             </svg>
           </button>
           <figure>
-            <Image src={open.src} width={open.width} height={open.height} alt="" />
+            <Image src={open.src} width={open.width} height={open.height} alt="" unoptimized />
             <figcaption>{open.caption}</figcaption>
           </figure>
         </div>
