@@ -6,10 +6,11 @@ import path from "path";
 // prev/next, the related rail, and the styled 404 — now serving AISEN Blog
 // API posts (ins-1…ins-5, from the e2e stub's fixtures) and CMS posts
 // through the same shell. The old static-article affordances (mark shots,
-// the figure rail + lightbox, the sources list, the standfirst class) left
-// with insightArticles.ts; AISEN-specific rendering (content_html body,
-// SEO metadata, hreflang, the language switch) is covered in
-// aisen-insights.spec.ts.
+// the sources list, the standfirst class) left with insightArticles.ts;
+// the figure rail + lightbox came back in WOS-347, fed by AISEN body images
+// (split rail/inline per viewport — covered in wos347-figure-rail.spec.ts);
+// AISEN-specific rendering (content_html body, SEO metadata, hreflang, the
+// language switch) is covered in aisen-insights.spec.ts.
 
 const SCREENSHOT_DIR = process.env.E2E_SCREENSHOT_DIR || "e2e/screenshots";
 
@@ -79,16 +80,18 @@ test.describe("insight article: AISEN post (ins-1)", () => {
   });
 });
 
-test.describe("insight article: inline figures from content_html (ins-4)", () => {
-  test("the hero carries the cover; both body figures render inline with captions", async ({
+test.describe("insight article: body figures split between rail and prose (ins-4, WOS-347)", () => {
+  test("the hero carries the cover; both body figures exist in the rail and inline", async ({
     page,
   }) => {
     await page.goto("/ko/insights/ins-4");
 
     await expect(page.locator(".ins-hero .ins-shot")).toBeAttached();
-    // The two figures arrive as <img> inside content_html — no figure rail.
+    // The two content_html <img>s are wrapped into .ins-inline-fig (hidden at
+    // this desktop viewport) and mirrored into the rail, which shows them.
     const body = page.locator(".ins-prose article.post-body");
-    await expect(body.locator("img")).toHaveCount(2);
+    await expect(body.locator(".ins-inline-fig")).toHaveCount(2);
+    await expect(page.locator(".ins-figs .ins-fig")).toHaveCount(2);
     await expect(body).toContainText("SkinArch");
 
     await page.screenshot({

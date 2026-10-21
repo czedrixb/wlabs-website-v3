@@ -169,7 +169,10 @@ test.describe("server-only: the browser never talks to the AISEN API", () => {
     await page.goto("/ko/company/insights");
     await page.locator(".insights-item#ins-4 a").click();
     await expect(page.locator(".ins-hero h1")).toContainText("SkinArch");
-    await expect(page.locator(".ins-prose article.post-body img").first()).toBeVisible();
+    // WOS-347: at desktop width the body images show in the figure rail
+    // (the inline twins are display:none) — still proves the image bytes
+    // load from the site origin, not AISEN.
+    await expect(page.locator(".ins-figs .ins-fig img").first()).toBeVisible();
 
     expect(offsite).toEqual([]);
   });
