@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { Locale } from "@/lib/locale";
 import { withLocale } from "@/lib/locale";
 import type { SiteStrings } from "@/lib/site/dictionary";
-import type { InsightShot } from "@/lib/site/insightArticles";
+import type { InsightShot } from "@/lib/site/insightTaxonomy";
 
 // WOS-342: the article's cover banner — v3's renderInsight hero
 // (wlabs-01-wired.html:1902-1908). Full-bleed navy with the cyan radial

@@ -81,10 +81,11 @@ test.describe("company: team panel", () => {
 });
 
 test.describe("company: insights panel", () => {
-  // WOS-342: the panel renders the union of the six static v3 articles and
-  // the CMS posts, six to a page newest-first — so bare counts are paging-
-  // and seed-dependent; the static cards are addressed by their ins-N ids.
-  test("the six static articles render across the pager; the 노트 chip narrows", async ({
+  // WOS-342/WOS-346: the panel renders the union of the AISEN posts (the
+  // e2e stub's ins-1…ins-5 fixtures) and the CMS posts, six to a page
+  // newest-first — so bare counts are paging- and seed-dependent; the AISEN
+  // cards are addressed by their ins-N ids.
+  test("the AISEN posts render across the pager; the 노트 chip narrows", async ({
     page,
   }) => {
     await page.goto("/ko/company/insights");
@@ -100,7 +101,7 @@ test.describe("company: insights panel", () => {
     await expect(page.locator(".insights-item#ins-4")).toBeVisible();
   });
 
-  test("a static article card's read link opens its /insights page", async ({ page }) => {
+  test("an AISEN post card's read link opens its /insights page", async ({ page }) => {
     await page.goto("/ko/company/insights");
     const card = page.locator(".insights-item#ins-4");
     await card.getByRole("link").click();
@@ -129,8 +130,14 @@ test.describe("company: /en translates", () => {
     await page.goto("/en/company/team");
     await expect(page.locator(".member").first()).toContainText("CEO");
 
+    // WOS-346: /en lists only the AISEN posts published in English — ins-5
+    // is the one with an English version in the fixtures (ins-1 is ko-only
+    // now, so it must NOT appear here).
     await page.goto("/en/company/insights");
-    await expect(page.locator(".insights-item#ins-1")).toContainText("Science Exchange");
+    await expect(page.locator(".insights-item#ins-5")).toContainText(
+      "When the Budget Isn't Visible",
+    );
+    await expect(page.locator(".insights-item#ins-1")).toHaveCount(0);
 
     await page.goto("/en/company/story");
     await expect(page.locator(".cta-panel")).toContainText("Partnership");

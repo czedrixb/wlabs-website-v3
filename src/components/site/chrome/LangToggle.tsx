@@ -4,7 +4,9 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef } from "react";
 import type { Locale } from "@/lib/locale";
+import { withLocale } from "@/lib/locale";
 import type { SiteStrings } from "@/lib/site/dictionary";
+import { useLangTargets } from "./LangTargetContext";
 
 type Props = { locale: Locale; s: SiteStrings["chrome"] };
 
@@ -49,9 +51,21 @@ export function LangToggle({ locale, s }: Props) {
     };
   }, [pathname]);
 
+  const targets = useLangTargets();
+
   const prefix = `/${locale}`;
   const rel = pathname.startsWith(prefix) ? pathname.slice(prefix.length) : pathname;
-  const hrefFor = (target: Locale) => `/${target}${rel === "" ? "" : rel}`;
+  // WOS-346: a page can override where its other-language version lives
+  // (AISEN posts publish each language independently, possibly under a
+  // different slug). An explicit href wins; `null` means "no such version"
+  // and falls back to that locale's insights list rather than a 404; pages
+  // that set nothing keep the plain prefix swap.
+  const hrefFor = (target: Locale) => {
+    const t = targets[target];
+    if (typeof t === "string") return t;
+    if (t === null) return withLocale("/company/insights", target);
+    return `/${target}${rel === "" ? "" : rel}`;
+  };
 
   return (
     <div ref={elRef} className="lang lang-float" role="group" aria-label={s.langGroup}>

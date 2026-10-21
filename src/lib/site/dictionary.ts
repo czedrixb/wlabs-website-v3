@@ -148,7 +148,16 @@ function build(locale: Locale) {
     // categories field), so the old hand-authored insBlog/insReadPost labels
     // are gone and the whole namespace is a plain passthrough (the single-
     // page strings arrive via scripts/v3-wos342-manifest.mjs).
-    insights: v3.insights,
+    insights: {
+      ...v3.insights,
+      // WOS-346: per-article language-switch labels, shown on an AISEN post
+      // when it has a published translation. Each is written in its TARGET
+      // language (same convention as the EN/KO toggle's own fixed labels),
+      // so both are the same literal in either dictionary — and v3 never had
+      // the affordance, so there's no source key to harvest.
+      langToKo: "한국어로 보기",
+      langToEn: "View in English",
+    },
     // WOS-334: the /contact form. rcNote is the one markup-bearing string
     // in this slice — see parseRcNote above.
     contact: {

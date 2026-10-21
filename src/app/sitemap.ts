@@ -3,7 +3,7 @@ import { getPayload } from "@/lib/getPayload";
 import { withLocale } from "@/lib/locale";
 import { siteUrl } from "@/lib/siteUrl";
 import { PROJECTS, PRODUCT_ORDER } from "@/lib/site/content";
-import { INSIGHT_ARTICLES } from "@/lib/site/insightArticles";
+import { listAisenPosts, type AisenPostCard } from "@/lib/aisen";
 
 // Every real (non-redirecting) site route. /work and /company both 302 to
 // a default panel (see their own page.tsx) — the panel URLs are listed
@@ -45,9 +45,45 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   for (const project of PROJECTS) {
     entries.push(withAlternates(`/projects/${project.id}`));
   }
-  // WOS-342: the six static insight articles are real pages now.
-  for (const article of INSIGHT_ARTICLES) {
-    entries.push(withAlternates(`/insights/${article.slug}`));
+  // WOS-346: AISEN insight posts. Unlike every other route, a language
+  // version only exists once a writer publishes it, so hreflang comes from
+  // each post's own `translations` instead of withAlternates' unconditional
+  // ko+en pair — advertising a missing version would point crawlers at a
+  // real 404. Convention matches withAlternates: one row per post, on its
+  // Korean URL when a Korean version exists, with the English URL as an
+  // alternate; English-only posts get their own row. AISEN unreachable on a
+  // cold cache → the posts are simply absent from this pass.
+  let aisenKo: AisenPostCard[] = [];
+  let aisenEn: AisenPostCard[] = [];
+  try {
+    [aisenKo, aisenEn] = await Promise.all([listAisenPosts("ko"), listAisenPosts("en")]);
+  } catch {
+    // Keep the rest of the sitemap intact.
+  }
+  const enSlugsLinkedFromKo = new Set<string>();
+  for (const card of aisenKo) {
+    const en = card.translations.find((t) => t.locale === "en");
+    if (en) enSlugsLinkedFromKo.add(en.slug);
+    entries.push({
+      url: `${siteUrl}${withLocale(`/insights/${card.slug}`, "ko")}`,
+      lastModified: card.updated_at,
+      alternates: {
+        languages: {
+          ko: `${siteUrl}${withLocale(`/insights/${card.slug}`, "ko")}`,
+          ...(en ? { en: `${siteUrl}${withLocale(`/insights/${en.slug}`, "en")}` } : {}),
+        },
+      },
+    });
+  }
+  for (const card of aisenEn) {
+    if (enSlugsLinkedFromKo.has(card.slug)) continue; // already the ko row's alternate
+    entries.push({
+      url: `${siteUrl}${withLocale(`/insights/${card.slug}`, "en")}`,
+      lastModified: card.updated_at,
+      alternates: {
+        languages: { en: `${siteUrl}${withLocale(`/insights/${card.slug}`, "en")}` },
+      },
+    });
   }
 
   // Published posts only — same overrideAccess:false + no user convention

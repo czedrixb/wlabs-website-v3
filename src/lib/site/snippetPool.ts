@@ -2,7 +2,7 @@ import type { Locale } from "@/lib/locale";
 import { withLocale } from "@/lib/locale";
 import { siteT } from "./dictionary";
 import { PROJECTS, PRODUCTS, PRODUCT_ORDER, SERVICES, TEAM, TEAM_GROUPS } from "./content";
-import { INSIGHT_ARTICLES } from "./insightArticles";
+import { listAisenPosts } from "@/lib/aisen";
 
 export type SnippetPoolItem = {
   kind: string;
@@ -59,7 +59,9 @@ function truncate(text: string, en: boolean): string {
   return text.length > limit ? `${text.slice(0, cut).trim()}…` : text;
 }
 
-export function buildSnippetPool(locale: Locale): SnippetPoolItem[] {
+// Async since WOS-346: the insight snippets come from the AISEN Blog API
+// (60s unstable_cache in aisen.ts) instead of the deleted static articles.
+export async function buildSnippetPool(locale: Locale): Promise<SnippetPoolItem[]> {
   const en = locale === "en";
   const s = siteT(locale);
   const items: SnippetPoolItem[] = [];
@@ -118,16 +120,20 @@ export function buildSnippetPool(locale: Locale): SnippetPoolItem[] {
     });
   }
 
-  // WOS-342: articles are real pages now, so a snippet opens the article
-  // itself instead of hash-targeting a listing card.
-  for (const article of INSIGHT_ARTICLES) {
-    const head = en ? article.title.en : article.title.ko;
-    items.push({
-      kind: en ? "Insights" : "인사이트",
-      title: truncate(head, en),
-      sub: head,
-      href: withLocale(`/insights/${article.slug}`, locale),
-    });
+  // WOS-342/WOS-346: insight snippets open the article itself; the entries
+  // are the AISEN posts published in this locale, so every href resolves.
+  // Guarded like every AISEN read — a cold-cache outage just drops them.
+  try {
+    for (const card of await listAisenPosts(locale)) {
+      items.push({
+        kind: en ? "Insights" : "인사이트",
+        title: truncate(card.title, en),
+        sub: card.title,
+        href: withLocale(`/insights/${card.slug}`, locale),
+      });
+    }
+  } catch {
+    // Pool ships without insight snippets this pass.
   }
 
   const principles = [s.company.v1h, s.company.v2h, s.company.v3h, s.company.v4h];

@@ -17,14 +17,19 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 // WOS-336: replaces the WOS-314 stub with v3's real search screen
 // (site/index.html:2671-2690 markup, :3652-3686 behavior). The index is
-// static site content, so it's built here on the server and handed to the
-// client component as a plain prop; SearchClient owns the debounced
-// scoring, keyboard navigation, result states and the rotating shortcut
-// list.
+// built here on the server and handed to the client component as a plain
+// prop; SearchClient owns the debounced scoring, keyboard navigation,
+// result states and the rotating shortcut list.
+//
+// WOS-346: the insight rows now come from the AISEN Blog API, so the page
+// is ISR on the same 60s window as the data cache — without this the index
+// would freeze at build time and never pick up a newly published post.
+export const revalidate = 60;
+
 export default async function SearchPage({ params }: Props) {
   const { locale: localeParam } = await params;
   const locale: Locale = resolveLocale(localeParam);
   const s = siteT(locale);
 
-  return <SearchClient locale={locale} eyebrow={s.chrome.tabSearch} s={s.search} index={buildSearchIndex()} />;
+  return <SearchClient locale={locale} eyebrow={s.chrome.tabSearch} s={s.search} index={await buildSearchIndex()} />;
 }

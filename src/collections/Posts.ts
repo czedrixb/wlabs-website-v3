@@ -272,9 +272,9 @@ export const Posts: CollectionConfig = {
     },
     {
       // WOS-342: v3's Insights taxonomy (INS_LABEL, wlabs-01-wired.html:1789)
-      // — three fixed categories, multi-select per post, matching the static
-      // articles' own multi-tagging (src/lib/site/insightArticles.ts). Reads
-      // also default untagged legacy posts to ["notes"] at mapping time
+      // — three fixed categories, multi-select per post, the same trio the
+      // AISEN posts map onto (src/lib/site/insightTaxonomy.ts). Reads also
+      // default untagged legacy posts to ["notes"] at mapping time
       // (insightsIndex.ts), so no backfill migration is needed.
       name: "categories",
       type: "select",
