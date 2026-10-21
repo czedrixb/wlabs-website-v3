@@ -4,6 +4,9 @@ import { withLocale } from "@/lib/locale";
 import { siteUrl } from "@/lib/siteUrl";
 import { ogImageUrl } from "@/lib/site/ogImage";
 
+/** A real photo (a CMS post's banner or an AISEN cover) in place of the generated /og card. */
+type OgImageOverride = { url: string; width?: number; height?: number; alt?: string };
+
 type Props = {
   locale: Locale;
   /** Locale-less path, e.g. "/work/products" — withLocale() adds the /ko or /en prefix. */
@@ -23,11 +26,8 @@ type Props = {
    * (locale-prefixed paths); omit to keep the default pair.
    */
   languages?: Partial<Record<Locale, string>>;
-  /**
-   * WOS-346: Open Graph image override (absolute URL, e.g. an AISEN
-   * cover_image). Omit to keep the generated /og card.
-   */
-  ogImage?: { url: string; width?: number; height?: number; alt?: string };
+  /** When set, used as og:image/twitter:image instead of the generated /og card. */
+  ogImage?: OgImageOverride;
 };
 
 const SITE_NAME = "W Labs";
@@ -50,11 +50,13 @@ function ogAndTwitter({
   ogImage,
 }: Omit<Props, "path"> & { path?: string }): Pick<Metadata, "openGraph" | "twitter"> {
   const url = path !== undefined ? withLocale(path, locale) : undefined;
-  const image = ogImage ?? {
+  // A caller-supplied real photo (a CMS post's own banner, an AISEN cover)
+  // wins over the generated branded card — only fall back to /og when there
+  // isn't one.
+  const resolvedImage: OgImageOverride = ogImage ?? {
     url: ogImageUrl({ title, kicker, locale }),
     width: 1200,
     height: 630,
-    alt: title ?? SITE_NAME,
   };
   return {
     // title/description are deliberately omitted when undefined, not
@@ -71,7 +73,14 @@ function ogAndTwitter({
       ...(url !== undefined ? { url } : {}),
       ...(title !== undefined ? { title } : {}),
       ...(description !== undefined ? { description } : {}),
-      images: [image],
+      images: [
+        {
+          url: resolvedImage.url,
+          ...(resolvedImage.width !== undefined ? { width: resolvedImage.width } : {}),
+          ...(resolvedImage.height !== undefined ? { height: resolvedImage.height } : {}),
+          alt: resolvedImage.alt ?? title ?? SITE_NAME,
+        },
+      ],
     },
     // card alone would actually be enough — Next infers title/description/
     // images from openGraph when twitter is present but incomplete — stated

@@ -86,6 +86,28 @@ function siteTranslation(aisen: AisenPost, locale: Locale): { locale: Locale; sl
   return null;
 }
 
+// WOS-343 follow-up: a CMS post's own banner photo is a better og:image than
+// the generic branded /og card when one exists. Mirrors the page body's own
+// banner resolution below (the `else` branch's `bannerUrl`) but adds the
+// two checks that matter for a scraper and not for the hero shot: skip SVG
+// (Facebook/LinkedIn don't accept it as og:image) and carry the derivative's
+// own width/height rather than hardcoding the generated card's 1200x630.
+// Static articles have no banner field at all — this only ever applies to
+// CMS posts, so a static article keeps using the generated card.
+function postOgImage(post: Post): { url: string; width?: number; height?: number; alt?: string } | undefined {
+  const banner = typeof post.banner === "object" && post.banner ? post.banner : null;
+  if (!banner?.mimeType?.startsWith("image/") || banner.mimeType === "image/svg+xml") return undefined;
+  const sized = banner.sizes?.banner;
+  const url = sized?.url ?? banner.url;
+  if (!url) return undefined;
+  return {
+    url: mediaPath(url),
+    width: sized?.width ?? banner.width ?? undefined,
+    height: sized?.height ?? banner.height ?? undefined,
+    alt: banner.alt,
+  };
+}
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale: localeParam, slug: slugParam } = await params;
   const locale = resolveLocale(localeParam);
@@ -146,7 +168,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   // becomes the card's kicker — the same label the hero/listing cards show.
   const categories = postCategories(post);
   const kicker = pick(locale, INSIGHT_CATEGORY_LABELS[categories[0]].ko, INSIGHT_CATEGORY_LABELS[categories[0]].en);
-  return siteMetadata({ locale, path: `/insights/${r.slug}`, title, description, type: "article", kicker });
+  const ogImage = postOgImage(post);
+  return siteMetadata({ locale, path: `/insights/${r.slug}`, title, description, type: "article", kicker, ogImage });
 }
 
 export default async function InsightDetailPage({ params }: Props) {
