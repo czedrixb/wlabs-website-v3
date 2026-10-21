@@ -3,6 +3,7 @@ import { withLocale } from "@/lib/locale";
 import { siteT } from "./dictionary";
 import { PROJECTS, PRODUCTS, PRODUCT_ORDER, SERVICES, TEAM, TEAM_GROUPS } from "./content";
 import { listAisenPosts } from "@/lib/aisen";
+import { insightPath } from "@/lib/site/insightPath";
 
 export type SnippetPoolItem = {
   kind: string;
@@ -129,7 +130,7 @@ export async function buildSnippetPool(locale: Locale): Promise<SnippetPoolItem[
         kind: en ? "Insights" : "인사이트",
         title: truncate(card.title, en),
         sub: card.title,
-        href: withLocale(`/insights/${card.slug}`, locale),
+        href: withLocale(insightPath(card.slug), locale),
       });
     }
   } catch {

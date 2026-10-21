@@ -4,6 +4,7 @@ import { withLocale } from "@/lib/locale";
 import { siteUrl } from "@/lib/siteUrl";
 import { PROJECTS, PRODUCT_ORDER } from "@/lib/site/content";
 import { listAisenPosts, type AisenPostCard } from "@/lib/aisen";
+import { insightPath } from "@/lib/site/insightPath";
 
 // Every real (non-redirecting) site route. /work and /company both 302 to
 // a default panel (see their own page.tsx) — the panel URLs are listed
@@ -65,12 +66,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const en = card.translations.find((t) => t.locale === "en");
     if (en) enSlugsLinkedFromKo.add(en.slug);
     entries.push({
-      url: `${siteUrl}${withLocale(`/insights/${card.slug}`, "ko")}`,
+      url: `${siteUrl}${withLocale(insightPath(card.slug), "ko")}`,
       lastModified: card.updated_at,
       alternates: {
         languages: {
-          ko: `${siteUrl}${withLocale(`/insights/${card.slug}`, "ko")}`,
-          ...(en ? { en: `${siteUrl}${withLocale(`/insights/${en.slug}`, "en")}` } : {}),
+          ko: `${siteUrl}${withLocale(insightPath(card.slug), "ko")}`,
+          ...(en ? { en: `${siteUrl}${withLocale(insightPath(en.slug), "en")}` } : {}),
         },
       },
     });
@@ -78,10 +79,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   for (const card of aisenEn) {
     if (enSlugsLinkedFromKo.has(card.slug)) continue; // already the ko row's alternate
     entries.push({
-      url: `${siteUrl}${withLocale(`/insights/${card.slug}`, "en")}`,
+      url: `${siteUrl}${withLocale(insightPath(card.slug), "en")}`,
       lastModified: card.updated_at,
       alternates: {
-        languages: { en: `${siteUrl}${withLocale(`/insights/${card.slug}`, "en")}` },
+        languages: { en: `${siteUrl}${withLocale(insightPath(card.slug), "en")}` },
       },
     });
   }
@@ -99,7 +100,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   });
 
   for (const post of posts) {
-    const path = `/insights/${post.slug}`;
+    const path = insightPath(post.slug);
     entries.push({
       ...withAlternates(path),
       lastModified: post.publishedAt ?? post.updatedAt,

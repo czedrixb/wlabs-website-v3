@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import Link from "next/link";
 import type { Locale } from "@/lib/locale";
 import { withLocale } from "@/lib/locale";
+import { insightPath } from "@/lib/site/insightPath";
 import type { SiteStrings } from "@/lib/site/dictionary";
 import type { InsightCategory, InsightShot } from "@/lib/site/insightTaxonomy";
 import { useTrackPill } from "@/components/site/chrome/lib/trackPill";
@@ -103,7 +104,7 @@ export function InsightsList({ locale, items, s }: Props) {
               </span>
               <h3>{n.title}</h3>
               <p>{n.excerpt}</p>
-              <Link className="link read" href={withLocale(`/insights/${n.slug}`, locale)}>
+              <Link className="link read" href={withLocale(insightPath(n.slug), locale)}>
                 <span>{s.insRead}</span> →
               </Link>
             </div>

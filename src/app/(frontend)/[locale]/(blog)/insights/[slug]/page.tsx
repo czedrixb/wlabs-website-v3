@@ -21,6 +21,7 @@ import {
   aisenCategories,
   type InsightEntry,
 } from "@/lib/site/insightsIndex";
+import { insightPath } from "@/lib/site/insightPath";
 import { extractAisenFigures } from "@/lib/site/aisenFigures";
 import { SetLangTargets } from "@/components/site/chrome/LangTargetContext";
 import { InsightHero } from "@/components/site/insights/InsightHero";
@@ -61,12 +62,15 @@ async function resolve(slugParam: string, locale: Locale): Promise<Resolved | nu
   let aisenError: unknown = null;
   try {
     const aisen = await getAisenPost(slug, locale);
-    if (aisen) return { slug, source: "aisen", aisen };
+    // WOS-348: the resolved slug is the API's own field, not the echoed
+    // request param — the slug is the canonical identifier everywhere a URL
+    // leaves this page (canonical/og:url, hreflang, share).
+    if (aisen) return { slug: aisen.slug, source: "aisen", aisen };
   } catch (err) {
     aisenError = err;
   }
   const post = await getPostBySlug(slug);
-  if (post) return { slug, source: "post", post };
+  if (post) return { slug: post.slug, source: "post", post };
   // A cold-cache AISEN outage must NOT turn a real article into a 404 (that
   // can deindex it) — bubble to (blog)/error.tsx's retry page instead, the
   // same way a Postgres outage does via getPostBySlug. Only when both
@@ -130,10 +134,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     // crawlers at a 404 for untranslated posts (see siteMetadata's comment).
     const translation = siteTranslation(aisen, locale);
     const languages: Partial<Record<Locale, string>> = {
-      [locale]: withLocale(`/insights/${r.slug}`, locale),
+      [locale]: withLocale(insightPath(r.slug), locale),
     };
     if (translation) {
-      languages[translation.locale] = withLocale(`/insights/${translation.slug}`, translation.locale);
+      languages[translation.locale] = withLocale(insightPath(translation.slug), translation.locale);
     }
     return {
       // seo.keywords is always an array; the tag is emitted only when the
@@ -141,7 +145,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       ...(aisen.seo.keywords.length ? { keywords: aisen.seo.keywords } : {}),
       ...siteMetadata({
         locale,
-        path: `/insights/${r.slug}`,
+        path: insightPath(r.slug),
         title,
         description,
         type: "article",
@@ -170,7 +174,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const categories = postCategories(post);
   const kicker = pick(locale, INSIGHT_CATEGORY_LABELS[categories[0]].ko, INSIGHT_CATEGORY_LABELS[categories[0]].en);
   const ogImage = postOgImage(post);
-  return siteMetadata({ locale, path: `/insights/${r.slug}`, title, description, type: "article", kicker, ogImage });
+  return siteMetadata({ locale, path: insightPath(r.slug), title, description, type: "article", kicker, ogImage });
 }
 
 export default async function InsightDetailPage({ params }: Props) {
@@ -194,11 +198,11 @@ export default async function InsightDetailPage({ params }: Props) {
 
   const toNavCell = (e?: InsightEntry): InsightNavCell =>
     e && {
-      href: withLocale(`/insights/${e.slug}`, locale),
+      href: withLocale(insightPath(e.slug), locale),
       title: e.title,
     };
   const toCard = (e: InsightEntry): InsightCardData => ({
-    href: withLocale(`/insights/${e.slug}`, locale),
+    href: withLocale(insightPath(e.slug), locale),
     category: catLabel(e.categories[0]),
     dateLabel: e.dateLabel,
     datetime: e.datetime,
@@ -252,7 +256,7 @@ export default async function InsightDetailPage({ params }: Props) {
     const translation = siteTranslation(aisen, locale);
     if (translation) {
       langSwitch = {
-        href: withLocale(`/insights/${translation.slug}`, translation.locale),
+        href: withLocale(insightPath(translation.slug), translation.locale),
         locale: translation.locale,
         label: translation.locale === "ko" ? s.langToKo : s.langToEn,
       };
@@ -326,7 +330,7 @@ export default async function InsightDetailPage({ params }: Props) {
               {langSwitch.label}
             </Link>
           )}
-          <ShareRow s={s} url={`${siteUrl}${withLocale(`/insights/${slug}`, locale)}`} />
+          <ShareRow s={s} url={`${siteUrl}${withLocale(insightPath(slug), locale)}`} />
         </div>
 
         <InsightNav s={s} prev={toNavCell(prev)} next={toNavCell(next)} />
