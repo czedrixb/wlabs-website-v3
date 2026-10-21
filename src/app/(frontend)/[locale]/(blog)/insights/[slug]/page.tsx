@@ -21,9 +21,10 @@ import {
   aisenCategories,
   type InsightEntry,
 } from "@/lib/site/insightsIndex";
+import { extractAisenFigures } from "@/lib/site/aisenFigures";
 import { SetLangTargets } from "@/components/site/chrome/LangTargetContext";
 import { InsightHero } from "@/components/site/insights/InsightHero";
-import { InsightFigures } from "@/components/site/insights/InsightFigures";
+import { InsightFigures, type ResolvedFigure } from "@/components/site/insights/InsightFigures";
 import { ShareRow } from "@/components/site/insights/ShareRow";
 import { InsightNav, type InsightNavCell } from "@/components/site/insights/InsightNav";
 import { InsightCard, type InsightCardData } from "@/components/site/insights/InsightCard";
@@ -215,6 +216,7 @@ export default async function InsightDetailPage({ params }: Props) {
   let meta: string | undefined;
   let shot: InsightShot | undefined;
   let byline = "W Labs";
+  let figs: ResolvedFigure[] = [];
   let bodyNode: React.ReactNode;
   let langSwitch: { href: string; locale: Locale; label: string } | null = null;
   let langTargets: React.ReactNode = null;
@@ -228,14 +230,23 @@ export default async function InsightDetailPage({ params }: Props) {
     // shot is a CSS background, so neither mediaPath() nor remotePatterns
     // apply (see insightsIndex.ts).
     shot = aisen.cover_image ? { src: aisen.cover_image.url } : undefined;
+    // WOS-347: body images render exactly once per viewport — the transform
+    // wraps each inline <img> (+ its caption paragraph) in .ins-inline-fig
+    // (hidden ≥900px) and hands the same figures to the sticky rail (hidden
+    // <900px). The cover is not special-cased: rail figures are the inline
+    // occurrences in document order, since the cover URL can legitimately
+    // also appear in the body (see aisenFigures.ts).
+    const body = extractAisenFigures(aisen.content_html, aisen.images);
+    figs = body.figs;
     bodyNode = (
-      // content_html is sanitised by AISEN on save — rendered as is, per the
-      // integration contract (Blog-integration §9); .post-body supplies the
-      // same typography the CMS posts get.
+      // content_html is sanitised by AISEN on save — rendered as is apart
+      // from the figure wrapping above, per the integration contract
+      // (Blog-integration §9); .post-body supplies the same typography the
+      // CMS posts get.
       <article
         className="post-body"
         lang={aisen.locale}
-        dangerouslySetInnerHTML={{ __html: aisen.content_html }}
+        dangerouslySetInnerHTML={{ __html: body.html }}
       />
     );
     const translation = siteTranslation(aisen, locale);
@@ -285,11 +296,11 @@ export default async function InsightDetailPage({ params }: Props) {
       />
       <div className="wrap">
         <article className="ins-body">
-          {/* Zero figures still render the (empty) rail aside — it reserves
-              the wide-viewport grid column that keeps every article's prose
-              on the same measure (see InsightFigures/site.css). AISEN body
-              images arrive inline inside content_html instead. */}
-          <InsightFigures s={s} figs={[]} />
+          {/* Zero figures (CMS posts) still render the (empty) rail aside —
+              it reserves the wide-viewport grid column that keeps every
+              article's prose on the same measure (see InsightFigures /
+              site.css). AISEN body images fill it on desktop (WOS-347). */}
+          <InsightFigures s={s} figs={figs} />
           <div className="ins-prose">{bodyNode}</div>
         </article>
 
