@@ -30,6 +30,9 @@ pipelines:
               append_env NEXT_PUBLIC_SERVER_URL "$NEXT_PUBLIC_SERVER_URL"
               append_env MEDIA_DIR "$MEDIA_DIR"
               append_env NODE_ENV "$NODE_ENV"
+              append_env AISEN_API_URL "$AISEN_API_URL"
+              append_env AISEN_KEY_ID "$AISEN_KEY_ID"
+              append_env AISEN_SECRET "$AISEN_SECRET"
 
             # Fail the build loudly if required vars are missing, rather than
             # silently deploying an app that can't reach its database.

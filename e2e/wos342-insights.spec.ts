@@ -1,28 +1,27 @@
 import { test, expect } from "@playwright/test";
 import path from "path";
 
-// WOS-342: the v3 Insights rebuild (v3 commit 2021e81) ported into the
-// site — the listing's glass cards / taxonomy / pager are covered in
-// blog-into-insights.spec.ts; this spec covers the new article single page
-// (/insights/[slug]): the navy hero with its photo/mark shot treatments,
-// the sticky figure rail + lightbox, sources, byline + share, date-ordered
-// prev/next, the related rail, and the styled 404. Static articles
-// (ins-1…ins-6, src/lib/site/insightArticles.ts) are deterministic; post-
-// dependent assertions stick to the seeded slugs.
+// WOS-342, reworked by WOS-346: the article single page (/insights/[slug])
+// — the navy hero with its shot treatment, byline + share, date-ordered
+// prev/next, the related rail, and the styled 404 — now serving AISEN Blog
+// API posts (ins-1…ins-5, from the e2e stub's fixtures) and CMS posts
+// through the same shell. The old static-article affordances (mark shots,
+// the figure rail + lightbox, the sources list, the standfirst class) left
+// with insightArticles.ts; AISEN-specific rendering (content_html body,
+// SEO metadata, hreflang, the language switch) is covered in
+// aisen-insights.spec.ts.
 
 const SCREENSHOT_DIR = process.env.E2E_SCREENSHOT_DIR || "e2e/screenshots";
 
-test.describe("insight article: static (ins-1, mark shot)", () => {
-  test("hero renders crumbs, category pill, title, dek, date — and the scix mark", async ({
+test.describe("insight article: AISEN post (ins-1)", () => {
+  test("hero renders crumbs, category pill, title, dek, date — and the cover shot", async ({
     page,
   }) => {
     await page.goto("/ko/insights/ins-1");
 
     const hero = page.locator(".ins-hero.has-shot");
     await expect(hero).toBeVisible();
-    // The Science Exchange asset is a logo — a plated corner mark, not a
-    // bleeding photograph.
-    await expect(hero.locator(".ins-shot.is-mark")).toBeAttached();
+    await expect(hero.locator(".ins-shot")).toBeAttached();
 
     await expect(hero.locator(".crumbs a").nth(0)).toHaveText("회사");
     await expect(hero.locator(".crumbs a").nth(1)).toHaveText("인사이트");
@@ -37,17 +36,13 @@ test.describe("insight article: static (ins-1, mark shot)", () => {
     });
   });
 
-  test("body: standfirst on the first paragraph, sources with external arrow", async ({ page }) => {
+  test("the sanitised content_html body renders inside .post-body", async ({ page }) => {
     await page.goto("/ko/insights/ins-1");
 
-    await expect(page.locator(".ins-prose p").first()).toHaveClass(/stand/);
-
-    const src = page.locator(".ins-src");
-    await expect(src.locator("h3")).toHaveText("출처");
-    await expect(src.locator("li")).toHaveCount(2);
-    const ext = src.locator('a[href="https://www.scienceexchange.com"]');
-    await expect(ext).toContainText("↗");
-    await expect(ext).toHaveAttribute("target", "_blank");
+    const body = page.locator(".ins-prose article.post-body");
+    await expect(body).toContainText("Science Exchange는 제약·바이오 기업이");
+    // The body carries the version's own language.
+    await expect(body).toHaveAttribute("lang", "ko");
   });
 
   test("byline + share: facebook/linkedin sharers carry the page URL, copy rings done", async ({
@@ -84,36 +79,22 @@ test.describe("insight article: static (ins-1, mark shot)", () => {
   });
 });
 
-test.describe("insight article: figure rail + lightbox (ins-4)", () => {
-  test("the rail holds two expandable figures; the hero carries a photo shot", async ({ page }) => {
+test.describe("insight article: inline figures from content_html (ins-4)", () => {
+  test("the hero carries the cover; both body figures render inline with captions", async ({
+    page,
+  }) => {
     await page.goto("/ko/insights/ins-4");
 
-    // Photo treatment, not a mark.
-    await expect(page.locator(".ins-hero .ins-shot:not(.is-mark)")).toBeAttached();
-    await expect(page.locator(".ins-figs .ins-fig")).toHaveCount(2);
+    await expect(page.locator(".ins-hero .ins-shot")).toBeAttached();
+    // The two figures arrive as <img> inside content_html — no figure rail.
+    const body = page.locator(".ins-prose article.post-body");
+    await expect(body.locator("img")).toHaveCount(2);
+    await expect(body).toContainText("SkinArch");
 
     await page.screenshot({
       path: path.join(SCREENSHOT_DIR, "wos342-article-ins-4.png"),
       fullPage: false,
     });
-  });
-
-  test("a figure expands into the lightbox; Escape closes and returns focus", async ({ page }) => {
-    await page.goto("/ko/insights/ins-4");
-
-    const firstBtn = page.locator(".ins-figs .ins-fig-btn").first();
-    await firstBtn.click();
-
-    const lbox = page.locator(".lbox");
-    await expect(lbox).toBeVisible();
-    await expect(lbox.locator("img")).toBeVisible();
-    await expect(lbox.locator("figcaption")).not.toBeEmpty();
-    // The close button takes focus on open.
-    await expect(lbox.locator(".lbox-close")).toBeFocused();
-
-    await page.keyboard.press("Escape");
-    await expect(lbox).toHaveCount(0);
-    await expect(firstBtn).toBeFocused();
   });
 });
 
@@ -161,18 +142,6 @@ test.describe("insight article: CMS post through the same shell", () => {
       path: path.join(SCREENSHOT_DIR, "wos342-article-post.png"),
       fullPage: false,
     });
-  });
-});
-
-test.describe("insight article: english", () => {
-  test("/en/insights/ins-1 renders the English article", async ({ page }) => {
-    await page.goto("/en/insights/ins-1");
-    await expect(page.locator(".ins-hero h1")).toHaveText(
-      "W Labs is now a verified supplier on Science Exchange",
-    );
-    await expect(page.locator(".ins-cats .c")).toHaveText(["Notes"]);
-    await expect(page.locator(".ins-src h3")).toHaveText("Sources");
-    await expect(page.locator(".ins-by .l")).toHaveText("Written by");
   });
 });
 

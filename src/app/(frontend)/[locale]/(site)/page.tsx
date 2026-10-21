@@ -16,6 +16,11 @@ import { buildSnippetPool } from "@/lib/site/snippetPool";
 
 type Props = { params: Promise<{ locale: string }> };
 
+// WOS-346: the hero's snippet pool now includes AISEN insight titles, so
+// Home is ISR on the same 60s window as the data cache — without this the
+// pool would freeze at build time and never pick up a newly published post.
+export const revalidate = 60;
+
 // No title/description override — (site)/layout.tsx's own generateMetadata
 // already covers Home, this only adds the canonical/hreflang alternates.
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -33,7 +38,7 @@ export default async function HomePage({ params }: Props) {
   const { locale: localeParam } = await params;
   const locale: Locale = resolveLocale(localeParam);
   const s = siteT(locale);
-  const snippetPool = buildSnippetPool(locale);
+  const snippetPool = await buildSnippetPool(locale);
 
   return (
     <>

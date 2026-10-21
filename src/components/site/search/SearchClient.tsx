@@ -160,6 +160,10 @@ export function SearchClient({ locale, eyebrow, s, index }: Props) {
   }, [hits]);
 
   function hrefOf(entry: SearchIndexEntry): string {
+    // WOS-346: AISEN insight rows carry explicit per-locale URLs (their
+    // language versions may not exist at the prefix-swapped path).
+    const override = entry.hrefByLocale?.[locale];
+    if (override) return override + (entry.hash ? `#${entry.hash}` : "");
     return withLocale(entry.href, locale) + (entry.hash ? `#${entry.hash}` : "");
   }
 

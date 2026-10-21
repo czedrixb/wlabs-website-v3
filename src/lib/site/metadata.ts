@@ -4,7 +4,7 @@ import { withLocale } from "@/lib/locale";
 import { siteUrl } from "@/lib/siteUrl";
 import { ogImageUrl } from "@/lib/site/ogImage";
 
-/** A real photo (e.g. a CMS post's own banner) in place of the generated /og card. */
+/** A real photo (a CMS post's banner or an AISEN cover) in place of the generated /og card. */
 type OgImageOverride = { url: string; width?: number; height?: number; alt?: string };
 
 type Props = {
@@ -17,8 +17,17 @@ type Props = {
   type?: "website" | "article";
   /** Article-only eyebrow (e.g. a category label) carried onto the OG card. */
   kicker?: string;
+  /**
+   * WOS-346: hreflang override. By default every route advertises both /ko
+   * and /en versions of `path`, which is right for the fully bilingual
+   * routes but wrong for AISEN insight posts, where a language version only
+   * exists once a writer publishes it — advertising a missing one would
+   * point crawlers at a real 404. Pass only the locales that resolve
+   * (locale-prefixed paths); omit to keep the default pair.
+   */
+  languages?: Partial<Record<Locale, string>>;
   /** When set, used as og:image/twitter:image instead of the generated /og card. */
-  image?: OgImageOverride;
+  ogImage?: OgImageOverride;
 };
 
 const SITE_NAME = "W Labs";
@@ -38,12 +47,13 @@ function ogAndTwitter({
   description,
   type = "website",
   kicker,
-  image,
+  ogImage,
 }: Omit<Props, "path"> & { path?: string }): Pick<Metadata, "openGraph" | "twitter"> {
   const url = path !== undefined ? withLocale(path, locale) : undefined;
-  // A caller-supplied real photo (a CMS post's own banner) wins over the
-  // generated branded card — only fall back to /og when there isn't one.
-  const resolvedImage: OgImageOverride = image ?? {
+  // A caller-supplied real photo (a CMS post's own banner, an AISEN cover)
+  // wins over the generated branded card — only fall back to /og when there
+  // isn't one.
+  const resolvedImage: OgImageOverride = ogImage ?? {
     url: ogImageUrl({ title, kicker, locale }),
     width: 1200,
     height: 630,
@@ -101,18 +111,27 @@ export function siteOpenGraphDefaults(locale: Locale, description?: string): Met
 // WOS-343: also the single place that emits Open Graph + Twitter Card tags
 // site-wide (every one of this function's 8 call sites), backed by a
 // generated preview image at /og (src/app/og/route.tsx).
-export function siteMetadata({ locale, path, title, description, type, kicker, image }: Props): Metadata {
+export function siteMetadata({
+  locale,
+  path,
+  title,
+  description,
+  type,
+  kicker,
+  languages,
+  ogImage,
+}: Props): Metadata {
   return {
     ...(title !== undefined ? { title } : {}),
     ...(description !== undefined ? { description } : {}),
     metadataBase: new URL(siteUrl),
     alternates: {
       canonical: withLocale(path, locale),
-      languages: {
+      languages: languages ?? {
         ko: withLocale(path, "ko"),
         en: withLocale(path, "en"),
       },
     },
-    ...ogAndTwitter({ locale, path, title, description, type, kicker, image }),
+    ...ogAndTwitter({ locale, path, title, description, type, kicker, ogImage }),
   };
 }

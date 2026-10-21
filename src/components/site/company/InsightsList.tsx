@@ -5,7 +5,7 @@ import Link from "next/link";
 import type { Locale } from "@/lib/locale";
 import { withLocale } from "@/lib/locale";
 import type { SiteStrings } from "@/lib/site/dictionary";
-import type { InsightCategory, InsightShot } from "@/lib/site/insightArticles";
+import type { InsightCategory, InsightShot } from "@/lib/site/insightTaxonomy";
 import { useTrackPill } from "@/components/site/chrome/lib/trackPill";
 
 // WOS-342: NewsList.tsx's successor — v3's rebuilt Insights listing

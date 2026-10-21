@@ -1,0 +1,110 @@
+[
+  {
+    "id": "6a0a93cb-45ca-4f69-b6fc-f224d2da1a43",
+    "slug": "ins-5",
+    "title": "When the Budget Isn't Visible, You Need a System",
+    "excerpt": "\"As the business grew, it became hard to manage project budget execution.\" This one sentence from a client was where the project management system began.",
+    "cover_image": null,
+    "categories": [
+      {
+        "slug": "note",
+        "name": "노트"
+      }
+    ],
+    "tags": [],
+    "published_at": "2026-10-20T03:48:33.501+00:00",
+    "updated_at": "2026-10-20T03:48:33.57864+00:00",
+    "locale": "en",
+    "translations": [
+      {
+        "locale": "ko",
+        "slug": "ins-5"
+      }
+    ],
+    "images": [],
+    "content_html": "<p>The brief wasn't a list of features. It was a description of something that had stopped working. Spending that could once be kept track of mentally no longer could be.</p><p>Briefs like this are the most useful. They state the symptom while leaving the diagnosis open. That way, the diagnosis can lead to a conclusion neither side expected.</p><p>So the work involved building, integration, and a screen that could be easily monitored. What that one sentence actually asked for was the last part.</p><p>The value of such a system shows up in that final stretch. Gathering figures is just a task; the purpose of the project is the moment someone can look at a single screen and judge the state of budget execution.</p><p>This is our clearest example of the principle of defining the problem before choosing the technology.</p><h2>Source</h2><p>2023 project brief. The quoted sentence is from a brief recorded by W Labs; the client's name is not disclosed.</p>",
+    "content_json": {
+      "type": "doc",
+      "content": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "text": "The brief wasn't a list of features. It was a description of something that had stopped working. Spending that could once be kept track of mentally no longer could be.",
+              "type": "text"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "text": "Briefs like this are the most useful. They state the symptom while leaving the diagnosis open. That way, the diagnosis can lead to a conclusion neither side expected.",
+              "type": "text"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "text": "So the work involved building, integration, and a screen that could be easily monitored. What that one sentence actually asked for was the last part.",
+              "type": "text"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "text": "The value of such a system shows up in that final stretch. Gathering figures is just a task; the purpose of the project is the moment someone can look at a single screen and judge the state of budget execution.",
+              "type": "text"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "text": "This is our clearest example of the principle of defining the problem before choosing the technology.",
+              "type": "text"
+            }
+          ]
+        },
+        {
+          "type": "heading",
+          "attrs": {
+            "level": 2
+          },
+          "content": [
+            {
+              "text": "Source",
+              "type": "text"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "text": "2023 project brief. The quoted sentence is from a brief recorded by W Labs; the client's name is not disclosed.",
+              "type": "text"
+            }
+          ]
+        }
+      ]
+    },
+    "schema_version": 1,
+    "seo": {
+      "title": "When the Budget Isn't Visible, You Need a System",
+      "description": "A client's single sentence about losing track of project spending became the starting point for a project management system.",
+      "keywords": [
+        "project management system",
+        "budget tracking software",
+        "project budget execution",
+        "custom dashboard development",
+        "system design process"
+      ]
+    }
+  }
+]

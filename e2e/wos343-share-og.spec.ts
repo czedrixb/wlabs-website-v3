@@ -109,10 +109,26 @@ test.describe("Open Graph + Twitter Card — site-wide, not just Insights", () =
     expect(tags["og:url"]).toBe(`${new URL(baseURL!).origin}/ko/insights/ins-1`);
     expect(tags["twitter:card"]).toBe("summary_large_image");
 
-    // og:image must be absolute and resolve to a real PNG — a relative URL
-    // or a 404 is invisible to every scraper (Facebook/LinkedIn/KakaoTalk).
+    // WOS-346: ins-1 has an AISEN cover image now, and the card must prefer
+    // it over the generated /og PNG. og:image must be absolute and resolve —
+    // a relative URL or a 404 is invisible to every scraper.
     const ogImage = tags["og:image"]!;
     expect(ogImage).toMatch(/^https?:\/\//);
+    expect(ogImage).toContain("/site/img/");
+    const imgRes = await page.request.get(ogImage);
+    expect(imgRes.status()).toBe(200);
+    expect((await imgRes.body()).length).toBeGreaterThan(1000);
+  });
+
+  test("a coverless insight article falls back to the generated /og PNG", async ({ page }) => {
+    // ins-2 carries no cover_image in the fixtures, so the card uses the
+    // branded /og route — the WOS-343 behavior, preserved for coverless
+    // posts.
+    await page.goto("/ko/insights/ins-2");
+    const tags = await ogTags(page);
+    const ogImage = tags["og:image"]!;
+    expect(ogImage).toMatch(/^https?:\/\//);
+    expect(ogImage).toContain("/og?");
     const imgRes = await page.request.get(ogImage);
     expect(imgRes.status()).toBe(200);
     expect(imgRes.headers()["content-type"]).toBe("image/png");

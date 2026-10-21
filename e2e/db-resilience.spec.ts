@@ -4,10 +4,11 @@ import path from "path";
 // WOS-329 DB resilience: posts are served through unstable_cache
 // (src/lib/cachedPosts.ts). Two different fallback paths exist: the
 // Company > Insights panel's entry union catches a getInsightPosts failure
-// and degrades to the six static articles (insightsIndex.ts) — (site) has
-// no error boundary of its own — while /insights/[slug] detail pages still
-// let a getPostBySlug failure bubble up to (blog)/error.tsx, which
-// replaces Next's raw production 500 (WOS-342 moved them off /blog/[slug]).
+// and degrades to the AISEN entries (insightsIndex.ts; WOS-346 — and vice
+// versa when AISEN is the one down) — (site) has no error boundary of its
+// own — while /insights/[slug] detail pages still let a getPostBySlug
+// failure bubble up to (blog)/error.tsx, which replaces Next's raw
+// production 500 (WOS-342 moved them off /blog/[slug]).
 
 const SCREENSHOT_DIR = process.env.E2E_SCREENSHOT_DIR || "e2e/screenshots";
 // A second `next start` of the same build, pointed at an unreachable
@@ -20,9 +21,9 @@ const DB_DOWN_ORIGIN = DB_DOWN_URL ? new URL(DB_DOWN_URL).origin : undefined;
 test.describe("posts served through the data cache", () => {
   test("insights panel renders the posts list", async ({ page }) => {
     await page.goto("/ko/company/insights");
-    // Scoped to a seeded post's card — the panel always has its six static
-    // article cards regardless of whether posts loaded, so a bare
-    // .insights-item count wouldn't actually exercise the DB-backed path.
+    // Scoped to a seeded post's card — the panel still has its AISEN cards
+    // regardless of whether posts loaded, so a bare .insights-item count
+    // wouldn't actually exercise the DB-backed path.
     const seeded = page.locator("main .insights-item", {
       hasText: "편집자를 위한 발행 워크플로우",
     });
@@ -67,12 +68,11 @@ test.describe("when Postgres is down", () => {
     page,
   }) => {
     test.setTimeout(120_000);
-    // The insights panel's own posts fetch is guarded (degrades to the six
-    // static articles — insightsIndex.ts), so it can no longer
-    // force-exercise (blog)/error.tsx the way the old /blog listing's
-    // ?page=97 did. A slug that's never been requested (and matches no
-    // static article) misses getPostBySlug's cache instead and hits the
-    // unreachable DB directly.
+    // The insights panel's own posts fetch is guarded (degrades to the
+    // AISEN entries — insightsIndex.ts), so it can no longer force-exercise
+    // (blog)/error.tsx the way the old /blog listing's ?page=97 did. A slug
+    // that's never been requested (and matches no AISEN post) misses
+    // getPostBySlug's cache instead and hits the unreachable DB directly.
     await page.goto(`${DB_DOWN_ORIGIN}/ko/insights/never-requested-${Date.now()}`, {
       timeout: 90_000,
     });

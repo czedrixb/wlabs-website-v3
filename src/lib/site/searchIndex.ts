@@ -1,5 +1,5 @@
 import { V3_STRINGS } from "./dictionary.generated";
-import { INSIGHT_ARTICLES } from "./insightArticles";
+import { listAisenPosts, type AisenPostCard } from "@/lib/aisen";
 import {
   CHIP_TIPS,
   PROJECTS,
@@ -34,6 +34,14 @@ export type SearchIndexEntry = {
   body: Bilingual;
   href: string; // locale-less; SearchClient applies withLocale
   hash?: string; // in-page anchor (v3's data-scroll)
+  /**
+   * WOS-346: full locale-prefixed overrides for entries whose two language
+   * versions don't live at the prefix-swapped URL — AISEN posts publish each
+   * language independently (possibly under a different slug), so an en
+   * visitor clicking a ko-only post must land on /ko/insights/… instead of
+   * a 404. SearchClient prefers this over withLocale(href) when present.
+   */
+  hrefByLocale?: Partial<Record<"ko" | "en", string>>;
 };
 
 // v3's five hard-coded page rows (index.html:3664) — [en, ko, bodyEn, bodyKo].
@@ -45,7 +53,10 @@ const PAGE_ROWS: [string, string, string, string, string][] = [
   ["Terms", "이용약관", "Terms of service", "서비스 이용약관", "/company"],
 ];
 
-export function buildSearchIndex(): SearchIndexEntry[] {
+// Async since WOS-346: the insight rows come from the AISEN Blog API (60s
+// unstable_cache in aisen.ts) instead of the deleted static articles. The
+// rest of the index is still the same static content tables.
+export async function buildSearchIndex(): Promise<SearchIndexEntry[]> {
   const entries: SearchIndexEntry[] = [];
   const workKo = V3_STRINGS.ko.work;
   const workEn = V3_STRINGS.en.work;
@@ -112,14 +123,44 @@ export function buildSearchIndex(): SearchIndexEntry[] {
     });
   }
 
-  // WOS-342: articles are real pages now (/insights/{slug}), so a result
-  // opens the article itself instead of scroll-flashing a listing card.
-  for (const ins of INSIGHT_ARTICLES) {
+  // WOS-342/WOS-346: insight results open the article itself. Both AISEN
+  // language lists are zipped via each ko post's `translations` so one row
+  // still searches both languages (v3's norm concatenates EN and KO);
+  // untranslated posts fall back to Korean text, and hrefByLocale keeps an
+  // en visitor off the 404 that the prefix-swapped URL would be. Guarded
+  // like every AISEN read: a cold-cache outage just drops the insight rows.
+  let aisenKo: AisenPostCard[] = [];
+  let aisenEn: AisenPostCard[] = [];
+  try {
+    [aisenKo, aisenEn] = await Promise.all([listAisenPosts("ko"), listAisenPosts("en")]);
+  } catch {
+    // Index ships without insight rows this pass.
+  }
+  const enBySlug = new Map(aisenEn.map((c) => [c.slug, c]));
+  const enSlugsZipped = new Set<string>();
+  for (const ko of aisenKo) {
+    const enSlug = ko.translations.find((t) => t.locale === "en")?.slug;
+    const en = enSlug ? enBySlug.get(enSlug) : undefined;
+    if (enSlug) enSlugsZipped.add(enSlug);
     entries.push({
       kind: "insight",
-      title: ins.title,
-      body: ins.dek,
-      href: `/insights/${ins.slug}`,
+      title: { ko: ko.title, en: en?.title ?? ko.title },
+      body: { ko: ko.excerpt ?? "", en: en?.excerpt ?? ko.excerpt ?? "" },
+      href: `/insights/${ko.slug}`,
+      hrefByLocale: {
+        ko: `/ko/insights/${ko.slug}`,
+        en: en ? `/en/insights/${en.slug}` : `/ko/insights/${ko.slug}`,
+      },
+    });
+  }
+  for (const en of aisenEn) {
+    if (enSlugsZipped.has(en.slug)) continue;
+    entries.push({
+      kind: "insight",
+      title: { ko: en.title, en: en.title },
+      body: { ko: en.excerpt ?? "", en: en.excerpt ?? "" },
+      href: `/insights/${en.slug}`,
+      hrefByLocale: { ko: `/en/insights/${en.slug}`, en: `/en/insights/${en.slug}` },
     });
   }
 
