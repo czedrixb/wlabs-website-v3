@@ -126,10 +126,22 @@ export async function listAisenPosts(locale: Locale): Promise<AisenPostCard[]> {
   return fetchAisenPosts(locale);
 }
 
-/** One published AISEN post, or null when it has no version in `locale`
- * (the API 404s). Null when AISEN is not configured; throws on a
- * cold-cache API failure. */
+/** One published AISEN post, or null when it has no version in `locale`.
+ * Null when AISEN is not configured; throws on a cold-cache API failure.
+ *
+ * Guarded by the locale's LIST: the live dev API's detail endpoint
+ * (observed 2026-10-21) falls back to the default language's content when
+ * the requested version isn't published — mislabeling `locale` and
+ * fabricating `translations` — instead of the documented 404. The
+ * per-locale list endpoint is accurate, so membership there is the gate
+ * (it costs nothing extra: the same cached entry every page already
+ * reads), and the list card's `translations` replaces the detail's, since
+ * hreflang and the language switch must never advertise an unpublished
+ * version. */
 export async function getAisenPost(slug: string, locale: Locale): Promise<AisenPost | null> {
   if (!aisenConfig()) return null;
-  return fetchAisenPost(slug, locale);
+  const card = (await fetchAisenPosts(locale)).find((c) => c.slug === slug);
+  if (!card) return null;
+  const post = await fetchAisenPost(slug, locale);
+  return post ? { ...post, locale: card.locale, translations: card.translations } : null;
 }
