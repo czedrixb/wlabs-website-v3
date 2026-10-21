@@ -106,5 +106,59 @@
         "system design process"
       ]
     }
+  },
+  {
+    "id": "d2b7e5a1-63c4-4e8f-9b70-1a2c3d4e5f60",
+    "slug": "agentic-learning-strategy",
+    "title": "An Agentic Learning Strategy",
+    "excerpt": "WOS-348 fixture: verifies that a descriptive slug authored in AISEN surfaces in site URLs without code changes.",
+    "cover_image": null,
+    "categories": [
+      {
+        "slug": "note",
+        "name": "노트"
+      }
+    ],
+    "tags": [],
+    "published_at": "2025-06-01T00:00:00+00:00",
+    "updated_at": "2026-10-21T00:00:00+00:00",
+    "locale": "en",
+    "translations": [
+      {
+        "locale": "ko",
+        "slug": "에이전트-러닝-전략"
+      }
+    ],
+    "images": [],
+    "content_html": "<p>This post's slug is a descriptive, writer-authored identifier rather than the auto-generated ins-N form.</p><p>The detail URL, share links, language switch, sitemap, RSS and search index must all emit this slug.</p>",
+    "content_json": {
+      "type": "doc",
+      "content": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "text": "This post's slug is a descriptive, writer-authored identifier rather than the auto-generated ins-N form.",
+              "type": "text"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "text": "The detail URL, share links, language switch, sitemap, RSS and search index must all emit this slug.",
+              "type": "text"
+            }
+          ]
+        }
+      ]
+    },
+    "schema_version": 1,
+    "seo": {
+      "title": "An Agentic Learning Strategy",
+      "description": "Verifies that a descriptive slug authored in AISEN surfaces in site URLs without code changes.",
+      "keywords": []
+    }
   }
 ]

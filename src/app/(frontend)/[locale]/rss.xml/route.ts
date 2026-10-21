@@ -5,6 +5,7 @@ import { listAisenPosts } from "@/lib/aisen";
 import { pick, withLocale, type Locale } from "@/lib/locale";
 import { siteT } from "@/lib/site/dictionary";
 import { siteUrl } from "@/lib/siteUrl";
+import { insightPath } from "@/lib/site/insightPath";
 
 // WOS-334: a per-locale RSS 2.0 feed at /ko/rss.xml and /en/rss.xml — the
 // site is bilingual with no single shared canonical feed, so one per
@@ -56,7 +57,7 @@ export async function GET(_request: Request, { params }: Props) {
     ...aisenPosts.map((p) => ({
       title: p.title,
       excerpt: p.excerpt ?? "",
-      link: `${siteUrl}${withLocale(`/insights/${p.slug}`, locale)}`,
+      link: `${siteUrl}${withLocale(insightPath(p.slug), locale)}`,
       iso: p.published_at,
     })),
     // Same AISEN-wins slug dedupe as insightsIndex.ts.
@@ -65,7 +66,7 @@ export async function GET(_request: Request, { params }: Props) {
       .map((post) => ({
         title: pick(locale, post.title, post.titleEn),
         excerpt: pick(locale, post.excerpt ?? null, post.excerptEn) ?? "",
-        link: `${siteUrl}${withLocale(`/insights/${post.slug}`, locale)}`,
+        link: `${siteUrl}${withLocale(insightPath(post.slug), locale)}`,
         iso: post.publishedAt ?? post.updatedAt,
       })),
   ]

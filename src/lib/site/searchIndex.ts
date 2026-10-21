@@ -1,5 +1,6 @@
 import { V3_STRINGS } from "./dictionary.generated";
 import { listAisenPosts, type AisenPostCard } from "@/lib/aisen";
+import { insightPath } from "@/lib/site/insightPath";
 import {
   CHIP_TIPS,
   PROJECTS,
@@ -146,10 +147,10 @@ export async function buildSearchIndex(): Promise<SearchIndexEntry[]> {
       kind: "insight",
       title: { ko: ko.title, en: en?.title ?? ko.title },
       body: { ko: ko.excerpt ?? "", en: en?.excerpt ?? ko.excerpt ?? "" },
-      href: `/insights/${ko.slug}`,
+      href: insightPath(ko.slug),
       hrefByLocale: {
-        ko: `/ko/insights/${ko.slug}`,
-        en: en ? `/en/insights/${en.slug}` : `/ko/insights/${ko.slug}`,
+        ko: `/ko${insightPath(ko.slug)}`,
+        en: en ? `/en${insightPath(en.slug)}` : `/ko${insightPath(ko.slug)}`,
       },
     });
   }
@@ -159,8 +160,8 @@ export async function buildSearchIndex(): Promise<SearchIndexEntry[]> {
       kind: "insight",
       title: { ko: en.title, en: en.title },
       body: { ko: en.excerpt ?? "", en: en.excerpt ?? "" },
-      href: `/insights/${en.slug}`,
-      hrefByLocale: { ko: `/en/insights/${en.slug}`, en: `/en/insights/${en.slug}` },
+      href: insightPath(en.slug),
+      hrefByLocale: { ko: `/en${insightPath(en.slug)}`, en: `/en${insightPath(en.slug)}` },
     });
   }
 
