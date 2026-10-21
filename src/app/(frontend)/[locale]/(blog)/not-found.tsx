@@ -3,6 +3,7 @@ import { pick } from "@/lib/locale";
 import { siteT } from "@/lib/site/dictionary";
 import { INSIGHT_CATEGORY_LABELS } from "@/lib/site/insightTaxonomy";
 import { getInsightEntries, type InsightEntry } from "@/lib/site/insightsIndex";
+import { insightPath } from "@/lib/site/insightPath";
 import {
   InsightNotFound,
   type InsightNotFoundPayload,
@@ -37,7 +38,7 @@ export default async function BlogGroupNotFound() {
       nfBackHome: s.nfBackHome,
       latestInsights: s.latestInsights,
       cards: latest.map((e) => ({
-        href: `/${locale}/insights/${e.slug}`,
+        href: `/${locale}${insightPath(e.slug)}`,
         category: pick(
           locale,
           INSIGHT_CATEGORY_LABELS[e.categories[0]].ko,
