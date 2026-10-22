@@ -32,7 +32,23 @@ export function Header({ locale, s }: Props) {
   const headerRef = useRef<HTMLElement | null>(null);
   const ulRef = useRef<HTMLUListElement | null>(null);
   const [isDark, setIsDark] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
   const [openSub, setOpenSub] = useState<string | null>(null);
+
+  // WOS-350: once the reader moves, the bar carries its own ground
+  // (.is-scrolled — site.css pairs it with cream, or navy while is-dark).
+  // Same dead-band hysteresis as Masthead's is-tight: it keeps the ground
+  // from flickering on a rubber-band bounce at the top of the page.
+  useEffect(() => {
+    function scrolled() {
+      const y = window.scrollY || document.documentElement.scrollTop || 0;
+      setIsScrolled((prev) => (prev ? y >= 8 : y > 24));
+    }
+    window.addEventListener("scroll", scrolled, { passive: true });
+    scrolled();
+    return () => window.removeEventListener("scroll", scrolled);
+    // Re-check on navigation — the new route restores its own scroll offset.
+  }, [pathname]);
 
   // Luminance sampler: read what actually paints behind the mark and flip
   // .is-dark so it stays legible. WOS-336 brings this to full parity with
@@ -116,7 +132,12 @@ export function Header({ locale, s }: Props) {
   }, [relPath]);
 
   return (
-    <header ref={headerRef} className={isDark ? "header is-dark" : "header"}>
+    <header
+      ref={headerRef}
+      className={["header", isDark && "is-dark", isScrolled && "is-scrolled"]
+        .filter(Boolean)
+        .join(" ")}
+    >
       <div className="wrap">
         <Link className="lockup" href={withLocale("/", locale)} aria-label="W Labs">
           {/* Plain <img>, deliberately — SVG logo, out of scope for

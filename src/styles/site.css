@@ -690,6 +690,21 @@ ol.timeline p{font-size:15px;color:var(--ink-2);line-height:1.65}
     box-shadow:inset 0 1px 0 rgba(255,255,255,.95),
                inset 0 0 0 1px rgba(24,39,49,.07)}
   .seg{top:calc(72px + env(safe-area-inset-top,0px))}
+  /* WOS-350: once the reader scrolls (is-scrolled, Header.tsx — the same
+     y>24/y<8 hysteresis as the mobile masthead's is-tight) the header takes
+     its own ground so content passes behind the bar instead of through it.
+     Ground follows the section, v3's search-screen pattern
+     (index.html:2045-2047): cream over light, navy while a dark section is
+     behind the bar — the is-dark inversion above pairs with it, light
+     contents on the navy ground. At the top of the page the bar stays
+     transparent, as the template defines. The tabbed screens are unaffected:
+     body:has(#main .seg) carries an ID so its cream (above) outranks both
+     rules, and the ground sits on .header itself, never inside .wrap —
+     whose invert(1) filter creates a containing block (see the navpane note
+     below). */
+  .header{transition:background .25s var(--ease)}
+  .header.is-scrolled{background:var(--cream)}
+  .header.is-scrolled.is-dark{background:var(--navy)}
   /* header inverts while a dark (.on-navy) section sits behind it */
   .header .wrap{transition:filter .25s}
   .header.is-dark .wrap{filter:invert(1)}
@@ -1880,6 +1895,15 @@ html:lang(ko) .sp-faq2-item b{font-family:var(--body);word-break:keep-all}
     padding:calc(env(safe-area-inset-top,0px) + var(--s3)) var(--gutter) var(--s2)}
   .sp-mhead .lockup{color:var(--ink);transition:color .25s var(--ease)}
   .sp-mhead.on-dark .lockup{color:#fff}
+  /* WOS-350: once the reader moves (is-tight, the same y>24/y<8 hysteresis
+     the logo shrink uses) the bar carries its own ground, so content passes
+     behind the lockup instead of through it. Ground follows the section —
+     v3's search-screen pattern (index.html:2045-2047): cream over light,
+     navy while a dark section sits behind the bar. At the very top the bar
+     stays transparent, as the template defines. */
+  .sp-mhead{transition:background .25s var(--ease)}
+  .sp-mhead.is-tight{background:var(--cream)}
+  .sp-mhead.is-tight.on-dark{background:var(--navy)}
   /* It takes no height of its own: the strip it used to occupy showed the
      page's ground above the first section, which on the navy screens read
      as a white band under the logo. Pulling the following content up by
