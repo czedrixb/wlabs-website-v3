@@ -29,10 +29,34 @@ export function Header({ locale, s }: Props) {
   const relPath = siteRelativePath(pathname, locale);
   const navItems = buildNav(s);
 
+  // WOS-350 follow-up: on the tabbed screens the header keeps its cream
+  // ground and the seg CSS pins the inversion off — but the artwork swap
+  // below still fired on a sampler flip (the navy seg pill under the
+  // lockup), painting the white logo on the cream bar. v3's sync() gates
+  // the desktop artwork by the tabbed screens (index.html:7740-7742);
+  // restate that guard here.
+  const tabbed = /^\/(work|company)(\/|$)/.test(relPath);
+
   const headerRef = useRef<HTMLElement | null>(null);
   const ulRef = useRef<HTMLUListElement | null>(null);
   const [isDark, setIsDark] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
   const [openSub, setOpenSub] = useState<string | null>(null);
+
+  // WOS-350: once the reader moves, the bar carries its own ground
+  // (.is-scrolled — site.css pairs it with cream, or navy while is-dark).
+  // Same dead-band hysteresis as Masthead's is-tight: it keeps the ground
+  // from flickering on a rubber-band bounce at the top of the page.
+  useEffect(() => {
+    function scrolled() {
+      const y = window.scrollY || document.documentElement.scrollTop || 0;
+      setIsScrolled((prev) => (prev ? y >= 8 : y > 24));
+    }
+    window.addEventListener("scroll", scrolled, { passive: true });
+    scrolled();
+    return () => window.removeEventListener("scroll", scrolled);
+    // Re-check on navigation — the new route restores its own scroll offset.
+  }, [pathname]);
 
   // Luminance sampler: read what actually paints behind the mark and flip
   // .is-dark so it stays legible. WOS-336 brings this to full parity with
@@ -116,14 +140,19 @@ export function Header({ locale, s }: Props) {
   }, [relPath]);
 
   return (
-    <header ref={headerRef} className={isDark ? "header is-dark" : "header"}>
+    <header
+      ref={headerRef}
+      className={["header", isDark && "is-dark", isScrolled && "is-scrolled"]
+        .filter(Boolean)
+        .join(" ")}
+    >
       <div className="wrap">
         <Link className="lockup" href={withLocale("/", locale)} aria-label="W Labs">
           {/* Plain <img>, deliberately — SVG logo, out of scope for
               WOS-334's next/image switch (see Footer.tsx's own note). */}
           <img
             className="logo-h"
-            src={isDark ? "/site/logo/secondary-land.svg" : "/site/logo/primary-land.svg"}
+            src={isDark && !tabbed ? "/site/logo/secondary-land.svg" : "/site/logo/primary-land.svg"}
             alt="W Labs"
             aria-hidden="true"
           />

@@ -24,6 +24,16 @@ export function Masthead({ locale }: Props) {
   const [isTight, setIsTight] = useState(false);
   const [isDark, setIsDark] = useState(false);
 
+  // WOS-350 follow-up: on the tabbed screens the bar keeps its cream ground
+  // (site.css pins it via body:has(#main .seg)), so a sampler flip there is
+  // always a false positive — the navy seg pill or a blue CTA passing under
+  // the logo, never a dark section. Gate the artwork swap the way v3's
+  // sync() gates it for the desktop header (index.html:7740-7742); the
+  // on-dark class still goes on, and the stylesheet ignores it there.
+  const prefix = `/${locale}`;
+  const rel = pathname.startsWith(prefix) ? pathname.slice(prefix.length) || "/" : pathname;
+  const tabbed = /^\/(work|company)(\/|$)/.test(rel);
+
   useEffect(() => {
     const bar = barRef.current;
     if (!bar) return;
@@ -85,7 +95,7 @@ export function Masthead({ locale }: Props) {
             WOS-334's next/image switch (see Footer.tsx's own note). */}
         <img
           className="logo-h"
-          src={isDark ? "/site/logo/secondary-land.svg" : "/site/logo/primary-land.svg"}
+          src={isDark && !tabbed ? "/site/logo/secondary-land.svg" : "/site/logo/primary-land.svg"}
           alt="W Labs"
           aria-hidden="true"
         />
