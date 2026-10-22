@@ -29,6 +29,14 @@ export function Header({ locale, s }: Props) {
   const relPath = siteRelativePath(pathname, locale);
   const navItems = buildNav(s);
 
+  // WOS-350 follow-up: on the tabbed screens the header keeps its cream
+  // ground and the seg CSS pins the inversion off — but the artwork swap
+  // below still fired on a sampler flip (the navy seg pill under the
+  // lockup), painting the white logo on the cream bar. v3's sync() gates
+  // the desktop artwork by the tabbed screens (index.html:7740-7742);
+  // restate that guard here.
+  const tabbed = /^\/(work|company)(\/|$)/.test(relPath);
+
   const headerRef = useRef<HTMLElement | null>(null);
   const ulRef = useRef<HTMLUListElement | null>(null);
   const [isDark, setIsDark] = useState(false);
@@ -144,7 +152,7 @@ export function Header({ locale, s }: Props) {
               WOS-334's next/image switch (see Footer.tsx's own note). */}
           <img
             className="logo-h"
-            src={isDark ? "/site/logo/secondary-land.svg" : "/site/logo/primary-land.svg"}
+            src={isDark && !tabbed ? "/site/logo/secondary-land.svg" : "/site/logo/primary-land.svg"}
             alt="W Labs"
             aria-hidden="true"
           />

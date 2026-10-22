@@ -1904,6 +1904,15 @@ html:lang(ko) .sp-faq2-item b{font-family:var(--body);word-break:keep-all}
   .sp-mhead{transition:background .25s var(--ease)}
   .sp-mhead.is-tight{background:var(--cream)}
   .sp-mhead.is-tight.on-dark{background:var(--navy)}
+  /* WOS-350 follow-up: on the tabbed screens nothing dark ever sits under
+     the logo — only the navy seg pill or a blue CTA scrolling past, which
+     the sampler misreads as a dark section and flips the bar navy with the
+     white artwork. Keep the ground and the ink lockup there whatever the
+     sampler says, the same tabbed guard the desktop header has (the #main
+     ID inside :has() outranks the .on-dark rules above). Masthead.tsx gates
+     the artwork swap by the same route check. */
+  body:has(#main .seg) .sp-mhead{background:var(--cream)}
+  body:has(#main .seg) .sp-mhead .lockup{color:var(--ink)}
   /* It takes no height of its own: the strip it used to occupy showed the
      page's ground above the first section, which on the navy screens read
      as a white band under the logo. Pulling the following content up by

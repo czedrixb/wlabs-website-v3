@@ -53,6 +53,40 @@ test.describe("WOS-350: mobile masthead ground on scroll", () => {
   });
 });
 
+test.describe("WOS-350 follow-up: tabbed screens pin the masthead", () => {
+  // The handoff's repro size. On Work/Company nothing dark ever sits under
+  // the logo — only the navy seg pill or a blue CTA, which the sampler
+  // misread as a dark section: the bar flipped navy and the logo went white.
+  test.use({ viewport: { width: 440, height: 956 } });
+
+  test("work: the bar stays cream with the ink logo while the CTA passes under it", async ({
+    page,
+  }) => {
+    await page.goto("/en/work/services");
+    const bar = page.locator(".sp-mhead");
+    // Pinned ground even at rest (invisible against the cream page).
+    await expect(bar).toHaveCSS("background-color", CREAM);
+    // Park the first CTA under the masthead — the pre-fix flip offset.
+    const cta = page.locator("a,button").filter({ hasText: "Discuss your project" }).first();
+    const y = await cta.evaluate((el) => el.getBoundingClientRect().top + window.scrollY - 40);
+    await page.evaluate((v) => window.scrollTo(0, v), y);
+    await expect(bar).toHaveClass(/is-tight/);
+    // Whatever the sampler says, the ground and the ink artwork hold.
+    await expect(bar).toHaveCSS("background-color", CREAM);
+    await expect(bar.locator("img")).toHaveAttribute("src", "/site/logo/primary-land.svg");
+  });
+
+  test("company: same pin while scrolled", async ({ page }) => {
+    await page.goto("/ko/company/story");
+    const bar = page.locator(".sp-mhead");
+    await expect(bar).toHaveCSS("background-color", CREAM);
+    await page.evaluate(() => window.scrollTo(0, 800));
+    await expect(bar).toHaveClass(/is-tight/);
+    await expect(bar).toHaveCSS("background-color", CREAM);
+    await expect(bar.locator("img")).toHaveAttribute("src", "/site/logo/primary-land.svg");
+  });
+});
+
 test.describe("WOS-350: desktop header ground on scroll", () => {
   test.use({ viewport: { width: 1440, height: 900 } });
 
