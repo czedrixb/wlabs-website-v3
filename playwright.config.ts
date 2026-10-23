@@ -48,7 +48,10 @@ export default defineConfig({
       // file) — it belongs to the "smoke" project below, not this one.
       // wos338-company-smtp.spec.ts drives a real Gmail send when GMAIL_* are
       // configured — it belongs to the "mail" project below, run explicitly.
-      testIgnore: /editor-role\.spec\.ts|wos337-deploy-smoke\.spec\.ts|wos338-company-smtp\.spec\.ts/,
+      // wos351-qa-sweep.spec.ts is the full-site deployed-URL QA matrix —
+      // it belongs to the "qa" project below, run explicitly.
+      testIgnore:
+        /editor-role\.spec\.ts|wos337-deploy-smoke\.spec\.ts|wos338-company-smtp\.spec\.ts|wos351-qa-sweep\.spec\.ts/,
     },
     {
       name: "chromium-editor",
@@ -67,6 +70,15 @@ export default defineConfig({
       name: "smoke",
       use: { ...devices["Desktop Chrome"] },
       testMatch: /wos337-deploy-smoke\.spec\.ts/,
+    },
+    {
+      // WOS-351: full-site visual QA sweep (route × locale × viewport) against
+      // a deployed URL. Unauthenticated for the same reason as "smoke" — no
+      // login attempt against whatever is deployed. Only ever run explicitly
+      // via --project=qa with E2E_BASE_URL set.
+      name: "qa",
+      use: { ...devices["Desktop Chrome"] },
+      testMatch: /wos351-qa-sweep\.spec\.ts/,
     },
     {
       // WOS-338: company Gmail SMTP + the Payload email adapter.
