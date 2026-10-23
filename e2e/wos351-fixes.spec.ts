@@ -76,6 +76,26 @@ test.describe("WOS-351 hero callout overflow guard", () => {
     expect(guarded.box).toContain("340px");
     expect(guarded.label).toBe(true);
   });
+
+  // Regression (post-merge): capping via max-width alone collapsed every
+  // pill to ~26px of bare padding — the box is abspos inside the zero-width
+  // .ntip anchor and overflow:hidden on `.k` zeroed the grid item's
+  // automatic minimum, so shrink-to-fit had nothing to hold the width open.
+  // Assert the RENDERED geometry, not just that the rules exist.
+  test("rendered pills keep their content width, capped at 340px", async ({ page }) => {
+    await page.goto("/ko");
+    // tips are DOM-built on mount regardless of --vis visibility
+    const box = page.locator(".ntip-box").first();
+    await expect(box).toBeAttached();
+    const widths = await page.$$eval(".ntip-box", (els) =>
+      els.map((el) => el.getBoundingClientRect().width),
+    );
+    expect(widths.length).toBeGreaterThan(0);
+    for (const w of widths) {
+      expect(w).toBeGreaterThan(80); // collapsed-pill regression was ~26px
+      expect(w).toBeLessThanOrEqual(341);
+    }
+  });
 });
 
 test.describe("WOS-351 insights card scrim", () => {
