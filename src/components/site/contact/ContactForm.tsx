@@ -36,7 +36,10 @@ export function ContactForm({ locale, s, topics, id, prefillTopic = null, prefil
   // rules, applied with the adjust-state-during-render pattern (a new
   // prefill value lands on the very render that carries it, no effect
   // round-trip).
-  const [topic, setTopic] = useState("");
+  // WOS-351: v3's #c-topic select has no placeholder option, so the browser
+  // shows the first topic ("General project") preselected; an empty-looking
+  // required select read as broken in QA. Default to the same first topic.
+  const [topic, setTopic] = useState(topics[0]?.id ?? "");
   const [message, setMessage] = useState("");
   const [messageTouched, setMessageTouched] = useState(false);
   const [prevPrefillTopic, setPrevPrefillTopic] = useState(prefillTopic);
@@ -66,8 +69,9 @@ export function ContactForm({ locale, s, topics, id, prefillTopic = null, prefil
       onSubmit={(e) => void handleSubmit(e)}
       onReset={() => {
         // useInquirySubmit calls form.reset() on success — clear the
-        // controlled fields along with the native ones.
-        setTopic("");
+        // controlled fields along with the native ones (topic back to the
+        // same first-topic default it opens with, WOS-351).
+        setTopic(topics[0]?.id ?? "");
         setMessage("");
         setMessageTouched(false);
       }}
