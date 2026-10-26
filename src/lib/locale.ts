@@ -15,6 +15,14 @@ export function resolveLocale(input: string | string[] | undefined): Locale {
   return ALIASES[raw.toLowerCase()] ?? "ko";
 }
 
+// WOS-355: unlike resolveLocale (which always returns a Locale, defaulting
+// unknown segments to "ko"), this is the actual "is this a real locale"
+// check the (site)/(blog) group layouts 404 on — resolveLocale can't be used
+// for that since it never reports failure.
+export function isSupportedLocale(input: string | undefined): input is Locale {
+  return input === "ko" || input === "en";
+}
+
 // Posts store Korean in the base fields (title/content/excerpt) and English
 // in optional `*En` fields — there is no Payload-level locale/fallbackLocale
 // anymore (see src/collections/Posts.ts). `pick` chooses which value a
