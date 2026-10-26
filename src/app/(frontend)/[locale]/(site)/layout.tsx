@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 import type { Locale } from "@/lib/locale";
-import { resolveLocale } from "@/lib/locale";
+import { isSupportedLocale, resolveLocale } from "@/lib/locale";
 import { siteT } from "@/lib/site/dictionary";
 import { siteOpenGraphDefaults } from "@/lib/site/metadata";
 import { SiteChrome } from "@/components/site/chrome/SiteChrome";
@@ -41,6 +42,13 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
 // attributes the stylesheet to whichever route group is actually rendering.
 export default async function SiteLayout({ children, params }: Props) {
   const { locale: localeParam } = await params;
+  // WOS-355: moved down from the frontend root layout. A layout.tsx's own
+  // not-found.tsx sibling can't catch a throw from that same layout (the
+  // boundary is nested inside it, same as error.js) — this one is caught by
+  // the PARENT segment's boundary instead: src/app/(frontend)/[locale]/not-found.tsx,
+  // which supplies its own SiteChrome since this layout never ran. See that
+  // file and src/app/(frontend)/[locale]/layout.tsx.
+  if (!isSupportedLocale(localeParam)) notFound();
   const locale: Locale = resolveLocale(localeParam);
 
   return <SiteChrome locale={locale}>{children}</SiteChrome>;

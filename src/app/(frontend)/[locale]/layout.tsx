@@ -1,4 +1,4 @@
-import { notFound } from "next/navigation";
+import { resolveLocale } from "@/lib/locale";
 import { siteFontVariables } from "@/lib/fonts";
 
 // Hints Next's build-time optimizer at the two real locales; on its own it
@@ -9,8 +9,8 @@ import { siteFontVariables } from "@/lib/fonts";
 // `dynamic`/`revalidate` and prerender statically at build (only (blog)'s
 // two routes stay force-dynamic). Either way, an unknown segment (e.g.
 // /fr/blog) would still render rather than 404 on this mechanism alone
-// (dynamicParams defaults to true) — the explicit check below is the real
-// enforcement, for both groups.
+// (dynamicParams defaults to true) — the real enforcement is the
+// isSupportedLocale() check in the (site)/(blog) group layouts below.
 export function generateStaticParams() {
   return [{ locale: "ko" }, { locale: "en" }];
 }
@@ -37,12 +37,19 @@ type Props = {
 // built on them silently dropped out site-wide, on every route — the
 // "wrong font on every page" bug. Mounting them here, above :root's own
 // scope, is what makes Quicksand/Raleway/Noto Sans KR actually resolve.
+// WOS-355: this used to notFound() here on an unsupported locale, but this
+// layout IS the frontend's root layout (it's the only thing rendering
+// <html>/<body> for the whole frontend) — a notFound() thrown by a layout is
+// caught by the PARENT boundary, never by a not-found.tsx sitting beside it,
+// and there is nothing above this one. So a bad locale (/fr/x) fell through
+// to Next's unbranded built-in 404 instead of the designed SiteNotFound page
+// (see src/app/(frontend)/[locale]/not-found.tsx). The guard moved down into
+// the (site)/(blog) group layouts, which DO have a not-found.tsx sibling.
 export default async function LocaleRootLayout({ children, params }: Props) {
   const { locale } = await params;
-  if (locale !== "ko" && locale !== "en") notFound();
 
   return (
-    <html lang={locale} className={siteFontVariables}>
+    <html lang={resolveLocale(locale)} className={siteFontVariables}>
       <body>{children}</body>
     </html>
   );
