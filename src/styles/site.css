@@ -260,6 +260,15 @@ footer{border-top:1px solid var(--line);padding-block:var(--s5) var(--s4);backgr
 /* product single page */
 .crumbs{display:flex;flex-wrap:wrap;gap:6px 10px;font:500 12px/1.4 var(--body);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding-top:var(--s3)}
 .crumbs a{color:var(--muted)}.crumbs a:hover{color:var(--ink)}.crumbs b{font-weight:600;color:var(--ink)}
+/* legal documents (WOS-354) — ported verbatim from v3 (index.html:614-623) */
+.legal-doc{max-width:72ch;padding-block:var(--s5)}
+.legal-doc h1{font-size:clamp(28px,3.4vw,40px);line-height:1.15;letter-spacing:-.02em;margin:0 0 var(--s3)}
+.legal-doc h2{font:700 19px/1.35 var(--display);margin:var(--s4) 0 10px;color:var(--ink)}
+.legal-doc h3{font:700 15px/1.4 var(--body);margin:var(--s3) 0 8px;color:var(--ink)}
+.legal-doc p{margin:0 0 1.05em;font:400 16px/1.72 var(--body);color:var(--ink-2)}
+.legal-doc ul{margin:0 0 1.05em;padding-left:1.15em}
+.legal-doc li{margin-bottom:.45em;font:400 16px/1.72 var(--body);color:var(--ink-2)}
+.legal-switch{display:flex;gap:10px;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:var(--s3);margin-top:var(--s4)}
 .prod-head{display:grid;gap:var(--s3);padding-block:var(--s3) var(--s5)}
 .prod-head .tag{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 .prod-head h1{font-size:var(--fs-h1);line-height:1.05;letter-spacing:-.02em}

@@ -5,11 +5,11 @@
 // src/lib/site/content.generated.ts.
 //
 // Unlike the dictionary (WOS-331), this content isn't harvested from
-// `data-i` markup — it lives in five top-level JS array/object literals
-// the v3 source builds its own DOM from at runtime (`TEAM`, `GROUPS`,
-// `PROJECTS`, `CATS`, `PRODUCT_PAGES` — see README.md's "Content that
-// lives in data, not markup" table). Each is a self-contained literal with
-// no free identifiers, so this script slices out its source text with a
+// `data-i` markup — it lives in top-level JS array/object literals the v3
+// source builds its own DOM from at runtime (`TEAM`, `GROUPS`, `PROJECTS`,
+// `CATS`, `PRODUCT_PAGES`, `LEGAL` — see README.md's "Content that lives in
+// data, not markup" table). Each is a self-contained literal with no free
+// identifiers, so this script slices out its source text with a
 // brace-matching scan (respecting quoted strings, so a `}` inside a string
 // doesn't end the literal early) and evaluates it directly — a real parse,
 // not a regex scrape, and there is exactly one literal per name so no
@@ -222,21 +222,25 @@ function main() {
   const chipTips = evalConst(source, "CHIP_TIPS");
   const searchKinds = evalConst(source, "KIND");
   const rail = parseRailEntries(source);
+  // WOS-354: the footer's Privacy/Terms legal copy ({ terms: {...}, privacy:
+  // {...} }, each a { t, lead, sec } tree of [en, ko] pairs) — same evalConst
+  // treatment, one top-level `const LEGAL=` in the source.
+  const legal = evalConst(source, "LEGAL");
 
   const banner = `// GENERATED FILE — do not hand-edit.
 // Regenerate with: node scripts/extract-v3-content.mjs
 // Source: ${v3IndexPath}
 //
-// Raw TEAM/GROUPS/PROJECTS/CATS/PRODUCT_PAGES/TOPICS literals harvested
-// from the v3 design repo, verbatim except for TEAM's photo column (base64
-// data URI swapped for the public/site/team/<Name>.webp path). Every value
-// here is still v3's own tuple/array shape ([en, ko] pairs, positional
-// TEAM/TOPICS rows) — src/lib/site/content.ts composes these into the
-// named, typed shapes components actually consume.
+// Raw TEAM/GROUPS/PROJECTS/CATS/PRODUCT_PAGES/TOPICS/LEGAL literals
+// harvested from the v3 design repo, verbatim except for TEAM's photo
+// column (base64 data URI swapped for the public/site/team/<Name>.webp
+// path). Every value here is still v3's own tuple/array shape ([en, ko]
+// pairs, positional TEAM/TOPICS rows) — src/lib/site/content.ts composes
+// these into the named, typed shapes components actually consume.
 `;
 
   const body = `export const V3_CONTENT = ${JSON.stringify(
-    { team, groups, projects, cats, productPages, topics, chipTips, searchKinds, rail },
+    { team, groups, projects, cats, productPages, topics, chipTips, searchKinds, rail, legal },
     null,
     2,
   )} as const;\n`;
@@ -246,7 +250,8 @@ function main() {
   console.log(
     `  team=${team.length} groups=${groups.length} projects=${projects.length} ` +
       `cats=${cats.length} products=${Object.keys(productPages).length} topics=${topics.length} ` +
-      `chipTips=${Object.keys(chipTips).length} kinds=${Object.keys(searchKinds).length} rail=${rail.length}`,
+      `chipTips=${Object.keys(chipTips).length} kinds=${Object.keys(searchKinds).length} rail=${rail.length} ` +
+      `legal=${Object.keys(legal).length}`,
   );
 }
 

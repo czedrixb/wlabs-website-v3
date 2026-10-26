@@ -41,7 +41,7 @@ export const V3_STRINGS = {
       "privacy": "개인정보처리방침",
       "terms": "이용약관",
       "legal1": "더블유랩스 (W Labs) · 대표 정원석",
-      "legalAddr": "서울 · 사업자등록번호 및 D-U-N-S® 번호는 확인 후 게재",
+      "legalAddr": "서울 · 사업자등록번호 387-87-03701 · D-U-N-S® 번호는 확인 후 게재",
       "legal2": "성장과 디지털 전환의 파트너"
     },
     "home": {
@@ -497,6 +497,11 @@ export const V3_STRINGS = {
       "close": "닫기",
       "fMsgShort": "한 줄이면 충분합니다",
       "consentShort": "개인정보 수집·이용에 동의합니다. (필수)"
+    },
+    "legal": {
+      "effective": "시행일자",
+      "switchCta": "{doc} →",
+      "legalSeg": "법적 고지 하위 메뉴"
     }
   },
   "en": {
@@ -531,7 +536,7 @@ export const V3_STRINGS = {
       "privacy": "Privacy policy",
       "terms": "Terms",
       "legal1": "W Labs (더블유랩스) · CEO Matt Jung",
-      "legalAddr": "Seoul · Business registration and D-U-N-S® numbers to be added once confirmed",
+      "legalAddr": "Seoul · Business registration no. 387-87-03701 · D-U-N-S® number to be added once confirmed",
       "legal2": "Partner for growth and digital transformation"
     },
     "home": {
@@ -987,6 +992,11 @@ export const V3_STRINGS = {
       "close": "Close",
       "fMsgShort": "One line is enough",
       "consentShort": "I agree to the collection and use of personal data (required)."
+    },
+    "legal": {
+      "effective": "Effective date",
+      "switchCta": "{doc} →",
+      "legalSeg": "Legal sections"
     }
   }
 } as const;

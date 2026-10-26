@@ -23,9 +23,9 @@ import {
 // Hash-routes become this repo's real routes: #project/<id> →
 // /projects/<id>, #product/<id> → /products/<id>, the panel links →
 // /work/* and /company/*, with v3's `scroll` targets carried as `hash`.
-// v3 points its Privacy/Terms page entries at #contact; this repo's
-// footer resolves them to /company (the legal pages don't exist yet), and
-// the index follows the footer.
+// The Privacy/Terms rows point at /legal/privacy and /legal/terms (WOS-354
+// — they used to follow the footer to /company, back when those pages
+// didn't exist).
 
 export type SearchKind = "project" | "product" | "service" | "team" | "story" | "insight" | "term" | "page";
 
@@ -50,8 +50,8 @@ const PAGE_ROWS: [string, string, string, string, string][] = [
   ["Work", "하는 일", "Services, products and projects", "서비스, 제품, 프로젝트", "/work"],
   ["Company", "회사", "Our story, team and insights", "회사 이야기, 팀, 인사이트", "/company"],
   ["Project Inquiry", "프로젝트 문의", "Tell us what you want to change", "무엇을 바꾸고 싶은지 알려 주세요", "/contact"],
-  ["Privacy policy", "개인정보처리방침", "How we handle personal data", "개인정보 처리 방식", "/company"],
-  ["Terms", "이용약관", "Terms of service", "서비스 이용약관", "/company"],
+  ["Privacy policy", "개인정보처리방침", "How we handle personal data", "개인정보 처리 방식", "/legal/privacy"],
+  ["Terms", "이용약관", "Terms of service", "서비스 이용약관", "/legal/terms"],
 ];
 
 // Async since WOS-346: the insight rows come from the AISEN Blog API (60s

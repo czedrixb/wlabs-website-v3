@@ -247,6 +247,9 @@ function build(locale: Locale) {
       toastInvalidT: v3.contact.toastInvalidT,
       toastFailT: v3.contact.toastFailT,
     },
+    // WOS-354: /legal's chrome strings (document body copy itself is
+    // content.ts's LEGAL_DOCS, not here — same split as rail above).
+    legal: v3.legal,
   };
 }
 

@@ -2,12 +2,12 @@
 // Regenerate with: node scripts/extract-v3-content.mjs
 // Source: D:\Submit\wlabs-website-v3\site\index.html
 //
-// Raw TEAM/GROUPS/PROJECTS/CATS/PRODUCT_PAGES/TOPICS literals harvested
-// from the v3 design repo, verbatim except for TEAM's photo column (base64
-// data URI swapped for the public/site/team/<Name>.webp path). Every value
-// here is still v3's own tuple/array shape ([en, ko] pairs, positional
-// TEAM/TOPICS rows) — src/lib/site/content.ts composes these into the
-// named, typed shapes components actually consume.
+// Raw TEAM/GROUPS/PROJECTS/CATS/PRODUCT_PAGES/TOPICS/LEGAL literals
+// harvested from the v3 design repo, verbatim except for TEAM's photo
+// column (base64 data URI swapped for the public/site/team/<Name>.webp
+// path). Every value here is still v3's own tuple/array shape ([en, ko]
+// pairs, positional TEAM/TOPICS rows) — src/lib/site/content.ts composes
+// these into the named, typed shapes components actually consume.
 
 export const V3_CONTENT = {
   "team": [
@@ -1334,5 +1334,437 @@ export const V3_CONTENT = {
       "titleKey": "spRailM2022H",
       "paraKey": "spRailM2022P"
     }
-  ]
+  ],
+  "legal": {
+    "terms": {
+      "t": [
+        "Terms & Conditions",
+        "이용약관"
+      ],
+      "lead": [
+        [
+          "Welcome to W Labs (주식회사 더블유랩스, business registration number 387-87-03701). By accessing or using the https://wsoft.space/ website and related services, you agree to be bound by these Terms. Please read them carefully before using the site.",
+          "W Labs (주식회사 더블유랩스, 사업자등록번호 387-87-03701)에 오신 것을 환영합니다. https://wsoft.space/ 웹사이트 및 관련 서비스에 접속하거나 이용함으로써 귀하는 본 이용약관에 구속되는 것에 동의하게 됩니다. 사이트 이용 전 본 약관을 주의 깊게 읽어주시기 바랍니다."
+        ],
+        [
+          "If you do not agree with any part of these Terms, please discontinue use of the website immediately.",
+          "본 약관의 일부에 동의하지 않으시는 경우, 즉시 웹사이트 이용을 중단해 주시기 바랍니다."
+        ]
+      ],
+      "sec": [
+        {
+          "h": [
+            "1. Services",
+            "1. 서비스"
+          ],
+          "p": [
+            [
+              "W Labs provides software development, AI solutions, UI/UX design and related digital services. This website is primarily an information and marketing platform. Specific services are governed by separate agreements or service contracts concluded with the client.",
+              "W Labs는 소프트웨어 개발, AI 솔루션, UI/UX 디자인 및 관련 디지털 서비스를 제공합니다. 본 웹사이트는 주로 정보 제공 및 마케팅 플랫폼입니다. 구체적인 서비스는 고객과 체결된 별도의 계약 또는 서비스 계약에 의해 규율됩니다."
+            ]
+          ]
+        },
+        {
+          "h": [
+            "2. Intellectual property",
+            "2. 지식재산권"
+          ],
+          "p": [
+            [
+              "All content on this website — text, graphics, logos, icons, images, software and the like — is the property of W Labs or its content suppliers and is protected by applicable intellectual property law. No content may be reproduced, distributed, modified or used to create derivative works without our prior written consent.",
+              "본 웹사이트의 모든 콘텐츠(텍스트, 그래픽, 로고, 아이콘, 이미지, 소프트웨어 등)는 W Labs 또는 그 콘텐츠 공급자의 재산이며, 해당 지식재산권법에 의해 보호됩니다. 당사의 사전 서면 동의 없이 어떠한 콘텐츠도 복제, 배포, 수정 또는 2차적 저작물을 작성할 수 없습니다."
+            ]
+          ]
+        },
+        {
+          "h": [
+            "3. Use of the website",
+            "3. 웹사이트 이용"
+          ],
+          "sub": [
+            "3.1 Permitted use",
+            "3.1 허용된 이용"
+          ],
+          "p": [
+            [
+              "You may use this website for lawful purposes and in accordance with these Terms. You agree not to:",
+              "귀하는 합법적인 목적과 본 약관에 따라 본 웹사이트를 이용할 수 있습니다. 귀하는 다음 행위를 하지 않을 것에 동의합니다:"
+            ]
+          ],
+          "li": [
+            [
+              "use the site in any way that violates applicable local, national or international law or regulation",
+              "해당 지역, 국가 또는 국제 법률이나 규정을 위반하는 방식으로 사이트를 이용하는 행위"
+            ],
+            [
+              "transmit unsolicited or unauthorised advertising or promotional material",
+              "원치 않거나 승인되지 않은 광고 또는 판촉 자료를 전송하는 행위"
+            ],
+            [
+              "attempt to gain unauthorised access to any part of the website or its systems",
+              "웹사이트나 시스템의 일부에 무단으로 접근을 시도하는 행위"
+            ],
+            [
+              "restrict or inhibit any other person’s use or enjoyment of the website",
+              "다른 사람의 웹사이트 이용이나 즐거움을 제한하거나 방해하는 행위"
+            ]
+          ],
+          "sub2": [
+            "3.2 Inquiry form",
+            "3.2 문의 양식"
+          ],
+          "p2": [
+            [
+              "When you submit an inquiry through the inquiry form, you provide your information voluntarily. By submitting, you consent to W Labs contacting you regarding your inquiry.",
+              "문의 양식을 통해 문의사항을 제출하시면, 귀하의 정보를 자발적으로 제공하게 됩니다. 제출함으로써 귀하는 문의사항에 관해 W Labs가 연락하는 것에 동의하게 됩니다."
+            ]
+          ]
+        },
+        {
+          "h": [
+            "4. Disclaimer of warranties",
+            "4. 보증의 부인"
+          ],
+          "p": [
+            [
+              "This website and its content are provided \"as is\" and \"as available\", without warranties of any kind, whether express or implied. W Labs does not guarantee uninterrupted service, the absence of errors, or the absence of harmful components.",
+              "본 웹사이트 및 그 콘텐츠는 \"있는 그대로\" 및 \"이용 가능한 상태로\" 제공되며, 명시적이든 묵시적이든 어떠한 종류의 보증도 제공되지 않습니다. W Labs는 중단 없는 서비스, 오류 부재, 또는 해로운 요소의 부재를 보장하지 않습니다."
+            ]
+          ]
+        },
+        {
+          "h": [
+            "5. Limitation of liability",
+            "5. 책임의 제한"
+          ],
+          "p": [
+            [
+              "To the maximum extent permitted by law, W Labs shall not be liable for indirect, incidental, special, consequential or punitive damages.",
+              "법이 허용하는 최대 범위 내에서, W Labs는 간접적, 부수적, 특별, 결과적 또는 징벌적 손해에 대해 책임을 지지 않습니다."
+            ]
+          ]
+        },
+        {
+          "h": [
+            "6. Third-party links",
+            "6. 제3자 링크"
+          ],
+          "p": [
+            [
+              "This website may contain links to external sites. Such links are provided for convenience, and W Labs has no control over, and no responsibility for, their content.",
+              "본 웹사이트에는 외부 사이트 링크가 포함될 수 있습니다. 이러한 링크는 편의 목적으로 제공되며, W Labs는 해당 콘텐츠에 대한 통제권이나 책임을 갖지 않습니다."
+            ]
+          ]
+        },
+        {
+          "h": [
+            "7. Changes to these Terms",
+            "7. 약관의 변경"
+          ],
+          "p": [
+            [
+              "We reserve the right to amend these Terms at any time. Changes will be posted on the website, and continued use constitutes agreement to the revised Terms.",
+              "당사는 이용약관을 언제든지 수정할 권리를 보유합니다. 변경사항은 웹사이트에 게시되며, 계속 이용 시 개정 약관에 동의한 것으로 간주됩니다."
+            ]
+          ]
+        },
+        {
+          "h": [
+            "8. Governing law",
+            "8. 준거법"
+          ],
+          "p": [
+            [
+              "These Terms are governed by the laws of the Republic of Korea, and all disputes are subject to the exclusive jurisdiction of the courts of the Republic of Korea.",
+              "본 약관은 대한민국 법률에 따라 규율되고, 모든 분쟁은 대한민국 법원의 전속적 관할에 따릅니다."
+            ]
+          ]
+        },
+        {
+          "h": [
+            "9. Contact",
+            "9. 문의처"
+          ],
+          "p": [
+            [
+              "W Labs (주식회사 더블유랩스)",
+              "W Labs (주식회사 더블유랩스)"
+            ],
+            [
+              "Website: https://wsoft.space/",
+              "웹사이트: https://wsoft.space/"
+            ]
+          ]
+        }
+      ]
+    },
+    "privacy": {
+      "t": [
+        "Privacy Policy",
+        "개인정보처리방침"
+      ],
+      "lead": [
+        [
+          "W Labs (주식회사 더블유랩스) is committed to protecting your personal information. This Privacy Policy explains what information we collect when you visit https://wsoft.space/, how we use it, and what rights you have.",
+          "W Labs (주식회사 더블유랩스)는 귀하의 개인정보 보호를 위해 최선을 다하고 있습니다. 본 개인정보처리방침은 https://wsoft.space/를 방문할 때 당사가 수집하는 정보, 그 사용 방법 및 귀하의 권리에 대해 설명합니다."
+        ],
+        [
+          "This policy complies with the Personal Information Protection Act (PIPA) of the Republic of Korea and applicable international standards.",
+          "본 방침은 대한민국의 개인정보보호법(PIPA) 및 해당 국제 기준을 준수합니다."
+        ]
+      ],
+      "sec": [
+        {
+          "h": [
+            "1. Information we collect",
+            "1. 수집하는 정보"
+          ],
+          "sub": [
+            "1.1 Information you provide",
+            "1.1 귀하가 제공하는 정보"
+          ],
+          "p": [
+            [
+              "When you use the inquiry form or contact us, we may collect the following:",
+              "문의 양식을 사용하거나 당사에 연락하실 때, 당사는 다음 정보를 수집할 수 있습니다:"
+            ]
+          ],
+          "li": [
+            [
+              "Name",
+              "이름"
+            ],
+            [
+              "Email address",
+              "이메일 주소"
+            ],
+            [
+              "Company name, where applicable",
+              "회사명 (해당되는 경우)"
+            ],
+            [
+              "Message content and inquiry details",
+              "메시지 내용 및 문의 세부사항"
+            ]
+          ],
+          "sub2": [
+            "1.2 Information collected automatically",
+            "1.2 자동으로 수집되는 정보"
+          ],
+          "p2": [
+            [
+              "When you visit the website, we may automatically collect:",
+              "웹사이트를 방문하실 때, 당사는 다음 정보를 자동으로 수집할 수 있습니다:"
+            ]
+          ],
+          "li2": [
+            [
+              "IP address and general location data",
+              "IP 주소 및 일반적인 위치 데이터"
+            ],
+            [
+              "Browser type and version",
+              "브라우저 유형 및 버전"
+            ],
+            [
+              "Pages visited and time spent on the site",
+              "방문한 페이지 및 사이트 체류 시간"
+            ],
+            [
+              "Referring URL",
+              "참조 URL"
+            ]
+          ],
+          "p3": [
+            [
+              "This data is collected through standard web server logs and analytics tools, and helps us understand how the site is used and improve the user experience.",
+              "이 데이터는 표준 웹 서버 로그 및 분석 도구를 통해 수집되며, 사이트 이용 방식을 이해하고 사용자 경험을 개선하는 데 도움을 줍니다."
+            ]
+          ]
+        },
+        {
+          "h": [
+            "2. How we use information",
+            "2. 정보 이용 방법"
+          ],
+          "p": [
+            [
+              "We use the information we collect to:",
+              "당사는 수집한 정보를 다음과 같이 이용합니다:"
+            ]
+          ],
+          "li": [
+            [
+              "respond to inquiries and provide requested services",
+              "문의사항에 응답하고 요청된 서비스 제공"
+            ],
+            [
+              "improve and optimise the website and our services",
+              "웹사이트 및 서비스 개선 및 최적화"
+            ],
+            [
+              "communicate about services and related updates",
+              "서비스 및 관련 업데이트에 관한 소통"
+            ],
+            [
+              "comply with legal obligations",
+              "법적 의무 준수"
+            ]
+          ],
+          "p2": [
+            [
+              "We do not sell, rent or trade your personal information to third parties for marketing purposes.",
+              "당사는 마케팅 목적으로 귀하의 개인정보를 제3자에게 판매, 임대 또는 교환하지 않습니다."
+            ]
+          ]
+        },
+        {
+          "h": [
+            "3. Cookies",
+            "3. 쿠키"
+          ],
+          "p": [
+            [
+              "Our website may use cookies and similar tracking technologies to improve your browsing experience. Cookies are small text files stored on your device. You can control cookie settings through your browser; disabling cookies may affect some features of the site.",
+              "당사 웹사이트는 귀하의 브라우징 경험을 향상시키기 위해 쿠키 및 유사한 추적 기술을 사용할 수 있습니다. 쿠키는 귀하의 기기에 저장되는 작은 텍스트 파일입니다. 브라우저 설정을 통해 쿠키 설정을 제어할 수 있습니다. 쿠키를 비활성화하면 사이트의 일부 기능에 영향을 미칠 수 있습니다."
+            ],
+            [
+              "Types of cookies we may use:",
+              "당사가 사용할 수 있는 쿠키 유형:"
+            ]
+          ],
+          "li": [
+            [
+              "Essential cookies: required for the website to function properly.",
+              "필수 쿠키: 웹사이트가 제대로 작동하는 데 필요합니다."
+            ],
+            [
+              "Analytics cookies: help us understand how visitors interact with the site, for example page views and session duration.",
+              "분석 쿠키: 방문자가 사이트와 상호작용하는 방식을 이해하는 데 도움을 줍니다(예: 페이지 조회수, 세션 시간)."
+            ]
+          ]
+        },
+        {
+          "h": [
+            "4. Data retention",
+            "4. 데이터 보유 기간"
+          ],
+          "p": [
+            [
+              "We retain personal information only for as long as is necessary to fulfil the purpose for which it was collected, or as required by law. Inquiry form submissions are kept for a reasonable period in order to manage business inquiries and follow-up communication.",
+              "당사는 개인정보를 수집 목적을 달성하거나 법률에서 요구하는 기간 동안만 보유합니다. 문의 양식 제출물은 비즈니스 문의 및 후속 커뮤니케이션을 관리하기 위해 합리적인 기간 동안 보관됩니다."
+            ]
+          ]
+        },
+        {
+          "h": [
+            "5. Data security",
+            "5. 데이터 보안"
+          ],
+          "p": [
+            [
+              "We implement appropriate technical and organisational measures to protect your personal information against unauthorised access, alteration, disclosure or destruction. However, no method of transmission over the internet is 100% secure, and absolute security cannot be guaranteed.",
+              "당사는 귀하의 개인정보를 무단 접근, 변경, 공개 또는 파괴로부터 보호하기 위해 적절한 기술적 및 조직적 조치를 시행합니다. 그러나 인터넷을 통한 전송 방법은 100% 안전하지 않으며, 절대적인 보안을 보장할 수 없습니다."
+            ]
+          ]
+        },
+        {
+          "h": [
+            "6. Third-party services",
+            "6. 제3자 서비스"
+          ],
+          "p": [
+            [
+              "We may use third-party tools and services, such as analytics providers or hosting platforms, that process data on our behalf. These service providers are contractually obliged to handle data securely and to process it only on our instructions.",
+              "당사는 당사를 대신하여 데이터를 처리할 수 있는 제3자 도구 및 서비스(분석 제공업체 또는 호스팅 플랫폼 등)를 사용할 수 있습니다. 이러한 서비스 제공자는 계약상 데이터를 안전하게 처리하고 당사의 지시에 따라서만 처리할 의무가 있습니다."
+            ]
+          ]
+        },
+        {
+          "h": [
+            "7. Your rights",
+            "7. 귀하의 권리"
+          ],
+          "p": [
+            [
+              "Under applicable law, you may have the right to:",
+              "해당 법률에 따라 귀하는 다음과 같은 권리를 가질 수 있습니다:"
+            ]
+          ],
+          "li": [
+            [
+              "access the personal information we hold about you",
+              "당사가 보유한 귀하의 개인정보에 접근"
+            ],
+            [
+              "request correction of inaccurate or incomplete data",
+              "부정확하거나 불완전한 데이터의 정정 요청"
+            ],
+            [
+              "request deletion of your personal information",
+              "귀하의 개인정보 삭제 요청"
+            ],
+            [
+              "withdraw consent to processing, where applicable",
+              "해당되는 경우 처리에 대한 동의 철회"
+            ],
+            [
+              "lodge a complaint with the relevant data protection authority",
+              "관련 개인정보 보호 기관에 불만 제기"
+            ]
+          ],
+          "p2": [
+            [
+              "To exercise these rights, please contact us using the details below.",
+              "이러한 권리를 행사하려면 아래 연락처로 문의해 주시기 바랍니다."
+            ]
+          ]
+        },
+        {
+          "h": [
+            "8. International users",
+            "8. 국제 사용자"
+          ],
+          "p": [
+            [
+              "This website is operated from the Republic of Korea. If you access the site from outside Korea, your information may be transferred to and processed in Korea, where data protection law may differ from that of your own country.",
+              "본 웹사이트는 대한민국에서 운영됩니다. 한국 이외의 지역에서 사이트에 접속하는 경우, 귀하의 정보가 한국으로 전송되어 처리될 수 있으며, 이 경우 데이터 보호법이 귀하의 국가와 다를 수 있습니다."
+            ]
+          ]
+        },
+        {
+          "h": [
+            "9. Changes to this policy",
+            "9. 방침 변경"
+          ],
+          "p": [
+            [
+              "We may update this Privacy Policy from time to time. The updated version will be posted on this page together with its revised effective date. Please review this policy periodically.",
+              "당사는 수시로 본 개인정보처리방침을 업데이트할 수 있습니다. 업데이트된 버전은 개정된 시행일자와 함께 본 페이지에 게시됩니다. 정기적으로 본 방침을 검토하시기 바랍니다."
+            ]
+          ]
+        },
+        {
+          "h": [
+            "10. Contact",
+            "10. 문의처"
+          ],
+          "p": [
+            [
+              "For questions about this Privacy Policy, please contact:",
+              "본 개인정보처리방침에 관한 문의사항은 다음 연락처로 문의해 주시기 바랍니다:"
+            ],
+            [
+              "W Labs (주식회사 더블유랩스)",
+              "W Labs (주식회사 더블유랩스)"
+            ],
+            [
+              "Website: https://wsoft.space/",
+              "웹사이트: https://wsoft.space/"
+            ]
+          ]
+        }
+      ]
+    }
+  }
 } as const;

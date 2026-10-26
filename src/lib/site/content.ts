@@ -528,3 +528,163 @@ export const RAIL_ENTRIES: RailEntry[] = (V3_CONTENT.rail as readonly RawRailEnt
   ...(r.breakLine ? { breakLine: r.breakLine } : {}),
   ...(r.link ? { link: r.link } : {}),
 }));
+
+// ── Legal (WOS-354) ────────────────────────────────────────────────────────
+//
+// content.generated.ts's `legal` is v3's own `{ terms, privacy }` tree,
+// harvested verbatim (scripts/extract-v3-content.mjs — `const LEGAL=` in
+// the v3 source, site/index.html:3980-4035). Each section is v3's fixed
+// `h → sub → p → li → sub2 → p2 → li2 → p3` field order (its own
+// renderLegal(), index.html:4088-4103); toLegalSection below flattens that
+// into an ordered block list so LegalDoc.tsx can render one `.map()` loop
+// instead of reimplementing that field order.
+//
+// v3 bakes a numeral into every top-level heading ("1. Services", "2.
+// ..."); that's stripped here and reapplied at render time from the
+// section's final array position, so splicing the two PIPA sections below
+// into `privacy` doesn't require renumbering the ported headings by hand.
+// Sub-headings ("3.1 Permitted use") keep their authored numbers — both
+// insertions land after section 4, so sections 1–3 (the only ones with
+// sub-numbering) never move.
+
+type RawLegalPair = readonly [string, string]; // [en, ko], v3's own order
+type RawLegalSection = {
+  h: RawLegalPair;
+  sub?: RawLegalPair;
+  p?: readonly RawLegalPair[];
+  li?: readonly RawLegalPair[];
+  sub2?: RawLegalPair;
+  p2?: readonly RawLegalPair[];
+  li2?: readonly RawLegalPair[];
+  p3?: readonly RawLegalPair[];
+};
+type RawLegalDoc = { t: RawLegalPair; lead: readonly RawLegalPair[]; sec: readonly RawLegalSection[] };
+
+export type LegalBlock =
+  | { kind: "h3"; text: Bilingual }
+  | { kind: "p"; text: Bilingual }
+  | { kind: "ul"; items: Bilingual[] };
+export type LegalSection = { heading: Bilingual; blocks: LegalBlock[] };
+export type LegalDocId = "privacy" | "terms";
+export type LegalDoc = {
+  id: LegalDocId;
+  title: Bilingual;
+  lead: Bilingual[];
+  sections: LegalSection[];
+  effective: string;
+};
+
+function pair(p: RawLegalPair): Bilingual {
+  return bi(p[0], p[1]);
+}
+
+function stripSectionNumber(p: RawLegalPair): Bilingual {
+  return bi(p[0].replace(/^\d+\.\s*/, ""), p[1].replace(/^\d+\.\s*/, ""));
+}
+
+function toLegalSection(s: RawLegalSection): LegalSection {
+  const blocks: LegalBlock[] = [];
+  if (s.sub) blocks.push({ kind: "h3", text: pair(s.sub) });
+  for (const p of s.p ?? []) blocks.push({ kind: "p", text: pair(p) });
+  if (s.li) blocks.push({ kind: "ul", items: s.li.map(pair) });
+  if (s.sub2) blocks.push({ kind: "h3", text: pair(s.sub2) });
+  for (const p of s.p2 ?? []) blocks.push({ kind: "p", text: pair(p) });
+  if (s.li2) blocks.push({ kind: "ul", items: s.li2.map(pair) });
+  for (const p of s.p3 ?? []) blocks.push({ kind: "p", text: pair(p) });
+  return { heading: stripSectionNumber(s.h), blocks };
+}
+
+function insertAfterHeadingEn(sections: LegalSection[], headingEn: string, section: LegalSection): void {
+  const idx = sections.findIndex((s) => s.heading.en === headingEn);
+  if (idx < 0) {
+    throw new Error(`WOS-354: expected a "${headingEn}" section to insert after — did the v3 source change?`);
+  }
+  sections.splice(idx + 1, 0, section);
+}
+
+// WOS-354: the ported privacy policy claims PIPA compliance in its lead
+// paragraph but doesn't carry the statute's own section scheme. These two
+// sections are the gaps this ticket can close truthfully without inventing
+// facts — a destruction procedure (general practice, no fixed numeric
+// retention period; that number needs a business decision, tracked in the
+// WOS-354 follow-up ticket) and the standard government remedy contacts
+// (public, verifiable, no company-specific data required). 개인정보
+// 보호책임자 and the 수탁자 명단 need real names/contacts this repo has no
+// source for, so they stay in that follow-up rather than being guessed at
+// here.
+const DESTRUCTION_SECTION: LegalSection = {
+  heading: bi("Destruction procedure and method", "파기절차 및 방법"),
+  blocks: [
+    {
+      kind: "p",
+      text: bi(
+        "Personal information is destroyed without delay once the purpose for which it was collected has been achieved, except where applicable law requires it to be retained for a longer period.",
+        "개인정보는 수집 및 이용목적이 달성되면 지체 없이 파기함을 원칙으로 하되, 관계 법령에 따라 보존이 필요한 경우에는 해당 기간 동안 보관합니다.",
+      ),
+    },
+    {
+      kind: "p",
+      text: bi(
+        "Personal information stored in electronic file form is deleted using a technical method that renders the records permanently unrecoverable. Personal information printed on paper is destroyed by shredding or incineration.",
+        "전자적 파일 형태로 저장된 개인정보는 기록을 재생할 수 없는 기술적 방법을 사용하여 삭제하며, 종이에 출력된 개인정보는 분쇄기로 분쇄하거나 소각하여 파기합니다.",
+      ),
+    },
+  ],
+};
+
+const REMEDY_SECTION: LegalSection = {
+  heading: bi("Remedies for infringement of rights", "권익침해 구제방법"),
+  blocks: [
+    {
+      kind: "p",
+      text: bi(
+        "If you believe your rights regarding personal information have been infringed, you may contact the following organisations for counselling, mediation or to file a report, in addition to contacting W Labs directly.",
+        "개인정보와 관련하여 귀하의 권익이 침해되었다고 판단되는 경우, W Labs에 직접 연락하시는 것 외에도 아래 기관에 상담, 조정 신청 또는 신고하실 수 있습니다.",
+      ),
+    },
+    {
+      kind: "ul",
+      items: [
+        bi(
+          "Personal Information Dispute Mediation Committee — 1833-6972 (dispute.kisa.or.kr)",
+          "개인정보분쟁조정위원회 — 1833-6972 (dispute.kisa.or.kr)",
+        ),
+        bi(
+          "Personal Information Infringement Report Center (KISA) — 118, no area code (privacy.kisa.or.kr)",
+          "개인정보침해신고센터(한국인터넷진흥원) — (국번없이) 118 (privacy.kisa.or.kr)",
+        ),
+        bi(
+          "Supreme Prosecutors' Office Cyber Investigation Division — 1301 (www.spo.go.kr)",
+          "대검찰청 사이버수사과 — 1301 (www.spo.go.kr)",
+        ),
+        bi("National Police Agency Cyber Bureau — 182 (ecrm.police.go.kr)", "경찰청 사이버수사국 — 182 (ecrm.police.go.kr)"),
+      ],
+    },
+  ],
+};
+
+// WOS-354: the v3 build never actually renders a 시행일자 despite §9/§7
+// promising one — see this ticket's plan. Dated to this port.
+const LEGAL_EFFECTIVE_DATE = "2026-10-23";
+
+const rawLegal = V3_CONTENT.legal as unknown as { terms: RawLegalDoc; privacy: RawLegalDoc };
+
+function toLegalDoc(id: LegalDocId, raw: RawLegalDoc): LegalDoc {
+  const sections = raw.sec.map(toLegalSection);
+  if (id === "privacy") {
+    insertAfterHeadingEn(sections, "Data retention", DESTRUCTION_SECTION);
+    insertAfterHeadingEn(sections, "Your rights", REMEDY_SECTION);
+  }
+  return {
+    id,
+    title: pair(raw.t),
+    lead: raw.lead.map(pair),
+    sections,
+    effective: LEGAL_EFFECTIVE_DATE,
+  };
+}
+
+export const LEGAL_DOCS: Record<LegalDocId, LegalDoc> = {
+  terms: toLegalDoc("terms", rawLegal.terms),
+  privacy: toLegalDoc("privacy", rawLegal.privacy),
+};
