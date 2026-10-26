@@ -23,17 +23,18 @@
 //      (`spRailUndisclosed` has no EN) is exactly the bug class this
 //      guards against for every future manifest addition.
 //
-// Six manifests feed this script: v3-dictionary-manifest.mjs (WOS-331 —
+// Manifests feed this script: v3-dictionary-manifest.mjs (WOS-331 —
 // chrome + Home's hero/proof/band/faq), v3-content-manifest.mjs (WOS-332 —
 // Work/Company panels, product/project detail pages, Home's project-strip/
 // company-teaser, and the rest of the FAQ), v3-contact-manifest.mjs
-// (WOS-334 — the /contact form), and WOS-336's v3-tuner-manifest.mjs /
+// (WOS-334 — the /contact form), WOS-336's v3-tuner-manifest.mjs /
 // v3-rail-manifest.mjs / v3-wos336-manifest.mjs (the sp-tuner, the sp-rail,
-// and search/sheet/Home-products/CTA/toast). They're merged
-// namespace-by-namespace before extraction — `home`, `faq` and `contact`
-// are extended by more than one manifest rather than each owning a
-// disjoint set of namespaces, since more than one ticket adds fields to
-// the same surface.
+// and search/sheet/Home-products/CTA/toast), v3-wos342-manifest.mjs, and
+// v3-wos354-manifest.mjs (the /legal pages' chrome strings, its own `legal`
+// namespace). They're merged namespace-by-namespace before extraction —
+// `home`, `faq` and `contact` are extended by more than one manifest rather
+// than each owning a disjoint set of namespaces, since more than one ticket
+// adds fields to the same surface.
 //
 // A manifest entry may also be an inline literal `{ ko: "…", en: "…" }`
 // with no `v3Key` — for the handful of strings the v3 source only renders
@@ -57,6 +58,7 @@ import { TUNER_MANIFEST } from "./v3-tuner-manifest.mjs";
 import { RAIL_MANIFEST } from "./v3-rail-manifest.mjs";
 import { WOS336_MANIFEST } from "./v3-wos336-manifest.mjs";
 import { WOS342_MANIFEST } from "./v3-wos342-manifest.mjs";
+import { WOS354_MANIFEST } from "./v3-wos354-manifest.mjs";
 
 function mergeManifests(...manifests) {
   const merged = {};
@@ -76,6 +78,7 @@ const MANIFEST = mergeManifests(
   RAIL_MANIFEST,
   WOS336_MANIFEST,
   WOS342_MANIFEST,
+  WOS354_MANIFEST,
 );
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));

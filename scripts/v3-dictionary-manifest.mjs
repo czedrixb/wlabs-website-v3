@@ -45,7 +45,15 @@ export const MANIFEST = {
     privacy: { v3Key: "privacy" },
     terms: { v3Key: "terms" },
     legal1: { v3Key: "legal1" },
-    legalAddr: { v3Key: "legalAddr" },
+    // WOS-354: the v3 harvest left this as a placeholder ("사업자등록번호 및
+    // D-U-N-S® 번호는 확인 후 게재") — the ported Terms document
+    // (content.ts's LEGAL_DOCS, from the same v3 source) states the
+    // business registration number outright (387-87-03701), so the two
+    // disagreed. Decision: publish it here too; D-U-N-S® stays pending.
+    legalAddr: {
+      ko: "서울 · 사업자등록번호 387-87-03701 · D-U-N-S® 번호는 확인 후 게재",
+      en: "Seoul · Business registration no. 387-87-03701 · D-U-N-S® number to be added once confirmed",
+    },
     legal2: { v3Key: "legal2" },
   },
   home: {

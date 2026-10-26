@@ -20,6 +20,8 @@ const STATIC_PATHS = [
   "/company/story",
   "/company/team",
   "/company/insights",
+  "/legal/privacy",
+  "/legal/terms",
   "/contact",
   "/search",
 ];
