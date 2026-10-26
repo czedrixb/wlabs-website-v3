@@ -8,8 +8,9 @@ type Props = { locale: Locale };
 // The inquiry/partnership/newsletter links carry `data-contact`, so with JS
 // they open the site-wide contact sheet preselected to that topic (WOS-336,
 // v3's footer buttons at index.html:3107) and without JS they still resolve
-// to /contact. The privacy/terms links point at a company panel in v3 —
-// those legal pages still don't exist, so they keep resolving to /company.
+// to /contact. The privacy/terms links point at /legal/privacy and
+// /legal/terms (WOS-354 — those pages used to not exist, so these dead-
+// ended at /company; see Footer.tsx's git history / WOS-351 finding F11).
 //
 // Server component — reads the dictionary itself rather than taking it as
 // a prop, since (unlike Header/TabBar/LangToggle) nothing here needs to run
@@ -65,8 +66,8 @@ export function Footer({ locale }: Props) {
           </div>
           <div>
             <h4>{s.legalHead}</h4>
-            <Link href={withLocale("/company", locale)}>{s.privacy}</Link>
-            <Link href={withLocale("/company", locale)}>{s.terms}</Link>
+            <Link href={withLocale("/legal/privacy", locale)}>{s.privacy}</Link>
+            <Link href={withLocale("/legal/terms", locale)}>{s.terms}</Link>
             <Link href={withLocale("/search", locale)}>{s.tabSearch}</Link>
           </div>
         </nav>
