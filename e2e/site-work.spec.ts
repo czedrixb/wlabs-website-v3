@@ -30,17 +30,18 @@ test.describe("work: services panel", () => {
 });
 
 test.describe("work: products panel", () => {
-  test("renders the 3 product teaser cards with RUO badges where due", async ({ page }) => {
+  test("renders the 5 product teaser cards with RUO / in-development badges where due", async ({ page }) => {
     await page.goto("/ko/work/products");
     const cards = page.locator(".panel .cards .card");
-    await expect(cards).toHaveCount(3);
-    await expect(cards.filter({ hasText: "SkinArch" }).locator(".ruo")).toBeVisible();
+    await expect(cards).toHaveCount(5);
+    await expect(cards.filter({ hasText: "UNDULIX" }).locator(".ruo")).toBeVisible();
     await expect(cards.filter({ hasText: "WIZ Assistant" }).locator(".ruo")).toHaveCount(0);
+    await expect(cards.filter({ hasText: "Willy" }).locator(".ruo")).toContainText("In development");
   });
 
   test("card links resolve to the product detail page", async ({ page }) => {
     await page.goto("/ko/work/products");
-    await page.locator(".card", { hasText: "SkinArch" }).getByRole("link", { name: "SkinArch" }).click();
+    await page.locator(".card", { hasText: "UNDULIX" }).getByRole("link", { name: "UNDULIX" }).click();
     await expect(page).toHaveURL(/\/ko\/products\/skinarch$/);
   });
 });

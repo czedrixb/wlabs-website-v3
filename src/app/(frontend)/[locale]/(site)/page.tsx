@@ -47,7 +47,7 @@ export default async function HomePage({ params }: Props) {
         <ProofBand s={s.proof} />
       </Field>
       <Band locale={locale} s={s.band} />
-      <ProductsPreview locale={locale} s={s.home} />
+      <ProductsPreview locale={locale} s={s.home} w={s.work} />
       <ProjectStrip locale={locale} s={s.home} />
       <CompanyTeaser locale={locale} s={s.home} />
       <Faq locale={locale} s={s.faq} />

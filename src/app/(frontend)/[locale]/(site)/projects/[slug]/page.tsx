@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import type { Locale } from "@/lib/locale";
 import { resolveLocale, withLocale } from "@/lib/locale";
-import { PROJECTS, PROJECT_CATS, CATEGORY_SERVICE, CATEGORY_TOPIC, SERVICES } from "@/lib/site/content";
+import { PROJECTS, PROJECT_CATS, CATEGORY_SERVICE, CATEGORY_TOPIC, SERVICES, PRODUCTS } from "@/lib/site/content";
 import { ProjectArt } from "@/components/site/work/ProjectArt";
 import { siteMetadata } from "@/lib/site/metadata";
 
@@ -146,7 +147,22 @@ export default async function ProjectPage({ params }: Props) {
             </Link>
           </div>
         </div>
-        <ProjectArt art={project.art} />
+        {project.shot ? (
+          // WOS-383: the project's real screen fills the head, anchored to
+          // the top of the capture — same slot and sizing as the product
+          // pages' hero image.
+          <div className="prod-visual pvis" aria-hidden="true">
+            <Image
+              src={project.shot}
+              alt=""
+              fill
+              sizes="(min-width: 744px) 430px, 100vw"
+              style={{ objectFit: "cover", objectPosition: "center top" }}
+            />
+          </div>
+        ) : (
+          <ProjectArt art={project.art} />
+        )}
       </header>
 
       <section className="prod-sec">
@@ -190,6 +206,15 @@ export default async function ProjectPage({ params }: Props) {
           <h2>{t("relatedH2")}</h2>
         </div>
         <div className="prod-rel">
+          {/* WOS-383: a project that became one of our products links to it first. */}
+          {project.product && (
+            <Link className="rel-item" href={withLocale(`/products/${project.product}`, locale)}>
+              <span className="initial" aria-hidden="true">
+                {initials(PRODUCTS[project.product].name)}
+              </span>
+              <span>{PRODUCTS[project.product].name}</span>
+            </Link>
+          )}
           <Link className="rel-item" href={withLocale(`/work/services#${svc.anchor}`, locale)}>
             <span className="initial" aria-hidden="true">
               {svc.abbr}

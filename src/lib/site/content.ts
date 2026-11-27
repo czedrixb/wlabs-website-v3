@@ -97,6 +97,16 @@ export const TEAM_GROUPS: TeamGroup[] = V3_CONTENT.groups
   }))
   .filter((g) => g.members.length > 0);
 
+// WOS-383: projects with a real screen capture (public/site/img/proj-<id>.webp)
+// show it on their card and as the project page's head; the rest keep the
+// "Illustration" placeholder / ProjectArt. KindleUp and ToDon't are left
+// out on purpose: their only captures are too small to stay sharp.
+const PROJECT_SHOT_IDS = new Set(["skin", "yumtrack", "ulms", "pagoda", "lingrid", "audiomint"]);
+
+export function projectShot(id: string): string | null {
+  return PROJECT_SHOT_IDS.has(id) ? `/site/img/proj-${id}.webp` : null;
+}
+
 // ── Projects ────────────────────────────────────────────────────────────
 
 export type ProjectCatId = "health" | "edu" | "lang" | "prod";
@@ -124,6 +134,11 @@ export type Project = {
   title: Bilingual;
   desc: Bilingual;
   list: Bilingual[];
+  // WOS-383: a project that grew into one of W Labs' own products links to
+  // that product's page from its "Related" rail (v3's `product` field).
+  product: ProductId | null;
+  // WOS-383: the project's screen capture, or null (see projectShot).
+  shot: string | null;
 };
 
 export const PROJECTS: Project[] = V3_CONTENT.projects.map((p) => ({
@@ -134,6 +149,8 @@ export const PROJECTS: Project[] = V3_CONTENT.projects.map((p) => ({
   title: bi(p.title[0], p.title[1]),
   desc: bi(p.desc[0], p.desc[1]),
   list: p.list.map(([en, ko]) => bi(en, ko)),
+  product: ("product" in p ? (p.product as ProductId) : null) ?? null,
+  shot: projectShot(p.id),
 }));
 
 // A project's own category maps to one "home" service for cross-linking
@@ -259,7 +276,7 @@ export const SERVICES: Service[] = [
     related: [
       { kind: "product", id: "skinarch", abbr: "SA" },
       { kind: "product", id: "brainarch", abbr: "BA" },
-      { kind: "project", id: "skin", abbr: "SO", short: "Skin Optics" },
+      { kind: "project", id: "skin", abbr: "UN", short: "UNDULIX research" },
     ],
     relatedCaption: "relatedProducts",
   },
@@ -297,7 +314,7 @@ export const SERVICES: Service[] = [
 
 // ── Products ────────────────────────────────────────────────────────────
 
-export type ProductId = "skinarch" | "brainarch" | "wiz";
+export type ProductId = "skinarch" | "brainarch" | "wiz" | "familytree" | "willy";
 
 export type ProductFeature = { title: Bilingual; body: Bilingual };
 export type ProductStep = { title: Bilingual; body: Bilingual };
@@ -330,14 +347,58 @@ export type Product = {
   // Hand-authored directly in that panel's markup, not part of
   // PRODUCT_PAGES — see this file's header on that split.
   teaserChips: string[];
-  priceKey: "priceAsk" | "monthly";
+  priceKey: "priceAsk" | "monthly" | "inDev";
+  // WOS-383: Willy is shown but not yet available — an "In development"
+  // chip on its card and page, and a pilot-shaped closing CTA.
+  dev: boolean;
+  // WOS-383: the Overview's four paragraphs (null when a product has none).
+  about: Bilingual[] | null;
+  more: ProductMore | null;
+};
+
+// WOS-383: the product pages' "See it", "Why it exists", "Getting started"
+// and "Good to know" sections (v3's PRODUCT_MORE). Media live as files under
+// public/site/media/products/<id>/: video.mp4 + poster.webp when `video`
+// is set, g1..g4.webp for the gallery, overview.webp beside the Overview.
+export type ProductMore = {
+  video: { label: Bilingual } | null;
+  gallery: Bilingual[];
+  goals: ProductFeature[];
+  setup: ProductStep[];
+  faq: { q: Bilingual; a: Bilingual }[];
 };
 
 const TEASER: Record<ProductId, { chips: string[]; priceKey: Product["priceKey"] }> = {
   skinarch: { chips: ["LC-OCT", "3D skin analysis", "Quantification"], priceKey: "priceAsk" },
   wiz: { chips: ["Website embed", "Q&A", "Document requests"], priceKey: "monthly" },
   brainarch: { chips: ["CT imaging", "Visualization", "AI analysis"], priceKey: "priceAsk" },
+  familytree: { chips: ["Jokbo", "Family tree", "Hanja OCR"], priceKey: "priceAsk" },
+  willy: { chips: ["AI agent", "Team records", "Human approval"], priceKey: "inDev" },
 };
+
+type V3Pair = readonly [string, string];
+type V3Quad = readonly [string, string, string, string];
+const quad = ([enT, koT, enB, koB]: V3Quad) => ({ title: bi(enT, koT), body: bi(enB, koB) });
+
+function toMore(id: ProductId): ProductMore | null {
+  const all = V3_CONTENT.productMore as unknown as Partial<
+    Record<ProductId, { video?: { label: V3Pair }; gallery?: V3Pair[]; goals: V3Quad[]; setup: V3Quad[]; faq: V3Quad[] }>
+  >;
+  const m = all[id];
+  if (!m) return null;
+  return {
+    video: m.video ? { label: bi(m.video.label[0], m.video.label[1]) } : null,
+    gallery: (m.gallery ?? []).map(([en, ko]) => bi(en, ko)),
+    goals: m.goals.map(quad),
+    setup: m.setup.map(quad),
+    faq: m.faq.map(([enQ, koQ, enA, koA]) => ({ q: bi(enQ, koQ), a: bi(enA, koA) })),
+  };
+}
+
+function toAbout(id: ProductId): Bilingual[] | null {
+  const all = V3_CONTENT.productAbout as unknown as Partial<Record<ProductId, V3Pair[]>>;
+  return all[id]?.map(([en, ko]) => bi(en, ko)) ?? null;
+}
 
 function toRel(r: (typeof V3_CONTENT.productPages)[ProductId]["rel"][number]): ProductRel {
   if (r.k === "proj") {
@@ -368,12 +429,19 @@ export const PRODUCTS: Record<ProductId, Product> = Object.fromEntries(
         rel: p.rel.map(toRel),
         teaserChips: TEASER[id].chips,
         priceKey: TEASER[id].priceKey,
+        dev: "dev" in p ? Boolean(p.dev) : false,
+        about: toAbout(id),
+        more: toMore(id),
       },
     ];
   }),
 ) as Record<ProductId, Product>;
 
-export const PRODUCT_ORDER: ProductId[] = ["skinarch", "wiz", "brainarch"];
+export const PRODUCT_ORDER: ProductId[] = ["skinarch", "wiz", "brainarch", "familytree", "willy"];
+
+// WOS-383: Home's three-card preview shows the current line-up; WIZ
+// Assistant and BrainArch stay on Work → Products.
+export const HOME_PRODUCT_ORDER: ProductId[] = ["skinarch", "willy", "familytree"];
 
 // ── FAQ ─────────────────────────────────────────────────────────────────
 //

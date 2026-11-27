@@ -1,6 +1,6 @@
 // GENERATED FILE — do not hand-edit.
 // Regenerate with: node scripts/extract-v3-content.mjs
-// Source: D:\Submit\wlabs-website-v3\site\index.html
+// Source: wlabs-website-v3/site/index.html (v3 design repo)
 //
 // Raw TEAM/GROUPS/PROJECTS/CATS/PRODUCT_PAGES/TOPICS/LEGAL literals
 // harvested from the v3 design repo, verbatim except for TEAM's photo
@@ -17,30 +17,6 @@ export const V3_CONTENT = {
       "CEO",
       "대표",
       "/site/team/Matt.webp",
-      "mgmt"
-    ],
-    [
-      "Joseph",
-      "이강준",
-      "Full-Stack Project Manager",
-      "풀스택 프로젝트 매니저",
-      "/site/team/Joseph.webp",
-      "mgmt"
-    ],
-    [
-      "Ricky",
-      "이현석",
-      "Project Manager",
-      "프로젝트 매니저",
-      "/site/team/Ricky.webp",
-      "mgmt"
-    ],
-    [
-      "Sing",
-      "김신영",
-      "Project Manager",
-      "프로젝트 매니저",
-      "/site/team/Sing.webp",
       "mgmt"
     ],
     [
@@ -68,6 +44,30 @@ export const V3_CONTENT = {
       "dev"
     ],
     [
+      "Joseph",
+      "이강준",
+      "Lead Full-Stack Developer",
+      "Lead Full-Stack Developer",
+      "/site/team/Joseph.webp",
+      "dev"
+    ],
+    [
+      "Ricky",
+      "이현석",
+      "Full-Stack Developer",
+      "풀스택 개발자",
+      "/site/team/Ricky.webp",
+      "dev"
+    ],
+    [
+      "Sing",
+      "김신영",
+      "AI Engineer",
+      "AI Engineer",
+      "/site/team/Sing.webp",
+      "dev"
+    ],
+    [
       "Neil",
       "",
       "Full-Stack AI Developer",
@@ -88,7 +88,7 @@ export const V3_CONTENT = {
       "",
       "AI / Full-Stack Developer",
       "AI·풀스택 개발자",
-      "",
+      "/site/team/Francis.webp",
       "dev"
     ],
     [
@@ -96,7 +96,7 @@ export const V3_CONTENT = {
       "",
       "Full-Stack Developer",
       "풀스택 개발자",
-      "",
+      "/site/team/JohnRey.webp",
       "dev"
     ],
     [
@@ -104,7 +104,7 @@ export const V3_CONTENT = {
       "",
       "Full-Stack Developer",
       "풀스택 개발자",
-      "",
+      "/site/team/Sean.webp",
       "dev"
     ],
     [
@@ -112,7 +112,7 @@ export const V3_CONTENT = {
       "",
       "Marketing Specialist",
       "마케팅 스페셜리스트",
-      "",
+      "/site/team/Jericho.webp",
       "biz"
     ],
     [
@@ -160,7 +160,7 @@ export const V3_CONTENT = {
       "",
       "Marketing",
       "마케팅",
-      "/site/team/Zyra.webp",
+      "",
       "biz"
     ],
     [
@@ -192,7 +192,7 @@ export const V3_CONTENT = {
       "",
       "Marketing Specialist",
       "마케팅 스페셜리스트",
-      "/site/team/Winona.webp",
+      "",
       "biz"
     ]
   ],
@@ -233,30 +233,31 @@ export const V3_CONTENT = {
       "id": "skin",
       "cat": "health",
       "art": "cells",
+      "product": "skinarch",
       "tag": [
-        "AI analysis / Skin optics",
-        "AI 분석 / 피부 광학"
+        "AI analysis / LC-OCT imaging",
+        "AI analysis / LC-OCT imaging"
       ],
       "title": [
-        "AI-Measuring & Analysis Skin Optics",
-        "AI 피부 광학 측정·분석"
+        "UNDULIX — LC-OCT Skin Structure Research",
+        "UNDULIX — LC-OCT Skin Structure Research"
       ],
       "desc": [
-        "Measurement and analysis of skin characteristics by connecting microscopy images and AI.",
-        "현미경 영상과 AI를 연결해 피부의 특성을 측정하고 분석합니다."
+        "The research behind UNDULIX: AI that finds the dermal–epidermal junction (DEJ) in LC-OCT skin scans and turns it into measurements a research team can review and export.",
+        "The research behind UNDULIX: AI that finds the dermal–epidermal junction (DEJ) in LC-OCT skin scans and turns it into measurements a research team can review and export."
       ],
       "list": [
         [
-          "Microscopy-based skin image analysis",
-          "현미경 기반 피부 이미지 분석"
+          "AI DEJ segmentation on LC-OCT scans",
+          "AI DEJ segmentation on LC-OCT scans"
         ],
         [
-          "Pore density and dead skin cells",
-          "모공 밀도와 각질"
+          "DEJ measurements per subject, site and visit",
+          "DEJ measurements per subject, site and visit"
         ],
         [
-          "Skin texture and tone",
-          "피부결과 피부 톤"
+          "2D slice review before export",
+          "2D slice review before export"
         ]
       ]
     },
@@ -507,7 +508,7 @@ export const V3_CONTENT = {
   ],
   "productPages": {
     "skinarch": {
-      "name": "SkinArch",
+      "name": "UNDULIX",
       "cat": [
         "Imaging",
         "이미징"
@@ -594,20 +595,20 @@ export const V3_CONTENT = {
         [
           "Support",
           "지원",
-          "Onboarding and implementation by the W Labs team.",
-          "W Labs 팀이 온보딩과 도입을 지원합니다."
+          "Onboarding and implementation by the W Labs team.",
+          "W Labs 팀이 온보딩과 도입을 지원합니다."
         ]
       ],
       "note": [
-        "SkinArch is research software. Nothing on this page claims diagnostic, screening or assessment performance.",
-        "SkinArch는 연구용 소프트웨어입니다. 이 페이지는 진단·선별·평가 성능을 주장하지 않습니다."
+        "UNDULIX is research software. Nothing on this page claims diagnostic, screening or assessment performance.",
+        "UNDULIX는 연구용 소프트웨어입니다. 이 페이지는 진단·선별·평가 성능을 주장하지 않습니다."
       ],
       "rel": [
         {
           "k": "proj",
           "id": "skin",
-          "ab": "SO",
-          "t": "Skin Optics"
+          "ab": "UR",
+          "t": "UNDULIX research"
         },
         {
           "k": "svc",
@@ -707,8 +708,8 @@ export const V3_CONTENT = {
         [
           "Support",
           "지원",
-          "Set-up and research support by the W Labs team.",
-          "W Labs 팀이 구축과 연구를 지원합니다."
+          "Set-up and research support by the W Labs team.",
+          "W Labs 팀이 구축과 연구를 지원합니다."
         ]
       ],
       "note": [
@@ -730,6 +731,231 @@ export const V3_CONTENT = {
           "t": [
             "AI & Intelligent Automation",
             "AI·지능형 자동화"
+          ]
+        }
+      ]
+    },
+    "willy": {
+      "name": "Willy",
+      "cat": [
+        "AI agent",
+        "AI agent"
+      ],
+      "ruo": false,
+      "dev": true,
+      "topic": "willy",
+      "lead": [
+        "Willy is W Labs' AI agent for teams, in development. It answers from what the team has written down and asks before it changes anything. If there is no record, it says so instead of guessing.",
+        "Willy is W Labs' AI agent for teams, in development. It answers from what the team has written down and asks before it changes anything. If there is no record, it says so instead of guessing."
+      ],
+      "feats": [
+        [
+          "Answers from your records",
+          "Answers from your records",
+          "Willy answers from the team's own tasks, schedules and notes, not the open web.",
+          "Willy answers from the team's own tasks, schedules and notes, not the open web."
+        ],
+        [
+          "Asks before it acts",
+          "Asks before it acts",
+          "It proposes a change and waits. Nothing moves until a person approves.",
+          "It proposes a change and waits. Nothing moves until a person approves."
+        ],
+        [
+          "Says when it doesn't know",
+          "Says when it doesn't know",
+          "No record means no answer, not a guess.",
+          "No record means no answer, not a guess."
+        ],
+        [
+          "Where the team is",
+          "Where the team is",
+          "Designed for the desk, phone, watch, meeting room and reception.",
+          "Designed for the desk, phone, watch, meeting room and reception."
+        ]
+      ],
+      "steps": [
+        [
+          "Ask",
+          "Ask",
+          "Ask in plain words, wherever you are.",
+          "Ask in plain words, wherever you are."
+        ],
+        [
+          "Check",
+          "Check",
+          "Willy answers from the records and shows what it found.",
+          "Willy answers from the records and shows what it found."
+        ],
+        [
+          "Approve",
+          "Approve",
+          "If something should change, you approve it first.",
+          "If something should change, you approve it first."
+        ]
+      ],
+      "whoH": [
+        "Built for teams that run on shared records.",
+        "Built for teams that run on shared records."
+      ],
+      "who": [
+        "Teams whose tasks, schedules and decisions live in many places, and who want answers from them without handing control to an AI.",
+        "Teams whose tasks, schedules and decisions live in many places, and who want answers from them without handing control to an AI."
+      ],
+      "facts": [
+        [
+          "Status",
+          "상태",
+          "In development. The screens shown are prototype concepts.",
+          "In development. The screens shown are prototype concepts."
+        ],
+        [
+          "Approval",
+          "Approval",
+          "Every change needs a person's approval.",
+          "Every change needs a person's approval."
+        ],
+        [
+          "Pilots",
+          "Pilots",
+          "Discussed with each team.",
+          "Discussed with each team."
+        ],
+        [
+          "Support",
+          "지원",
+          "Set-up with the W Labs team.",
+          "Set-up with the W Labs team."
+        ]
+      ],
+      "note": null,
+      "rel": [
+        {
+          "k": "svc",
+          "ab": "AI",
+          "t": [
+            "AI & Intelligent Automation",
+            "AI·지능형 자동화"
+          ]
+        },
+        {
+          "k": "svc",
+          "ab": "CS",
+          "t": [
+            "Custom Software Development",
+            "맞춤 소프트웨어 개발"
+          ]
+        }
+      ]
+    },
+    "familytree": {
+      "name": "우리家",
+      "cat": [
+        "Family records",
+        "Family records"
+      ],
+      "ruo": false,
+      "topic": "familytree",
+      "lead": [
+        "우리家 turns the paper clan register (jokbo) into a family tree anyone can search. AI reads the Hanja register and records each person's source page. Characters it cannot read are left as ○: nothing is guessed.",
+        "우리家는 종이 족보를 누구나 찾아볼 수 있는 가계도로 바꿉니다. AI가 한자 족보를 읽어 인물마다 원문 쪽수까지 기록합니다. 읽을 수 없는 글자는 ○로 남깁니다. 추측하지 않습니다."
+      ],
+      "feats": [
+        [
+          "You at the centre",
+          "You at the centre",
+          "With you at the centre, the whole family tree opens at a glance.",
+          "나를 중심으로 우리 집안 가계도가 한눈에 펼쳐집니다."
+        ],
+        [
+          "A record for everyone",
+          "A record for everyone",
+          "Open a branch and each family member's record is right there.",
+          "가지를 펼치면 가족 한 사람 한 사람의 기록이 보입니다."
+        ],
+        [
+          "Search by name",
+          "Search by name",
+          "Type a name and the tree takes you straight to that ancestor.",
+          "이름만 입력하면 가계도에서 조상을 바로 찾아갑니다."
+        ],
+        [
+          "AI reading, with sources",
+          "AI reading, with sources",
+          "AI reads the Hanja register and keeps each person's source page. Unreadable characters stay ○, never guessed.",
+          "AI가 한자 족보를 읽어 인물마다 원문 쪽수까지 기록합니다. 읽을 수 없는 글자는 ○로 남깁니다."
+        ]
+      ],
+      "steps": [
+        [
+          "Read",
+          "Read",
+          "AI reads the paper register and records each person's source page.",
+          "AI가 한자 족보를 읽어 인물마다 원문 쪽수까지 기록합니다."
+        ],
+        [
+          "Approve",
+          "Approve",
+          "Once the clan approves you, you go straight into your family tree.",
+          "종중의 승인을 받으면 바로 가계도로 들어갑니다."
+        ],
+        [
+          "Share",
+          "Share",
+          "The whole family reads one tree, together.",
+          "온 가족이 함께 보는 우리 집안 이야기"
+        ]
+      ],
+      "whoH": [
+        "Built for clans with a paper jokbo.",
+        "Built for clans with a paper jokbo."
+      ],
+      "who": [
+        "Clan associations and families who want their register readable by every generation, not only the elders who can read Hanja.",
+        "Clan associations and families who want their register readable by every generation, not only the elders who can read Hanja."
+      ],
+      "facts": [
+        [
+          "Status",
+          "상태",
+          "Working prototype. Talk to us about your clan's register.",
+          "Working prototype. Talk to us about your clan's register."
+        ],
+        [
+          "Pricing",
+          "가격",
+          "On request.",
+          "문의."
+        ],
+        [
+          "Languages",
+          "언어",
+          "Korean and English.",
+          "한국어, 영어."
+        ],
+        [
+          "Support",
+          "지원",
+          "Set-up with the W Labs team.",
+          "Set-up with the W Labs team."
+        ]
+      ],
+      "note": null,
+      "rel": [
+        {
+          "k": "svc",
+          "ab": "AI",
+          "t": [
+            "AI & Intelligent Automation",
+            "AI·지능형 자동화"
+          ]
+        },
+        {
+          "k": "svc",
+          "ab": "CS",
+          "t": [
+            "Custom Software Development",
+            "맞춤 소프트웨어 개발"
           ]
         }
       ]
@@ -847,6 +1073,565 @@ export const V3_CONTENT = {
       ]
     }
   },
+  "productAbout": {
+    "skinarch": [
+      [
+        "UNDULIX is W Labs' analysis software for LC-OCT skin imaging. It finds the dermal–epidermal junction (DEJ), the undulating boundary between the epidermis and the dermis, in every slice of a scan, and turns it into measurements a research team can use.",
+        "UNDULIX is W Labs' analysis software for LC-OCT skin imaging. It finds the dermal–epidermal junction (DEJ), the undulating boundary between the epidermis and the dermis, in every slice of a scan, and turns it into measurements a research team can use."
+      ],
+      [
+        "An LC-OCT volume can hold around 500 cross-sections. Traced by hand, the junction takes hours and depends on who draws it: two readers rarely trace the same line. UNDULIX traces every slice the same way and marks where it is less certain, so reviewers spend their time where it matters.",
+        "An LC-OCT volume can hold around 500 cross-sections. Traced by hand, the junction takes hours and depends on who draws it: two readers rarely trace the same line. UNDULIX traces every slice the same way and marks where it is less certain, so reviewers spend their time where it matters."
+      ],
+      [
+        "Your lab keeps scanning exactly as it does today. Export the volume as a .tif stack, import it and run it with one click. A person accepts or excludes each run, and that decision is recorded with the result.",
+        "Your lab keeps scanning exactly as it does today. Export the volume as a .tif stack, import it and run it with one click. A person accepts or excludes each run, and that decision is recorded with the result."
+      ],
+      [
+        "What comes out: undulation, roughness (Rq, Ra) and surface area per scan and per region, overlays, and a PDF or HTML study report. Each export carries the model version and settings, so a figure can be compared or repeated later. UNDULIX is Research Use Only software and makes no diagnostic or screening claims.",
+        "What comes out: undulation, roughness (Rq, Ra) and surface area per scan and per region, overlays, and a PDF or HTML study report. Each export carries the model version and settings, so a figure can be compared or repeated later. UNDULIX is Research Use Only software and makes no diagnostic or screening claims."
+      ]
+    ],
+    "wiz": [
+      [
+        "WIZ Assistant is an AI service assistant that lives inside your website. Visitors ask in their own words; WIZ answers from your published pages and documents, walks them through procedures, and passes document requests to the right person.",
+        "WIZ Assistant is an AI service assistant that lives inside your website. Visitors ask in their own words; WIZ answers from your published pages and documents, walks them through procedures, and passes document requests to the right person."
+      ],
+      [
+        "Most service desks hear the same questions every day: how to apply, which form to use, where to find the price. WIZ takes those first, around the clock, so staff can focus on the requests that need a person. It is built as a practical work assistant, not a scripted FAQ bot.",
+        "Most service desks hear the same questions every day: how to apply, which form to use, where to find the price. WIZ takes those first, around the clock, so staff can focus on the requests that need a person. It is built as a practical work assistant, not a scripted FAQ bot."
+      ],
+      [
+        "Setting it up is not an AI project. Together we agree what WIZ may answer and what it must not, its tone and your brand terms. W Labs configures it on your content, and one script embeds it on your site, styled to match.",
+        "Setting it up is not an AI project. Together we agree what WIZ may answer and what it must not, its tone and your brand terms. W Labs configures it on your content, and one script embeds it on your site, styled to match."
+      ],
+      [
+        "WIZ runs as a monthly subscription, with optional reports and suggestions for improvement. It suits companies, schools, associations and public bodies, online shops and customer centres, and hospitals for non-clinical administrative questions. Pricing is shared on enquiry.",
+        "WIZ runs as a monthly subscription, with optional reports and suggestions for improvement. It suits companies, schools, associations and public bodies, online shops and customer centres, and hospitals for non-clinical administrative questions. Pricing is shared on enquiry."
+      ]
+    ],
+    "brainarch": [
+      [
+        "BrainArch is W Labs' research software for brain CT. It brings pre-processing, visualisation and AI analysis into one workflow, so a research team can move through a study without juggling separate tools.",
+        "BrainArch is W Labs' research software for brain CT. It brings pre-processing, visualisation and AI analysis into one workflow, so a research team can move through a study without juggling separate tools."
+      ],
+      [
+        "A CT series runs to many slices. BrainArch localises: it marks candidate regions slice by slice, so the researcher knows where to look first.",
+        "A CT series runs to many slices. BrainArch localises: it marks candidate regions slice by slice, so the researcher knows where to look first."
+      ],
+      [
+        "The researcher then reviews each region against the original slices and confirms or rejects it. BrainArch does not diagnose, score or classify; the decision stays with the person reviewing.",
+        "The researcher then reviews each region against the original slices and confirms or rejects it. BrainArch does not diagnose, score or classify; the decision stays with the person reviewing."
+      ],
+      [
+        "Annotations stay with their series and export for statistics. A desktop client works with an inference service, set up with each research site. BrainArch is Research Use Only and is not cleared as a medical device.",
+        "Annotations stay with their series and export for statistics. A desktop client works with an inference service, set up with each research site. BrainArch is Research Use Only and is not cleared as a medical device."
+      ]
+    ],
+    "familytree": [
+      [
+        "우리家 turns a clan's paper register, the jokbo, into a family tree anyone can search. Many families keep their jokbo as thousands of pages of Hanja that fewer people can read each year; 우리家 makes it something the whole family can open.",
+        "우리家 turns a clan's paper register, the jokbo, into a family tree anyone can search. Many families keep their jokbo as thousands of pages of Hanja that fewer people can read each year; 우리家 makes it something the whole family can open."
+      ],
+      [
+        "AI reads the Hanja register and records each person's source page. Characters it cannot read are left as ○ rather than guessed, and every person links back to the page they came from, so the record can always be checked against the original.",
+        "AI reads the Hanja register and records each person's source page. Characters it cannot read are left as ○ rather than guessed, and every person links back to the page they came from, so the record can always be checked against the original."
+      ],
+      [
+        "Access follows the clan: a member requests access, the clan approves, and they go straight into the tree. With you at the centre, the family tree opens at a glance. Open a branch to see each person's record, or type a name to jump to an ancestor.",
+        "Access follows the clan: a member requests access, the clan approves, and they go straight into the tree. With you at the centre, the family tree opens at a glance. Open a branch to see each person's record, or type a name to jump to an ancestor."
+      ],
+      [
+        "The app works in Korean and English, so relatives abroad can read it too. 우리家 is a working prototype: talk to us about your clan's register.",
+        "The app works in Korean and English, so relatives abroad can read it too. 우리家 is a working prototype: talk to us about your clan's register."
+      ]
+    ],
+    "willy": [
+      [
+        "Willy is W Labs' AI agent for teams, now in development. It answers questions from what the team has already written down: tasks, schedules, notes and decisions.",
+        "Willy is W Labs' AI agent for teams, now in development. It answers questions from what the team has already written down: tasks, schedules, notes and decisions."
+      ],
+      [
+        "Two rules shape it. Willy asks before it acts: it proposes a change and waits, and only changes what a person approves. And it does not guess: when there is no record, it says so.",
+        "Two rules shape it. Willy asks before it acts: it proposes a change and waits, and only changes what a person approves. And it does not guess: when there is no record, it says so."
+      ],
+      [
+        "It is designed to be where the team is: at a desk, on a phone or a watch, in a meeting room, or at reception welcoming a guest. In meetings it tells everyone when it is listening, and it can be paused at any time.",
+        "It is designed to be where the team is: at a desk, on a phone or a watch, in a meeting room, or at reception welcoming a guest. In meetings it tells everyone when it is listening, and it can be paused at any time."
+      ],
+      [
+        "Willy is not available yet, and the screens on this page are prototype concepts. If your team runs on shared records and wants answers from them without handing control to an AI, talk to us about a pilot.",
+        "Willy is not available yet, and the screens on this page are prototype concepts. If your team runs on shared records and wants answers from them without handing control to an AI, talk to us about a pilot."
+      ]
+    ]
+  },
+  "productMore": {
+    "skinarch": {
+      "video": {
+        "label": [
+          "UNDULIX product film, 2 min",
+          "UNDULIX product film, 2 min"
+        ],
+        "pending": true
+      },
+      "gallery": [
+        [
+          "The 2D viewer: the junction traced on every slice, with low-confidence regions marked for review.",
+          "The 2D viewer: the junction traced on every slice, with low-confidence regions marked for review."
+        ],
+        [
+          "An LC-OCT B-scan as it leaves the lab's own device. Nothing about how your team scans changes.",
+          "An LC-OCT B-scan as it leaves the lab's own device. Nothing about how your team scans changes."
+        ],
+        [
+          "Export: metrics as CSV, slices and overlays as PNG, run metadata as JSON, and a PDF report.",
+          "Export: metrics as CSV, slices and overlays as PNG, run metadata as JSON, and a PDF report."
+        ],
+        [
+          "Illustrative 3D DEJ surface. A procedural render, not a measurement.",
+          "Illustrative 3D DEJ surface. A procedural render, not a measurement."
+        ]
+      ],
+      "goals": [
+        [
+          "Hundreds of slices per scan",
+          "Hundreds of slices per scan",
+          "A single LC-OCT volume can hold around 500 B-scans. Tracing the dermal–epidermal junction through each one by hand slows every study down.",
+          "A single LC-OCT volume can hold around 500 B-scans. Tracing the dermal–epidermal junction through each one by hand slows every study down."
+        ],
+        [
+          "Two readers, two answers",
+          "Two readers, two answers",
+          "Manual tracing depends on who does it, so the same scan can give different figures. UNDULIX traces every slice the same way.",
+          "Manual tracing depends on who does it, so the same scan can give different figures. UNDULIX traces every slice the same way."
+        ],
+        [
+          "Numbers you can repeat",
+          "Numbers you can repeat",
+          "Model version, settings and confidence are stored with each result, so a figure can be compared or repeated later.",
+          "Model version, settings and confidence are stored with each result, so a figure can be compared or repeated later."
+        ]
+      ],
+      "setup": [
+        [
+          "Scan as you do today",
+          "Scan as you do today",
+          "Your team scans the study site with its own LC-OCT device and exports the volume as a .tif stack.",
+          "Your team scans the study site with its own LC-OCT device and exports the volume as a .tif stack."
+        ],
+        [
+          "Import and run",
+          "Import and run",
+          "One click. The AI traces the junction slice by slice and flags where it is less certain.",
+          "One click. The AI traces the junction slice by slice and flags where it is less certain."
+        ],
+        [
+          "Review",
+          "Review",
+          "A person accepts or excludes each run, and that decision is recorded.",
+          "A person accepts or excludes each run, and that decision is recorded."
+        ],
+        [
+          "Export",
+          "Export",
+          "PDF or HTML report, CSV, PNG and JSON, each carrying the run's metadata.",
+          "PDF or HTML report, CSV, PNG and JSON, each carrying the run's metadata."
+        ]
+      ],
+      "faq": [
+        [
+          "Does UNDULIX change how we scan?",
+          "Does UNDULIX change how we scan?",
+          "No. UNDULIX comes in after your imaging: your lab measures with its own device, UNDULIX analyses the exported stack.",
+          "No. UNDULIX comes in after your imaging: your lab measures with its own device, UNDULIX analyses the exported stack."
+        ],
+        [
+          "What do we get out of it?",
+          "What do we get out of it?",
+          "Undulation (%), roughness Rq and Ra (µm) and surface area (mm²), per scan and per region, plus overlays and a study report.",
+          "Undulation (%), roughness Rq and Ra (µm) and surface area (mm²), per scan and per region, plus overlays and a study report."
+        ],
+        [
+          "Is it a medical device?",
+          "Is it a medical device?",
+          "No. UNDULIX is Research Use Only software. It is not for diagnosis and makes no diagnostic or screening claims.",
+          "No. UNDULIX is Research Use Only software. It is not for diagnosis and makes no diagnostic or screening claims."
+        ]
+      ]
+    },
+    "brainarch": {
+      "video": {
+        "label": [
+          "BrainArch introduction, 1 min",
+          "BrainArch introduction, 1 min"
+        ],
+        "pending": true
+      },
+      "gallery": [
+        [
+          "Load a CT series into a study.",
+          "Load a CT series into a study."
+        ],
+        [
+          "Localise: candidate regions are marked slice by slice.",
+          "Localise: candidate regions are marked slice by slice."
+        ],
+        [
+          "Review: the boundary drawn on the source CT slice, for the researcher to confirm.",
+          "Review: the boundary drawn on the source CT slice, for the researcher to confirm."
+        ],
+        [
+          "A desktop client working with an inference service.",
+          "A desktop client working with an inference service."
+        ]
+      ],
+      "goals": [
+        [
+          "Long series, one reader",
+          "Long series, one reader",
+          "A CT series runs to many slices. Finding where to look first takes time a research team rarely has.",
+          "A CT series runs to many slices. Finding where to look first takes time a research team rarely has."
+        ],
+        [
+          "The researcher stays in charge",
+          "The researcher stays in charge",
+          "BrainArch localises; a person reviews every region against the original slices and decides.",
+          "BrainArch localises; a person reviews every region against the original slices and decides."
+        ],
+        [
+          "One place for the study",
+          "One place for the study",
+          "Series, overlays and annotations stay together, ready to export for analysis.",
+          "Series, overlays and annotations stay together, ready to export for analysis."
+        ]
+      ],
+      "setup": [
+        [
+          "Import",
+          "Import",
+          "Add CT series to a study.",
+          "Add CT series to a study."
+        ],
+        [
+          "Localise",
+          "Localise",
+          "AI marks candidate regions slice by slice.",
+          "AI marks candidate regions slice by slice."
+        ],
+        [
+          "Review",
+          "Review",
+          "Check each region against the source slices and confirm or reject it.",
+          "Check each region against the source slices and confirm or reject it."
+        ],
+        [
+          "Export",
+          "Export",
+          "Take annotations and findings into your own analysis.",
+          "Take annotations and findings into your own analysis."
+        ]
+      ],
+      "faq": [
+        [
+          "Is BrainArch a diagnostic device?",
+          "Is BrainArch a diagnostic device?",
+          "No. BrainArch is Research Use Only and is not cleared as a medical device. It does not replace clinical judgement.",
+          "No. BrainArch is Research Use Only and is not cleared as a medical device. It does not replace clinical judgement."
+        ],
+        [
+          "Does it diagnose, score or classify?",
+          "Does it diagnose, score or classify?",
+          "No. It localises regions for a researcher to review. It gives no diagnosis, score or classification.",
+          "No. It localises regions for a researcher to review. It gives no diagnosis, score or classification."
+        ],
+        [
+          "How is it deployed?",
+          "How is it deployed?",
+          "A desktop client works with an inference service. The set-up is agreed with each research site.",
+          "A desktop client works with an inference service. The set-up is agreed with each research site."
+        ]
+      ]
+    },
+    "wiz": {
+      "video": {
+        "label": [
+          "WIZ Assistant promo, 48 s",
+          "WIZ Assistant promo, 48 s"
+        ],
+        "pending": false
+      },
+      "gallery": [
+        [
+          "WIZ greets visitors where they are, on your own site.",
+          "WIZ greets visitors where they are, on your own site."
+        ],
+        [
+          "Asked \"What is this service?\", it explains in plain words.",
+          "Asked \"What is this service?\", it explains in plain words."
+        ],
+        [
+          "Asked where the pricing is, it points the way.",
+          "Asked where the pricing is, it points the way."
+        ],
+        [
+          "One assistant, embedded across many sites.",
+          "One assistant, embedded across many sites."
+        ]
+      ],
+      "goals": [
+        [
+          "Answers at any hour",
+          "Answers at any hour",
+          "Visitors get an answer on your site 24/7, not after the service desk opens.",
+          "Visitors get an answer on your site 24/7, not after the service desk opens."
+        ],
+        [
+          "Less repetition for staff",
+          "Less repetition for staff",
+          "Repeat questions, usage guidance and document requests are handled first by WIZ, so people handle what needs a person.",
+          "Repeat questions, usage guidance and document requests are handled first by WIZ, so people handle what needs a person."
+        ],
+        [
+          "AI without an AI project",
+          "AI without an AI project",
+          "You get a working assistant on your site without building an AI system of your own.",
+          "You get a working assistant on your site without building an AI system of your own."
+        ]
+      ],
+      "setup": [
+        [
+          "Agree the scope",
+          "Agree the scope",
+          "What WIZ may answer, what it must not, its tone, your brand terms and the questions you hear most.",
+          "What WIZ may answer, what it must not, its tone, your brand terms and the questions you hear most."
+        ],
+        [
+          "We configure it",
+          "We configure it",
+          "W Labs sets WIZ up on your published content and procedures.",
+          "W Labs sets WIZ up on your published content and procedures."
+        ],
+        [
+          "Embed",
+          "Embed",
+          "One script on your site. WIZ is styled to match it.",
+          "One script on your site. WIZ is styled to match it."
+        ],
+        [
+          "Run monthly",
+          "Run monthly",
+          "Monthly subscription, with optional reports and suggestions for improvement.",
+          "Monthly subscription, with optional reports and suggestions for improvement."
+        ]
+      ],
+      "faq": [
+        [
+          "Is it just an FAQ chatbot?",
+          "Is it just an FAQ chatbot?",
+          "No. Beyond answering, WIZ guides people through procedures and takes document requests to the right staff member.",
+          "No. Beyond answering, WIZ guides people through procedures and takes document requests to the right staff member."
+        ],
+        [
+          "Who is it for?",
+          "Who is it for?",
+          "Companies, schools, associations and public bodies, online shops and customer centres, and hospitals for non-clinical administrative questions.",
+          "Companies, schools, associations and public bodies, online shops and customer centres, and hospitals for non-clinical administrative questions."
+        ],
+        [
+          "How is it priced?",
+          "How is it priced?",
+          "A monthly subscription, tiered by site size, expected usage and the features you need. Pricing is shared on enquiry.",
+          "A monthly subscription, tiered by site size, expected usage and the features you need. Pricing is shared on enquiry."
+        ]
+      ]
+    },
+    "familytree": {
+      "video": {
+        "label": [
+          "우리家 promo film, 68 s, in Korean",
+          "우리家 홍보 영상 (68초)"
+        ],
+        "pending": false
+      },
+      "gallery": [
+        [
+          "The way in: the register, opened like a door.",
+          "The way in: the register, opened like a door."
+        ],
+        [
+          "Open a branch and each family member's record is right there.",
+          "Open a branch and each family member's record is right there."
+        ],
+        [
+          "Search by name and jump straight to an ancestor.",
+          "Search by name and jump straight to an ancestor."
+        ],
+        [
+          "Every person links back to the page of the paper register they came from.",
+          "Every person links back to the page of the paper register they came from."
+        ]
+      ],
+      "goals": [
+        [
+          "Thousands of pages of Hanja",
+          "Thousands of pages of Hanja",
+          "A paper jokbo runs to thousands of pages in Hanja. Even finding your own name isn't easy.",
+          "한자로 가득한 수천 쪽, 내 이름 하나 찾기도 쉽지 않습니다"
+        ],
+        [
+          "Fewer readers every year",
+          "Fewer readers every year",
+          "The elders who can read the register are growing fewer.",
+          "족보를 읽을 수 있는 어르신은 점점 줄어들고 있습니다"
+        ],
+        [
+          "Shared by the whole family",
+          "Shared by the whole family",
+          "The family story, open to everyone in it, not kept in one bookcase.",
+          "온 가족이 함께 보는 우리 집안 이야기"
+        ]
+      ],
+      "setup": [
+        [
+          "Start from your volumes",
+          "Start from your volumes",
+          "Talk to us about your clan's paper register: which volumes, and who looks after them.",
+          "Talk to us about your clan's paper register: which volumes, and who looks after them."
+        ],
+        [
+          "Read",
+          "Read",
+          "AI reads the Hanja register and records each person's source page. Unreadable characters are left as ○.",
+          "AI가 한자 족보를 읽어 인물마다 원문 쪽수까지 기록합니다"
+        ],
+        [
+          "Approve",
+          "Approve",
+          "Once the clan approves a member, they go straight into the family tree.",
+          "종중의 승인을 받으면 바로 가계도로 들어갑니다"
+        ],
+        [
+          "Explore",
+          "Explore",
+          "Members open branches, search by name and follow each record back to its page.",
+          "Members open branches, search by name and follow each record back to its page."
+        ]
+      ],
+      "faq": [
+        [
+          "Will the AI get names wrong?",
+          "Will the AI get names wrong?",
+          "Characters it cannot read are left as ○. Nothing is guessed, and every person links to the source page so it can be checked.",
+          "읽을 수 없는 글자는 ○로 남깁니다. 추측하지 않습니다."
+        ],
+        [
+          "Who can see our tree?",
+          "Who can see our tree?",
+          "Members the clan approves. Access is requested and approved before anyone enters the tree.",
+          "Members the clan approves. Access is requested and approved before anyone enters the tree."
+        ],
+        [
+          "Is it only in Korean?",
+          "Is it only in Korean?",
+          "The app has Korean and English, so family members abroad can read the tree too.",
+          "The app has Korean and English, so family members abroad can read the tree too."
+        ]
+      ]
+    },
+    "willy": {
+      "video": {
+        "label": [
+          "Willy concept film, 88 s",
+          "Willy concept film, 88 s"
+        ],
+        "pending": true
+      },
+      "gallery": [
+        [
+          "At a desk: Willy proposes the change and waits for approval.",
+          "At a desk: Willy proposes the change and waits for approval."
+        ],
+        [
+          "At reception: welcoming a guest and letting the host know.",
+          "At reception: welcoming a guest and letting the host know."
+        ],
+        [
+          "On the move: asked who is late, it shows what is overdue instead.",
+          "On the move: asked who is late, it shows what is overdue instead."
+        ],
+        [
+          "In a meeting: it says when it is listening, and pauses when asked.",
+          "In a meeting: it says when it is listening, and pauses when asked."
+        ]
+      ],
+      "goals": [
+        [
+          "Answers trapped in chat threads",
+          "Answers trapped in chat threads",
+          "What a team knows is scattered across messages, files and people's memories. Willy answers from what is written down.",
+          "What a team knows is scattered across messages, files and people's memories. Willy answers from what is written down."
+        ],
+        [
+          "AI you can trust with changes",
+          "AI you can trust with changes",
+          "An agent that acts on its own is hard to trust. Willy asks first and only changes what a person approves.",
+          "An agent that acts on its own is hard to trust. Willy asks first and only changes what a person approves."
+        ],
+        [
+          "No record, no guess",
+          "No record, no guess",
+          "When there is nothing written, Willy says so instead of making something up.",
+          "When there is nothing written, Willy says so instead of making something up."
+        ]
+      ],
+      "setup": [
+        [
+          "Connect the records",
+          "Connect the records",
+          "Choose the team records Willy may read: tasks, schedules, notes.",
+          "Choose the team records Willy may read: tasks, schedules, notes."
+        ],
+        [
+          "Set what it may change",
+          "Set what it may change",
+          "Decide which updates Willy can propose. Every one still needs a person's approval.",
+          "Decide which updates Willy can propose. Every one still needs a person's approval."
+        ],
+        [
+          "Choose where it works",
+          "Choose where it works",
+          "Desk, phone, watch, meeting room or reception, wherever the team needs it.",
+          "Desk, phone, watch, meeting room or reception, wherever the team needs it."
+        ],
+        [
+          "Pilot with one team",
+          "Pilot with one team",
+          "Start small, see what the team asks, then widen.",
+          "Start small, see what the team asks, then widen."
+        ]
+      ],
+      "faq": [
+        [
+          "Is Willy available now?",
+          "Is Willy available now?",
+          "Not yet. Willy is in development, and the screens on this page are prototype concepts. Talk to us about a pilot.",
+          "Not yet. Willy is in development, and the screens on this page are prototype concepts. Talk to us about a pilot."
+        ],
+        [
+          "Does it change things on its own?",
+          "Does it change things on its own?",
+          "No. Willy proposes; a person approves. It only changes what you approve.",
+          "No. Willy proposes; a person approves. It only changes what you approve."
+        ],
+        [
+          "Does it listen all the time?",
+          "Does it listen all the time?",
+          "No. In a meeting it tells everyone it is listening, and it can be paused at any time.",
+          "No. In a meeting it tells everyone it is listening, and it can be paused at any time."
+        ]
+      ]
+    }
+  },
   "topics": [
     [
       "general",
@@ -880,8 +1665,8 @@ export const V3_CONTENT = {
     ],
     [
       "skinarch",
-      "SkinArch",
-      "SkinArch"
+      "UNDULIX",
+      "UNDULIX"
     ],
     [
       "wiz",
@@ -892,6 +1677,16 @@ export const V3_CONTENT = {
       "brainarch",
       "BrainArch",
       "BrainArch"
+    ],
+    [
+      "familytree",
+      "우리家",
+      "우리家"
+    ],
+    [
+      "willy",
+      "Willy",
+      "Willy"
     ],
     [
       "partnership",
@@ -1027,6 +1822,10 @@ export const V3_CONTENT = {
     "insight": [
       "Insights",
       "인사이트"
+    ],
+    "cert": [
+      "Certifications",
+      "Certifications"
     ],
     "term": [
       "Glossary",

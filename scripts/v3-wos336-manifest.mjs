@@ -56,9 +56,11 @@ export const WOS336_MANIFEST = {
     prodEyebrow: { v3Key: "prodEyebrow" },
     prodH2: { v3Key: "prodH2" },
     prodLead: { v3Key: "prodLead" },
+    // WOS-383: Home now shows UNDULIX, Willy and 우리家; Willy and 우리家
+    // reuse the Work panel's pp5/pp4 blurbs (content manifest), so only
+    // UNDULIX's p1 and the new "See all products" link stay here.
     p1: { v3Key: "p1" },
-    p2: { v3Key: "p2" },
-    p3: { v3Key: "p3" },
+    seeAllProducts: { v3Key: "seeAllProducts" },
     // closing CTA panel (index.html:2424-2435); ctaDiscuss is already
     // harvested in the chrome namespace — dictionary.ts cross-references it.
     ctaEyebrow: { v3Key: "ctaEyebrow" },

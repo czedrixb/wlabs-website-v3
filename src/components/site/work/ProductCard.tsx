@@ -2,16 +2,24 @@ import Link from "next/link";
 import type { Locale } from "@/lib/locale";
 import { withLocale } from "@/lib/locale";
 import type { SiteStrings } from "@/lib/site/dictionary";
-import type { Product } from "@/lib/site/content";
+import type { Product, ProductId } from "@/lib/site/content";
 
 type Props = { locale: Locale; product: Product; s: SiteStrings["work"] };
+
+// The card capture for a product. Willy's page hero is a desktop render;
+// its cards use the film's end card instead (willy-card.webp), as v3 does
+// with `data-shot-key="willy-card"` (WOS-383).
+export function productShot(id: ProductId): React.CSSProperties {
+  const file = id === "willy" ? "willy-card" : id;
+  return { "--shot": `url(/site/img/${file}.webp)` } as React.CSSProperties;
+}
 
 // Work → Products panel's card — the short teaser, not the full detail
 // page (products/[slug], WOS-332 plan's M4). Ported from site/index.html's
 // `#panel-products` `.card`s.
 export function ProductCard({ locale, product, s }: Props) {
-  const blurb = { skinarch: s.pp1, wiz: s.pp2, brainarch: s.pp3 }[product.id];
-  const price = product.priceKey === "monthly" ? s.monthly : s.priceAsk;
+  const blurb = { skinarch: s.pp1, wiz: s.pp2, brainarch: s.pp3, familytree: s.pp4, willy: s.pp5 }[product.id];
+  const price = product.priceKey === "inDev" ? s.inDev : product.priceKey === "monthly" ? s.monthly : s.priceAsk;
 
   return (
     <article className="card">
@@ -22,11 +30,12 @@ export function ProductCard({ locale, product, s }: Props) {
       <div
         className="art sp-shot sp-shot-made"
         aria-hidden="true"
-        style={{ "--shot": `url(/site/img/${product.id}.webp)` } as React.CSSProperties}
+        style={productShot(product.id)}
       />
       <div className="tag">
         <span>{locale === "en" ? product.cat.en : product.cat.ko}</span>
         {product.ruo && <span className="ruo">{locale === "en" ? "Research use only" : "연구용"}</span>}
+        {product.dev && <span className="ruo">{s.inDev}</span>}
       </div>
       <h3>
         <Link href={withLocale(`/products/${product.id}`, locale)}>{product.name}</Link>

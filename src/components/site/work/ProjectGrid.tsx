@@ -79,10 +79,19 @@ export function ProjectGrid({ locale, cats, projects, filterLabel, limit, showSt
       <div className="pgrid">
         {items.map((p) => (
           <article className="pcard" key={p.id}>
-            {/* WOS-336: no artwork here for now — the reference design's
-                dashed "Illustration" placeholder instead (ProjectArt stays
-                in use on the project detail pages). */}
-            <div className="pvis pvis-ph" aria-hidden="true" />
+            {/* WOS-336: the reference design's dashed "Illustration"
+                placeholder, unless the project has a real screen capture
+                (WOS-383, Project.shot) — painted the same way as the product
+                cards' .sp-shot slot, anchored to the top of the screen. */}
+            {p.shot ? (
+              <div
+                className="pvis sp-shot"
+                aria-hidden="true"
+                style={{ "--shot": `url(${p.shot})` } as React.CSSProperties}
+              />
+            ) : (
+              <div className="pvis pvis-ph" aria-hidden="true" />
+            )}
             <div className="pbody">
               <span className="pcat">{locale === "en" ? p.tag.en : p.tag.ko}</span>
               <h3>{locale === "en" ? p.title.en : p.title.ko}</h3>

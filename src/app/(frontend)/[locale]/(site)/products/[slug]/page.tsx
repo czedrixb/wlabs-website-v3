@@ -6,6 +6,8 @@ import type { Locale } from "@/lib/locale";
 import { resolveLocale, withLocale } from "@/lib/locale";
 import { PRODUCTS, SERVICES, type ProductId } from "@/lib/site/content";
 import { siteMetadata } from "@/lib/site/metadata";
+import { siteT } from "@/lib/site/dictionary";
+import { ProductGallery } from "@/components/site/work/ProductGallery";
 
 type Props = { params: Promise<{ locale: string; slug: string }> };
 
@@ -51,6 +53,22 @@ const T = {
   related: { en: "Related", ko: "관련" },
   whereFrom: { en: "Where this comes from", ko: "이 제품의 배경" },
   wantToSee: (name: string) => ({ en: `Want to see ${name} on your data?`, ko: `내 데이터로 ${name}을 보고 싶다면` }),
+  // WOS-383: the new sections (v3 renderProduct, verbatim). The pilot CTA
+  // for a product still in development has no approved Korean yet, so both
+  // slots carry the English, exactly as v3 does.
+  inDev: { en: "In development", ko: "In development" },
+  overview: { en: "Overview", ko: "개요" },
+  about: (name: string) => ({ en: `About ${name}`, ko: `${name} 소개` }),
+  seeIt: { en: "See it", ko: "살펴보기" },
+  inAction: (name: string) => ({ en: `${name} in action`, ko: `${name} 미리 보기` }),
+  whyItExists: { en: "Why it exists", ko: "왜 만들었나요" },
+  problems: { en: "The problems it takes on", ko: "해결하려는 문제" },
+  gettingStarted: { en: "Getting started", ko: "시작하기" },
+  setupH2: { en: "Set-up, simplified", ko: "간단한 도입 절차" },
+  pilotH2: { en: "How a pilot would start", ko: "파일럿은 이렇게 시작합니다" },
+  questions: { en: "Questions", ko: "자주 묻는 질문" },
+  goodToKnow: { en: "Good to know", ko: "알아 두면 좋은 것" },
+  pilotCta: (name: string) => ({ en: `Interested in a ${name} pilot?`, ko: `Interested in a ${name} pilot?` }),
   wantToSeeLead: {
     en: "Tell us about your setup and we will come back with the right next step.",
     ko: "환경을 알려 주시면 적절한 다음 단계를 안내드립니다.",
@@ -64,6 +82,10 @@ export default async function ProductPage({ params }: Props) {
   const product = PRODUCTS[slug as ProductId];
   if (!product) notFound();
 
+  const pick = (b: { en: string; ko: string }) => (en ? b.en : b.ko);
+  const more = product.more;
+  const media = `/site/media/products/${product.id}`;
+  const ins = siteT(locale).insights;
   const t = <K extends keyof typeof T>(key: K) => (en ? (T[key] as { en: string }).en : (T[key] as { ko: string }).ko);
 
   return (
@@ -80,6 +102,7 @@ export default async function ProductPage({ params }: Props) {
           <div className="tag">
             <span className="eyebrow">{en ? product.cat.en : product.cat.ko}</span>
             {product.ruo && <span className="ruo">{t("ruo")}</span>}
+            {product.dev && <span className="ruo">{t("inDev")}</span>}
           </div>
           <h1>{product.name}</h1>
           <p className="lead">{en ? product.lead.en : product.lead.ko}</p>
@@ -113,6 +136,27 @@ export default async function ProductPage({ params }: Props) {
         </div>
       </header>
 
+      {product.about && (
+        // WOS-383: four paragraphs beside an image; on desktop the text sets
+        // the row height and the image is cropped to fill it (site.css).
+        <section className="prod-sec">
+          <div className="section-head">
+            <span className="eyebrow">{t("overview")}</span>
+            <h2>{pick(T.about(product.name))}</h2>
+          </div>
+          <div className="prod-about-wrap">
+            <div className="prod-about">
+              {product.about.map((para, i) => (
+                <p key={i}>{pick(para)}</p>
+              ))}
+            </div>
+            <figure className="prod-about-img">
+              <Image src={`${media}/overview.webp`} alt="" fill sizes="(min-width: 900px) 40vw, 100vw" />
+            </figure>
+          </div>
+        </section>
+      )}
+
       <section className="prod-sec">
         <div className="section-head">
           <span className="eyebrow">{t("whatItDoes")}</span>
@@ -128,6 +172,45 @@ export default async function ProductPage({ params }: Props) {
           ))}
         </div>
       </section>
+
+      {more && (
+        <>
+          <section className="prod-sec">
+            <div className="section-head">
+              <span className="eyebrow">{t("seeIt")}</span>
+              <h2>{pick(T.inAction(product.name))}</h2>
+            </div>
+            {more.video && (
+              <figure className="pg-video">
+                <video controls preload="none" playsInline poster={`${media}/poster.webp`}>
+                  <source src={`${media}/video.mp4`} type="video/mp4" />
+                </video>
+                <figcaption>{pick(more.video.label)}</figcaption>
+              </figure>
+            )}
+            <ProductGallery
+              stills={more.gallery.map((c, i) => ({ src: `${media}/g${i + 1}.webp`, caption: pick(c) }))}
+              expandLabel={ins.expandImage}
+              closeLabel={ins.lightboxClose}
+            />
+          </section>
+
+          <section className="prod-sec">
+            <div className="section-head">
+              <span className="eyebrow">{t("whyItExists")}</span>
+              <h2>{t("problems")}</h2>
+            </div>
+            <div className="goals">
+              {more.goals.map((g, i) => (
+                <article className="goal" key={i}>
+                  <h3>{pick(g.title)}</h3>
+                  <p>{pick(g.body)}</p>
+                </article>
+              ))}
+            </div>
+          </section>
+        </>
+      )}
 
       <section className="prod-sec">
         <div className="section-head">
@@ -145,6 +228,26 @@ export default async function ProductPage({ params }: Props) {
           ))}
         </div>
       </section>
+
+      {more && (
+        <section className="prod-sec">
+          <div className="section-head">
+            <span className="eyebrow">{t("gettingStarted")}</span>
+            <h2>{product.dev ? t("pilotH2") : t("setupH2")}</h2>
+          </div>
+          <ol className="setup">
+            {more.setup.map((st, i) => (
+              <li key={i}>
+                <span className="num">0{i + 1}</span>
+                <div>
+                  <h3>{pick(st.title)}</h3>
+                  <p>{pick(st.body)}</p>
+                </div>
+              </li>
+            ))}
+          </ol>
+        </section>
+      )}
 
       <section className="prod-sec">
         <div className="section-head">
@@ -166,6 +269,23 @@ export default async function ProductPage({ params }: Props) {
         </dl>
         {product.note && <p className="note" style={{ marginTop: "var(--s3)" }}>{en ? product.note.en : product.note.ko}</p>}
       </section>
+
+      {more && (
+        <section className="prod-sec">
+          <div className="section-head">
+            <span className="eyebrow">{t("questions")}</span>
+            <h2>{t("goodToKnow")}</h2>
+          </div>
+          <div className="pfaq">
+            {more.faq.map((q, i) => (
+              <details key={i}>
+                <summary>{pick(q.q)}</summary>
+                <p>{pick(q.a)}</p>
+              </details>
+            ))}
+          </div>
+        </section>
+      )}
 
       <section className="prod-sec">
         <div className="section-head">
@@ -199,7 +319,7 @@ export default async function ProductPage({ params }: Props) {
 
       <aside className="prod-cta">
         <div>
-          <h2>{en ? T.wantToSee(product.name).en : T.wantToSee(product.name).ko}</h2>
+          <h2>{pick(product.dev ? T.pilotCta(product.name) : T.wantToSee(product.name))}</h2>
           <p className="lead" style={{ marginTop: 8 }}>
             {t("wantToSeeLead")}
           </p>

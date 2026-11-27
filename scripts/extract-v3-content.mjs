@@ -105,10 +105,10 @@ function sliceConstLiteral(source, name) {
 // against the v3 source at extraction time — so evaluating them in an
 // isolated `new Function` scope is safe and is a real JS parse rather than
 // a regex scrape.
-function evalConst(source, name) {
+function evalConst(source, name, prelude = "") {
   const literal = sliceConstLiteral(source, name);
   try {
-    return new Function(`"use strict"; return (${literal});`)();
+    return new Function(`"use strict"; ${prelude} return (${literal});`)();
   } catch (err) {
     throw new Error(`Failed to evaluate \`const ${name}\` from the v3 source: ${err.message}`);
   }
@@ -117,22 +117,33 @@ function evalConst(source, name) {
 // TEAM's photo column: swap the baked-in base64 data URI for the public
 // path to the file WOS-314 already checked in, and verify the two sides
 // (member list, file list) agree exactly.
+// File names drop spaces ("John Rey" -> JohnRey.webp, as WOS-341 named it).
+// WOS-341's roster layer in content.ts removes departed members and adds
+// new ones after the harvest, so their photos legitimately exist on only
+// one side: the v3 source still carries the departed, and the joined
+// member's file has no v3 row. Anyone else missing on either side still
+// fails loudly.
+const fileNameOf = (name) => name.replace(/\s+/g, "");
+const WOS341_DEPARTED = new Set(["Zyra", "Winona"]);
+const WOS341_JOINED = new Set(["Windy"]);
+
 function resolveTeamPhotos(team) {
   const files = new Set(readdirSync(teamPhotoDir).map((f) => f.replace(/\.webp$/, "")));
-  const named = new Set();
+  const named = new Set(WOS341_JOINED);
 
   const resolved = team.map(([name, nameKo, roleEn, roleKo, photoDataUri, group]) => {
-    const hasPhoto = Boolean(photoDataUri);
+    const file = fileNameOf(name);
+    const hasPhoto = Boolean(photoDataUri) && !(WOS341_DEPARTED.has(name) && !files.has(file));
     if (hasPhoto) {
-      if (!files.has(name)) {
+      if (!files.has(file)) {
         throw new Error(
           `TEAM member "${name}" has a photo in the v3 source but no ` +
             `public/site/team/${name}.webp file. Add the file or check the name matches.`,
         );
       }
-      named.add(name);
+      named.add(file);
     }
-    return [name, nameKo, roleEn, roleKo, hasPhoto ? `/site/team/${name}.webp` : "", group];
+    return [name, nameKo, roleEn, roleKo, hasPhoto ? `/site/team/${file}.webp` : "", group];
   });
 
   const orphanFiles = [...files].filter((f) => !named.has(f));
@@ -226,6 +237,18 @@ function main() {
   // {...} }, each a { t, lead, sec } tree of [en, ko] pairs) — same evalConst
   // treatment, one top-level `const LEGAL=` in the source.
   const legal = evalConst(source, "LEGAL");
+  // WOS-383: the product pages' new sections. PRODUCT_ABOUT is the
+  // Overview's four [en, ko] paragraphs per product; PRODUCT_MORE carries
+  // the video label, gallery captions, goals, set-up steps and FAQ. The
+  // latter's Korean slots are written with v3's one free helper, KP(),
+  // which repeats the English while Korean is pending the W Labs
+  // translator, so it is defined here, verbatim, for the evaluation.
+  const productAbout = evalConst(source, "PRODUCT_ABOUT");
+  const productMore = evalConst(
+    source,
+    "PRODUCT_MORE",
+    "const KP=(en)=>Array.isArray(en)?[en[0],en[0],en[1],en[1]]:[en,en];",
+  );
 
   const banner = `// GENERATED FILE — do not hand-edit.
 // Regenerate with: node scripts/extract-v3-content.mjs
@@ -240,7 +263,7 @@ function main() {
 `;
 
   const body = `export const V3_CONTENT = ${JSON.stringify(
-    { team, groups, projects, cats, productPages, topics, chipTips, searchKinds, rail, legal },
+    { team, groups, projects, cats, productPages, productAbout, productMore, topics, chipTips, searchKinds, rail, legal },
     null,
     2,
   )} as const;\n`;

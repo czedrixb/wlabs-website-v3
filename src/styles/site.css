@@ -3091,3 +3091,44 @@ html:lang(ko) .post-body h3,html:lang(ko) .post-body h4{letter-spacing:-.03em;li
   .ins-body h2{font-size:17px}
   .ins-meta{font-size:11px}
 }
+
+/* ── WOS-383: product pages — overview, media, goals, set-up, questions ──
+   Ported from v3's "product pages: media, goals, set-up, questions" block
+   (wlabs-01-wired.html). The overview image sits LEFT of the text; on
+   desktop the paragraphs set the row height and the image is cropped to
+   fill it, on phones it sits above the text at 4:3. */
+.prod-about{max-width:760px}
+.prod-about-wrap{display:grid;gap:var(--s3)}
+.prod-about-img{margin:0;border-radius:var(--r-m);overflow:hidden;background:var(--cream-2,#eef3f7);aspect-ratio:4/3;order:-1;position:relative}
+.prod-about-img img{object-fit:cover}
+@media (min-width:900px){
+  .prod-about-wrap{grid-template-columns:minmax(0,1fr) minmax(0,1.35fr);gap:var(--s5);align-items:stretch}
+  .prod-about-img{aspect-ratio:auto;min-height:0}
+}
+.prod-about p{margin:0 0 1.1em;font-size:17px;line-height:1.75;color:var(--ink-2,var(--ink))}
+.prod-about p:last-child{margin-bottom:0}
+.pg-video{margin:0 0 var(--s3)}
+.pg-video video{display:block;width:100%;aspect-ratio:16/9;border-radius:var(--r-m);background:#0b1220}
+.pg-video figcaption,.pg-item figcaption{font-size:13px;line-height:1.5;color:var(--muted);margin-top:8px}
+.pg-grid{display:grid;gap:var(--s2);grid-template-columns:1fr 1fr}
+.pg-item{margin:0}
+.pg-btn{display:block;width:100%;padding:0;border:1px solid var(--line);border-radius:var(--r-m);overflow:hidden;background:var(--cream-2,#f3f5f7);cursor:zoom-in}
+.pg-btn img{display:block;width:100%;height:auto;aspect-ratio:16/10;object-fit:cover;object-position:center top;transition:transform .3s ease}
+.pg-btn:hover img{transform:scale(1.02)}
+.goals{display:grid;gap:var(--s2)}
+.goal{border-left:2px solid var(--line-strong,var(--line));padding:4px 0 4px var(--s2)}
+.goal h3{margin:0 0 6px;font-size:18px}.goal p{margin:0;color:var(--muted);line-height:1.6}
+.setup{list-style:none;margin:0;padding:0;display:grid;gap:0;border-top:1px solid var(--line)}
+.setup li{display:grid;grid-template-columns:48px 1fr;gap:var(--s2);padding:18px 0;border-bottom:1px solid var(--line)}
+.setup .num{font:600 13px/1.6 var(--body);color:var(--muted)}
+.setup h3{margin:0 0 4px;font-size:17px}.setup p{margin:0;color:var(--muted);line-height:1.6}
+.pfaq{border-top:1px solid var(--line)}
+.pfaq details{border-bottom:1px solid var(--line);padding:16px 0}
+.pfaq summary{cursor:pointer;font-weight:600;list-style:none;display:flex;justify-content:space-between;gap:16px}
+.pfaq summary::-webkit-details-marker{display:none}
+.pfaq summary::after{content:"+";color:var(--muted);font-weight:400}
+.pfaq details[open] summary::after{content:"−"}
+.pfaq details p{margin:10px 0 0;color:var(--muted);line-height:1.6;max-width:760px}
+@media (min-width:900px){.pg-grid{grid-template-columns:repeat(4,1fr)}.goals{grid-template-columns:repeat(3,1fr)}}
+/* WOS-383: project cards with a real capture show the top of the screen */
+.pcard .pvis.sp-shot{background-position:center top!important}
