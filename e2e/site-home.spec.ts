@@ -94,7 +94,7 @@ test.describe("home: project strip (WOS-332)", () => {
   test("/en shows English project titles", async ({ page }) => {
     await page.goto("/en");
     await page.locator("#home-projects").scrollIntoViewIfNeeded();
-    await expect(page.locator("#home-projects .pcard").first()).toContainText("Skin Optics");
+    await expect(page.locator("#home-projects .pcard").first()).toContainText("UNDULIX — LC-OCT Skin Structure Research");
   });
 });
 

@@ -39,10 +39,16 @@ const SHORTCUTS: { kind: ShortcutKind; en: string; ko: string; href: string }[] 
   { kind: "svc", en: "Data & Imaging Intelligence", ko: "데이터·이미징 인텔리전스", href: "/work/services" },
   { kind: "svc", en: "UI/UX & Product Design", ko: "UI/UX·제품 디자인", href: "/work/services" },
   { kind: "svc", en: "Modernization & Support", ko: "현대화·운영 지원", href: "/work/services" },
-  { kind: "prod", en: "SkinArch", ko: "SkinArch", href: "/products/skinarch" },
+  { kind: "prod", en: "UNDULIX", ko: "UNDULIX", href: "/products/skinarch" },
   { kind: "prod", en: "BrainArch", ko: "BrainArch", href: "/products/brainarch" },
+  { kind: "prod", en: "우리家", ko: "우리家", href: "/products/familytree" },
   { kind: "prod", en: "WIZ Assistant", ko: "WIZ Assistant", href: "/products/wiz" },
-  { kind: "proj", en: "AI-Measuring & Analysis Skin Optics", ko: "AI 피부 광학 측정·분석", href: "/work/cases" },
+  {
+    kind: "proj",
+    en: "UNDULIX — LC-OCT Skin Structure Research",
+    ko: "UNDULIX — LC-OCT Skin Structure Research",
+    href: "/projects/skin",
+  },
   { kind: "proj", en: "YumTrack — AI-Aided Diet and Calorie Tracker", ko: "YumTrack — AI 식단·칼로리 트래커", href: "/work/cases" },
   { kind: "proj", en: "U Education LMS", ko: "U Education LMS", href: "/work/cases" },
   { kind: "proj", en: "Pagoda Talking Plus", ko: "Pagoda Talking Plus", href: "/work/cases" },
@@ -54,7 +60,9 @@ const SHORTCUTS: { kind: ShortcutKind; en: string; ko: string; href: string }[] 
 ];
 
 // v3's static seed rows are these pool entries (index.html:2682-2686).
-const SEED_ROWS = [2, 5, 7, 10, 16];
+// WOS-383: 우리家 joined the pool after BrainArch, so the rows after it
+// moved down by one (still Data & Imaging, UNDULIX, WIZ, YumTrack, Inquiry).
+const SEED_ROWS = [2, 5, 8, 10, 17];
 
 const ROW_COUNT = 5;
 const MAX_HITS = 24;

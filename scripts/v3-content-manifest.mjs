@@ -40,6 +40,10 @@ export const CONTENT_MANIFEST = {
     pp1: { v3Key: "pp1" },
     pp2: { v3Key: "pp2" },
     pp3: { v3Key: "pp3" },
+    // WOS-383: 우리家 and Willy cards, and Willy's "In development" chip
+    pp4: { v3Key: "pp4" },
+    pp5: { v3Key: "pp5" },
+    inDev: { v3Key: "inDev" },
     priceAsk: { v3Key: "priceAsk" },
     monthly: { v3Key: "monthly" },
     productPage: { v3Key: "productPage" },

@@ -2,13 +2,63 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useRef } from "react";
+import { useEffect, useLayoutEffect, useRef } from "react";
 import type { Locale } from "@/lib/locale";
 import { withLocale } from "@/lib/locale";
 import type { SiteStrings } from "@/lib/site/dictionary";
 import { useLangTargets } from "./LangTargetContext";
 
 type Props = { locale: Locale; s: SiteStrings["chrome"] };
+
+// WOS-383: switching language keeps the reader's place. Without this the
+// toggle is a plain route change, so Next.js scrolls the new locale to the
+// top. Instead the link opts out of that scroll, and before navigating we
+// remember which heading the reader had just passed and how far past it
+// they were; once the other language renders we scroll to that same
+// heading plus the same distance. KO and EN wrap differently, so page
+// heights differ — anchoring to a heading (both languages render the same
+// headings in the same order) lands on the same content where a raw
+// scrollY would not.
+const LANG_ANCHOR_KEY = "wl-lang-anchor";
+const HEADINGS = "main h1, main h2, main h3";
+
+function rememberAnchor(targetPath: string) {
+  const hs = Array.from(document.querySelectorAll<HTMLElement>(HEADINGS));
+  let index = -1;
+  for (let i = 0; i < hs.length; i++) {
+    if (hs[i].getBoundingClientRect().top <= 1) index = i;
+    else break;
+  }
+  const offset = index >= 0 ? -hs[index].getBoundingClientRect().top : window.scrollY;
+  try {
+    sessionStorage.setItem(LANG_ANCHOR_KEY, JSON.stringify({ path: targetPath, index, offset }));
+  } catch {
+    // storage unavailable (private mode): the switch still works, it just lands at the top
+  }
+}
+
+function useRestoreLangScroll(pathname: string) {
+  useLayoutEffect(() => {
+    let saved: { path: string; index: number; offset: number } | null = null;
+    try {
+      const raw = sessionStorage.getItem(LANG_ANCHOR_KEY);
+      saved = raw ? JSON.parse(raw) : null;
+    } catch {
+      return;
+    }
+    if (!saved || saved.path !== pathname) return;
+    sessionStorage.removeItem(LANG_ANCHOR_KEY);
+    const { index, offset } = saved;
+    const restore = () => {
+      const h = index >= 0 ? document.querySelectorAll<HTMLElement>(HEADINGS)[index] : null;
+      const top = h ? h.getBoundingClientRect().top + window.scrollY + offset : offset;
+      window.scrollTo({ top, behavior: "instant" });
+    };
+    restore();
+    // late images and fonts can still move the page; settle once more
+    requestAnimationFrame(() => requestAnimationFrame(restore));
+  }, [pathname]);
+}
 
 /**
  * The language toggle floats over the page, which is right everywhere
@@ -51,6 +101,8 @@ export function LangToggle({ locale, s }: Props) {
     };
   }, [pathname]);
 
+  useRestoreLangScroll(pathname);
+
   const targets = useLangTargets();
 
   const prefix = `/${locale}`;
@@ -69,12 +121,23 @@ export function LangToggle({ locale, s }: Props) {
 
   return (
     <div ref={elRef} className="lang lang-float" role="group" aria-label={s.langGroup}>
-      <Link href={hrefFor("en")} aria-pressed={locale === "en"} lang="en">
-        EN
-      </Link>
-      <Link href={hrefFor("ko")} aria-pressed={locale === "ko"} lang="ko">
-        KO
-      </Link>
+      {(["en", "ko"] as const).map((l) => {
+        const href = hrefFor(l);
+        return (
+          <Link
+            key={l}
+            href={href}
+            scroll={false}
+            aria-pressed={locale === l}
+            lang={l}
+            onClick={() => {
+              if (l !== locale) rememberAnchor(href);
+            }}
+          >
+            {l.toUpperCase()}
+          </Link>
+        );
+      })}
     </div>
   );
 }

@@ -25,13 +25,13 @@ test.describe("site search", () => {
 
   test("ko: results are grouped by kind with highlighted matches", async ({ page }) => {
     await page.goto("/ko/search");
-    await page.locator("#q").fill("SkinArch");
+    await page.locator("#q").fill("UNDULIX");
 
     const results = page.locator("#search-results");
     await expect(results.locator(".meta")).toContainText("개 결과");
     await expect(results.locator(".group h2").filter({ hasText: "제품" })).toBeVisible();
     const firstHit = results.locator(".hit").first();
-    await expect(firstHit.locator("mark").first()).toContainText(/skinarch/i);
+    await expect(firstHit.locator("mark").first()).toContainText(/undulix/i);
   });
 
   test("ko: glossary terms are searchable", async ({ page }) => {
